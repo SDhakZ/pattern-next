@@ -1,0 +1,286 @@
+import { Divider } from "../shared/Divider.jsx";
+import { Label } from "../shared/Label.jsx";
+import { SliderControl } from "../shared/SliderControl.jsx";
+import { SET_BG_COLOR } from "../../app/actions.js";
+import { PREVIEW_BG_OPTIONS } from "../../data/constants/backgrounds.js";
+import { FONT, FONT_MONO } from "../../data/constants/themes.js";
+import { tangentSize } from "../../domain/geometry.js";
+import { ColorPicker } from "../shared/ColorPicker.jsx";
+
+export function RingStudioRightPanel({
+  T,
+  bgColor,
+  dispatch,
+  activeCl,
+  activeRing,
+  ringSetupMode,
+  updCl,
+  updRing,
+}) {
+  return (
+    <aside
+      style={{
+        width: 340,
+        flexShrink: 0,
+        height: "100%",
+        minHeight: 0,
+        overflowY: "auto",
+        overscrollBehavior: "contain",
+        padding: "24px 20px",
+        display: "flex",
+        flexDirection: "column",
+        background: T.surf,
+        borderLeft: `1px solid ${T.brd}`,
+      }}
+    >
+      <Label T={T}>Cluster / Ring Controls</Label>
+      <div style={{ marginTop: 4 }}>
+        <SliderControl
+          label="Cluster X"
+          val={Math.round(activeCl.x * 100)}
+          min={0}
+          max={100}
+          onChange={(v) => updCl("x", v / 100)}
+          display={`${Math.round(activeCl.x * 100)}%`}
+          T={T}
+        />
+        <SliderControl
+          label="Cluster Y"
+          val={Math.round(activeCl.y * 100)}
+          min={0}
+          max={100}
+          onChange={(v) => updCl("y", v / 100)}
+          display={`${Math.round(activeCl.y * 100)}%`}
+          T={T}
+        />
+        <SliderControl
+          label="Cluster Scale"
+          val={activeCl.scale}
+          min={0.2}
+          max={3}
+          step={0.05}
+          onChange={(v) => updCl("scale", v)}
+          display={`${activeCl.scale.toFixed(2)}×`}
+          T={T}
+        />
+        <Divider T={T} />
+
+        <SliderControl
+          label="Count"
+          val={activeRing.count}
+          min={2}
+          max={100}
+          onChange={(v) => updRing("count", v)}
+          display={activeRing.count}
+          T={T}
+        />
+        <SliderControl
+          label="Radius"
+          val={activeRing.radius}
+          min={20}
+          max={400}
+          step={2}
+          onChange={(v) => updRing("radius", v)}
+          display={`${activeRing.radius}px`}
+          T={T}
+        />
+        <div
+          style={{
+            fontSize: 10,
+            color: T.mut,
+            marginBottom: 10,
+            fontFamily: FONT_MONO,
+          }}
+        >
+          Tile: {Math.round(tangentSize(activeRing.radius, activeRing.count))}px
+        </div>
+      </div>
+
+      <ColorPicker
+        key={activeRing.id}
+        label="Ring Colors"
+        colors={activeRing.colors ?? DEFAULT_COLORS}
+        onChange={(c) => updRing("colors", c)}
+        T={T}
+      />
+
+      <Divider T={T} />
+
+      <Label T={T}>Preview Background</Label>
+      <div
+        style={{
+          marginTop: 4,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        <div style={{ fontSize: 10, color: T.mut }}>
+          Pick a backdrop to view the motifs better
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 6,
+          }}
+        >
+          {PREVIEW_BG_OPTIONS.map((option) => {
+            const isActive = bgColor === option.color;
+            return (
+              <button
+                key={option.color}
+                type="button"
+                onClick={() =>
+                  dispatch({ type: SET_BG_COLOR, color: option.color })
+                }
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  minHeight: 36,
+                  padding: "7px 10px",
+                  borderRadius: 10,
+                  border: `1px solid ${isActive ? T.gold : T.brd}`,
+                  background: isActive ? `${T.gold}1a` : T.surf1,
+                  color: isActive ? T.gold : T.txt,
+                  cursor: "pointer",
+                  boxShadow: isActive
+                    ? "0 0 0 1px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.18)"
+                    : "none",
+                }}
+              >
+                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <span
+                    style={{
+                      width: 14,
+                      height: 14,
+                      borderRadius: "50%",
+                      background: option.color,
+                      border: "1px solid rgba(255,255,255,0.24)",
+                      boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.2)",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontFamily: FONT,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {option.name}
+                  </span>
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: isActive ? T.gold : T.dim,
+                    opacity: isActive ? 1 : 0.65,
+                  }}
+                >
+                  {isActive ? "Selected" : ""}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: SET_BG_COLOR, color: "#101010" })}
+            style={{
+              padding: "7px 10px",
+              fontSize: 10,
+              fontFamily: FONT,
+              fontWeight: 700,
+              borderRadius: 8,
+              border: `1px solid ${bgColor === "#101010" ? T.gold : T.brd}`,
+              background: bgColor === "#101010" ? `${T.gold}14` : T.surf2,
+              color: bgColor === "#101010" ? T.gold : T.txt,
+              cursor: "pointer",
+            }}
+          >
+            Dark default
+          </button>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: SET_BG_COLOR, color: "#f5f1e7" })}
+            style={{
+              padding: "7px 10px",
+              fontSize: 10,
+              fontFamily: FONT,
+              fontWeight: 700,
+              borderRadius: 8,
+              border: `1px solid ${bgColor === "#f5f1e7" ? T.gold : T.brd}`,
+              background: bgColor === "#f5f1e7" ? `${T.gold}14` : T.surf2,
+              color: bgColor === "#f5f1e7" ? T.gold : T.txt,
+              cursor: "pointer",
+            }}
+          >
+            Light paper
+          </button>
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto auto",
+            gap: 8,
+            alignItems: "center",
+          }}
+        >
+          <input
+            type="color"
+            value={bgColor}
+            onChange={(e) =>
+              dispatch({ type: SET_BG_COLOR, color: e.target.value })
+            }
+            aria-label="Card background color"
+            style={{
+              width: "100%",
+              height: 34,
+              border: `1px solid ${T.brd}`,
+              borderRadius: 8,
+              cursor: "pointer",
+              padding: 2,
+              background: "transparent",
+            }}
+          />
+          <div
+            style={{
+              fontSize: 10,
+              fontFamily: FONT_MONO,
+              color: T.mut,
+              minWidth: 70,
+              textAlign: "center",
+              padding: "7px 8px",
+              borderRadius: 8,
+              border: `1px solid ${T.brd}`,
+              background: T.surf1,
+            }}
+          >
+            {bgColor.toUpperCase()}
+          </div>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: SET_BG_COLOR, color: "#101010" })}
+            style={{
+              padding: "7px 10px",
+              fontSize: 10,
+              fontFamily: FONT,
+              fontWeight: 700,
+              borderRadius: 6,
+              border: `1px solid ${T.brd}`,
+              background: T.surf2,
+              color: T.txt,
+              cursor: "pointer",
+            }}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}

@@ -31,7 +31,13 @@ export function StageTemplatePicker() {
         small={false}
         T={T}
         onClick={goBack}
-        style={{ position: "fixed", top: 28, left: 28, zIndex: 100 }}
+        style={{
+          position: "fixed",
+          bottom: 28,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 100,
+        }}
       >
         ← Back
       </Button>

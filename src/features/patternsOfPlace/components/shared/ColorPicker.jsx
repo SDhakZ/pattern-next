@@ -400,9 +400,12 @@ export function ColorPicker({ label, colors, onChange, T }) {
               gap: 6,
             }}
           >
-            {MANUAL_PALETTES.map((palette) => (
+            {MANUAL_PALETTES.map((palette) =>
               (() => {
-                const normalized = normalizePalette(palette.colors, currentColors);
+                const normalized = normalizePalette(
+                  palette.colors,
+                  currentColors,
+                );
                 const isSelected = normalized.every(
                   (color, index) =>
                     color.toLowerCase() === currentColors[index].toLowerCase(),
@@ -424,7 +427,10 @@ export function ColorPicker({ label, colors, onChange, T }) {
                   >
                     <div style={{ display: "flex", height: 24 }}>
                       {normalized.map((color, index) => (
-                        <div key={`${palette.id}-${index}`} style={{ flex: 1, background: color }} />
+                        <div
+                          key={`${palette.id}-${index}`}
+                          style={{ flex: 1, background: color }}
+                        />
                       ))}
                     </div>
                     <div
@@ -440,8 +446,8 @@ export function ColorPicker({ label, colors, onChange, T }) {
                     </div>
                   </button>
                 );
-              })()
-            ))}
+              })(),
+            )}
           </div>
 
           <div
