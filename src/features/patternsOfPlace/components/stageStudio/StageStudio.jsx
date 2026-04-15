@@ -156,39 +156,65 @@ export function StageStudio() {
       style={{
         height: "100dvh",
         display: "flex",
-        flexDirection: "row-reverse",
+        flexDirection: "column",
         fontFamily: FONT,
         background: T.bg,
         overflow: "hidden",
         position: "relative",
       }}
     >
-      {/* ── Back Button ── */}
-      <Button
-        variant="secondary"
-        small={false}
-        T={T}
-        onClick={goBack}
-        style={{ position: "fixed", top: 28, left: 28, zIndex: 100 }}
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          padding: "20px 24px",
+          borderBottom: `1px solid ${T.brd}`,
+          background: T.surf,
+          flexShrink: 0,
+        }}
       >
-        ← Back
-      </Button>
-      <Button
-        variant="secondary"
-        small={false}
-        T={T}
-        onClick={toggleTheme}
-        style={{ position: "fixed", top: 28, right: 28, zIndex: 100 }}
-      >
-        {theme === "dark" ? "☀" : "◐"}
-      </Button>
+        <Button variant="secondary" small={false} T={T} onClick={goBack}>
+          ← Back
+        </Button>
+        <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: "0.3em",
+              color: T.gold,
+              textTransform: "uppercase",
+              marginBottom: 2,
+            }}
+          >
+            Step 2 / 3
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
+            Ring Studio
+          </div>
+        </div>
+        <Button variant="secondary" small={false} T={T} onClick={toggleTheme}>
+          {theme === "dark" ? "☀" : "◐"}
+        </Button>
+      </header>
 
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          display: "flex",
+          overflow: "hidden",
+        }}
+      >
       {/* ── Control Rail ── */}
       <aside
         style={{
           ...PANEL_STYLE,
           background: T.surf,
-          borderLeft: `1px solid ${T.brd}`,
+          borderRight: `1px solid ${T.brd}`,
         }}
       >
         <div style={{ marginBottom: 8 }}>
@@ -561,7 +587,79 @@ export function StageStudio() {
           </>
         )}
 
-        {/* ── Background ── */}
+      </aside>
+
+      {/* ── Postcard Preview ── */}
+      <main
+        role="region"
+        aria-label="Postcard preview"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          gap: 10,
+          background: T.bg,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: T.mut,
+          }}
+        >
+          Postcard Preview
+        </div>
+        <div
+          ref={previewRef}
+          onTouchStart={handlePreviewTouchStart}
+          onTouchMove={handlePreviewTouchMove}
+          onTouchEnd={handlePreviewTouchEnd}
+          onTouchCancel={handlePreviewTouchEnd}
+          style={{
+            borderRadius: 6,
+            boxShadow: `0 12px 40px ${T.shadow}`,
+            touchAction: "none",
+          }}
+        >
+          <CardCanvas
+            clusters={clusters}
+            bgColor={bgColor}
+            W={600}
+            H={400}
+            library={library}
+            activeClId={activeClusterId}
+            activeRingId={activeRingId}
+          />
+        </div>
+        <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
+          Touch: drag cluster with one finger, pinch with two fingers to zoom.
+        </div>
+        <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
+          Active ring:{" "}
+          <span style={{ color: "#00e5ff", fontWeight: 700 }}>cyan dashed</span>
+          {"  ·  "}
+          Cluster:{" "}
+          <span style={{ color: "#ff6b35", fontWeight: 700 }}>
+            ● orange dot
+          </span>
+        </div>
+      </main>
+      <aside
+        style={{
+          ...PANEL_STYLE,
+          background: T.surf,
+          borderLeft: `1px solid ${T.brd}`,
+        }}
+      >
         <Label T={T}>Card Background</Label>
         <div
           style={{
@@ -658,75 +756,24 @@ export function StageStudio() {
             </button>
           </div>
         </div>
-
+      </aside>
+      <footer
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: 12,
+          padding: "16px 24px",
+          borderTop: `1px solid ${T.brd}`,
+          background: T.surf,
+          flexShrink: 0,
+        }}
+      >
         <Button onClick={finalize} T={T}>
           Finalize →
         </Button>
-      </aside>
-
-      {/* ── Postcard Preview ── */}
-      <main
-        role="region"
-        aria-label="Postcard preview"
-        style={{
-          flex: 1,
-          minHeight: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-          gap: 10,
-          background: T.bg,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: T.mut,
-          }}
-        >
-          Postcard Preview
-        </div>
-        <div
-          ref={previewRef}
-          onTouchStart={handlePreviewTouchStart}
-          onTouchMove={handlePreviewTouchMove}
-          onTouchEnd={handlePreviewTouchEnd}
-          onTouchCancel={handlePreviewTouchEnd}
-          style={{
-            borderRadius: 6,
-            boxShadow: `0 12px 40px ${T.shadow}`,
-            touchAction: "none",
-          }}
-        >
-          <CardCanvas
-            clusters={clusters}
-            bgColor={bgColor}
-            W={600}
-            H={400}
-            library={library}
-            activeClId={activeClusterId}
-            activeRingId={activeRingId}
-          />
-        </div>
-        <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
-          Touch: drag cluster with one finger, pinch with two fingers to zoom.
-        </div>
-        <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
-          Active ring:{" "}
-          <span style={{ color: "#00e5ff", fontWeight: 700 }}>cyan dashed</span>
-          {"  ·  "}
-          Cluster:{" "}
-          <span style={{ color: "#ff6b35", fontWeight: 700 }}>
-            ● orange dot
-          </span>
-        </div>
-      </main>
+      </footer>
+      </div>
     </div>
   );
 }
