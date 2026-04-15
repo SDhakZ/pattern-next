@@ -194,7 +194,7 @@ export function StageStudio() {
               marginBottom: 2,
             }}
           >
-            Step 3 / 4
+            Step 2 / 3
           </div>
           <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Ring Studio

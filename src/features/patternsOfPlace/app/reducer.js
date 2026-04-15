@@ -37,7 +37,12 @@ import {
   MAX_RINGS_PER_CLUSTER,
 } from "../data/constants/defaults.js";
 import { REVERSE_TEMPLATES } from "../data/constants/templates.js";
-import { MOTIF_COUNT } from "../data/motifs/motifRegistry.js";
+import {
+  MOTIF_COUNT,
+  SELECTABLE_MOTIFS,
+} from "../data/motifs/motifRegistry.js";
+
+const SELECTABLE_MOTIF_IDS = SELECTABLE_MOTIFS.map((motif) => motif.id);
 
 // ─── Factories ────────────────────────────────────────────────────────────────
 
@@ -60,8 +65,17 @@ export const makeRing = (index = 0) => ({
   presetId: null,
 });
 
-export const makeCluster = (tpl) => {
-  const rings = [0].map((i) => makeRing(i));
+export const makeCluster = (tpl, motifSeed = 0) => {
+  const fallbackMotifId = 0;
+  const selectableMotifId =
+    SELECTABLE_MOTIF_IDS[motifSeed % SELECTABLE_MOTIF_IDS.length] ??
+    fallbackMotifId;
+  const rings = [
+    {
+      ...makeRing(0),
+      motifId: selectableMotifId,
+    },
+  ];
   return {
     id: makeId(),
     x: tpl.x,
@@ -92,7 +106,7 @@ const firstLayer = makeLayer(0);
 
 export const initialState = {
   ui: {
-    stage: 0,
+    stage: 1,
     theme: "dark",
     activeClusterId: null,
     activeRingId: null,
@@ -230,7 +244,9 @@ export function reducer(state, action) {
 
     // Template selection → initializes clusters + advances to Studio stage
     case SELECT_TEMPLATE: {
-      const clusters = action.template.clusters.map((t) => makeCluster(t));
+      const clusters = action.template.clusters.map((t, index) =>
+        makeCluster(t, index),
+      );
       const firstCluster = clusters[0];
       return {
         ...state,
@@ -308,7 +324,11 @@ export function reducer(state, action) {
       if (!activeCl || activeCl.rings.length >= MAX_RINGS_PER_CLUSTER)
         return state;
       const maxRadius = Math.max(...activeCl.rings.map((r) => r.radius));
-      const nr = { ...makeRing(0), radius: maxRadius + 80 };
+      const nr = {
+        ...makeRing(0),
+        count: 20,
+        radius: Math.min(maxRadius + 24, 400),
+      };
       return {
         ...state,
         editor: {

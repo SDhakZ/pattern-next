@@ -650,7 +650,7 @@ export function StageFinalize() {
               marginBottom: 2,
             }}
           >
-            Step 4 / 4
+            Step 3 / 3
           </div>
           <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Finalize & Share

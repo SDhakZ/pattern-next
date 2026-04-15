@@ -52,7 +52,7 @@ export function StageTemplatePicker() {
           marginBottom: 16,
         }}
       >
-        Step 2 / 4
+        Step 1 / 3
       </div>
       <h2
         style={{

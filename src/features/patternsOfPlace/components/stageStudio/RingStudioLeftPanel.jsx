@@ -81,7 +81,7 @@ export function RingStudioLeftPanel({
             marginBottom: 2,
           }}
         >
-          Step 3 / 4
+          Step 2 / 3
         </div>
         <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
           Ring Studio
@@ -316,6 +316,21 @@ export function RingStudioLeftPanel({
           </>
         ) : (
           <>
+            <Button
+              small
+              variant="primary"
+              T={T}
+              onClick={onCreatePattern}
+              style={{
+                width: "100%",
+                fontSize: 10,
+                padding: "8px 10px",
+                minHeight: 38,
+                marginBottom: 8,
+              }}
+            >
+              Create your own pattern
+            </Button>
             <Label T={T}>Pattern Preset</Label>
             {library.length > 0 ? (
               <div
