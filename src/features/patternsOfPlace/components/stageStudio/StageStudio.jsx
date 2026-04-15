@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import {
   SET_STAGE,
@@ -45,7 +45,7 @@ import { tangentSize } from "../../domain/geometry.js";
 import { FONT, FONT_MONO } from "../../data/constants/themes.js";
 
 const PANEL_STYLE = {
-  width: 340,
+  width: 380,
   flexShrink: 0,
   height: "100%",
   minHeight: 0,
@@ -67,6 +67,7 @@ export function StageStudio() {
   const { theme, activeClusterId, activeRingId } = state.ui;
   const previewRef = useRef(null);
   const gestureRef = useRef(null);
+  const [showPatternLabModal, setShowPatternLabModal] = useState(false);
 
   const toggleTheme = () =>
     dispatch({ type: SET_THEME, theme: theme === "dark" ? "light" : "dark" });
@@ -86,7 +87,12 @@ export function StageStudio() {
   );
 
   const finalize = () => dispatch({ type: SET_STAGE, stage: 4 });
-  const goBack = () => dispatch({ type: SET_STAGE, stage: 2 });
+  const goBack = () => dispatch({ type: SET_STAGE, stage: 1 });
+  const openPatternLab = () => setShowPatternLabModal(true);
+  const enterPatternLab = () => {
+    setShowPatternLabModal(false);
+    dispatch({ type: SET_STAGE, stage: 3 });
+  };
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const touchDistance = (t1, t2) => {
@@ -188,7 +194,7 @@ export function StageStudio() {
               marginBottom: 2,
             }}
           >
-            Step 2 / 3
+            Step 3 / 4
           </div>
           <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Ring Studio
@@ -219,6 +225,7 @@ export function StageStudio() {
           ringSetupMode={ringSetupMode}
           dispatch={dispatch}
           updRing={updRing}
+          onCreatePattern={openPatternLab}
         />
 
         <main
@@ -323,6 +330,78 @@ export function StageStudio() {
           Finalize →
         </Button>
       </div>
+
+      {showPatternLabModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Create your own pattern"
+          onClick={() => setShowPatternLabModal(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 220,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(0,0,0,0.6)",
+            padding: 24,
+          }}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: "min(520px, 100%)",
+              borderRadius: 18,
+              background: T.surf,
+              border: `1px solid ${T.brd}`,
+              boxShadow: `0 24px 80px ${T.shadow}`,
+              padding: 24,
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.3em",
+                color: T.gold,
+                textTransform: "uppercase",
+              }}
+            >
+              Create Your Own Pattern
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: T.txt }}>
+              Open Pattern Lab
+            </div>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: T.mut }}>
+              Build a reusable tile, save it to your library, and then come back
+              to Ring Studio to apply it to your rings.
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                justifyContent: "flex-end",
+                marginTop: 8,
+              }}
+            >
+              <Button
+                variant="secondary"
+                T={T}
+                onClick={() => setShowPatternLabModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button T={T} onClick={enterPatternLab}>
+                Open Pattern Lab
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

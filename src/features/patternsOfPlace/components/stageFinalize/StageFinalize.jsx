@@ -43,7 +43,7 @@ import { tangentSize } from "../../domain/geometry.js";
 import { FONT, FONT_MONO } from "../../data/constants/themes.js";
 
 const PANEL_STYLE = {
-  width: 340,
+  width: 380,
   flexShrink: 0,
   height: "100%",
   minHeight: 0,
@@ -450,7 +450,7 @@ export function StageFinalize() {
 
   const toggleTheme = () =>
     dispatch({ type: SET_THEME, theme: theme === "dark" ? "light" : "dark" });
-  const goBack = () => dispatch({ type: SET_STAGE, stage: 3 });
+  const goBack = () => dispatch({ type: SET_STAGE, stage: 2 });
   const restart = () => dispatch({ type: RESET });
   const isFront = previewSide === "front";
 
@@ -650,7 +650,7 @@ export function StageFinalize() {
               marginBottom: 2,
             }}
           >
-            Step 3 / 3
+            Step 4 / 4
           </div>
           <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Finalize & Share
@@ -968,7 +968,7 @@ export function StageFinalize() {
         }}
       >
         <Button variant="secondary" small={false} T={T} onClick={goBack}>
-          ← Back
+          ← Back to Studio
         </Button>
         <Button variant="secondary" small={false} T={T} onClick={restart}>
           Start Over

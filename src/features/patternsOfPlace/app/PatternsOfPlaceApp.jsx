@@ -1,16 +1,19 @@
-import { PatternsOfPlaceProvider, usePatternsOfPlace } from "./PatternsOfPlaceProvider.jsx";
+import {
+  PatternsOfPlaceProvider,
+  usePatternsOfPlace,
+} from "./PatternsOfPlaceProvider.jsx";
 import { selectStage } from "./selectors.js";
 import { StageSplash } from "../components/stageSplash/StageSplash.jsx";
-import { StagePatternLab } from "../components/stagePatternLab/StagePatternLab.jsx";
 import { StageTemplatePicker } from "../components/stageTemplatePicker/StageTemplatePicker.jsx";
 import { StageStudio } from "../components/stageStudio/StageStudio.jsx";
+import { StagePatternLab } from "../components/stagePatternLab/StagePatternLab.jsx";
 import { StageFinalize } from "../components/stageFinalize/StageFinalize.jsx";
 
 const STAGES = [
   StageSplash,
-  StagePatternLab,
   StageTemplatePicker,
   StageStudio,
+  StagePatternLab,
   StageFinalize,
 ];
 

@@ -217,7 +217,11 @@ export function reducer(state, action) {
         ...state,
         library: state.library.map((p) =>
           p.id === action.id
-            ? { ...p, layers: state.editor.layers.map((l) => ({ ...l })) }
+            ? {
+                ...p,
+                name: typeof action.name === "string" ? action.name : p.name,
+                layers: state.editor.layers.map((l) => ({ ...l })),
+              }
             : p,
         ),
         ui: { ...state.ui, activePresetId: null },
@@ -237,7 +241,7 @@ export function reducer(state, action) {
         },
         ui: {
           ...state.ui,
-          stage: 3,
+          stage: 2,
           activeClusterId: firstCluster.id,
           activeRingId: firstCluster.rings[0].id,
         },

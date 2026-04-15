@@ -33,7 +33,7 @@ import { PREVIEW_BG_OPTIONS } from "../../data/constants/backgrounds.js";
 import { FONT, FONT_MONO } from "../../data/constants/themes.js";
 
 const PANEL_STYLE = {
-  width: 320,
+  width: 380,
   flexShrink: 0,
   height: "100%",
   minHeight: 0,
@@ -49,15 +49,30 @@ export function StagePatternLab() {
   const layers = selectLayers(state);
   const active = selectActiveLayer(state);
   const library = selectLibrary(state);
-  const { theme, activeLayerId, activePresetId } = state.ui;
+  const { theme, activeLayerId } = state.ui;
 
   const [presetName, setPresetName] = useState("");
+  const [editingPresetId, setEditingPresetId] = useState(null);
   const [savedMsg, setSavedMsg] = useState("");
   const [previewBgColor, setPreviewBgColor] = useState("#101010");
   const [copiedColors, setCopiedColors] = useState(null);
   const [copyMsg, setCopyMsg] = useState("");
   const previewRef = useRef(null);
   const gestureRef = useRef(null);
+  const editingPreset = library.find((preset) => preset.id === editingPresetId);
+
+  const buildDefaultPresetName = () => {
+    const existingNames = new Set(
+      library.map((preset) => (preset.name || "").trim().toLowerCase()),
+    );
+    let index = library.length + 1;
+    let candidate = `Preset ${index}`;
+    while (existingNames.has(candidate.toLowerCase())) {
+      index += 1;
+      candidate = `Preset ${index}`;
+    }
+    return candidate;
+  };
 
   const upd = useCallback(
     (key, value) => {
@@ -79,23 +94,36 @@ export function StagePatternLab() {
     if (copiedColors) upd("colors", copiedColors);
   };
 
-  const savePreset = () => {
-    if (!presetName.trim()) return;
-    if (activePresetId) {
-      // Update existing preset
-      dispatch({ type: UPDATE_PRESET, id: activePresetId });
-      setSavedMsg(`"${presetName}" updated!`);
-    } else {
-      // Save new preset
-      dispatch({ type: SAVE_PRESET, name: presetName.trim() });
-      setSavedMsg(`"${presetName}" saved!`);
-    }
+  const saveAsNewPreset = () => {
+    const normalizedName = presetName.trim() || buildDefaultPresetName();
+    dispatch({ type: SAVE_PRESET, name: normalizedName });
+    setSavedMsg(`"${normalizedName}" saved to library.`);
+    setEditingPresetId(null);
     setPresetName("");
     setTimeout(() => setSavedMsg(""), 2000);
   };
 
-  const toNext = () => dispatch({ type: SET_STAGE, stage: 2 });
-  const goBack = () => dispatch({ type: SET_STAGE, stage: 0 });
+  const updateSelectedPreset = () => {
+    if (!editingPresetId) return;
+    const normalizedName =
+      presetName.trim() || editingPreset?.name || buildDefaultPresetName();
+    dispatch({
+      type: UPDATE_PRESET,
+      id: editingPresetId,
+      name: normalizedName,
+    });
+    setSavedMsg(`"${normalizedName}" updated.`);
+    setEditingPresetId(null);
+    setPresetName("");
+    setTimeout(() => setSavedMsg(""), 2000);
+  };
+
+  const stopEditingPreset = () => {
+    setEditingPresetId(null);
+    setPresetName("");
+  };
+
+  const goBack = () => dispatch({ type: SET_STAGE, stage: 2 });
   const toggleTheme = () =>
     dispatch({ type: SET_THEME, theme: theme === "dark" ? "light" : "dark" });
 
@@ -197,7 +225,7 @@ export function StagePatternLab() {
               marginBottom: 2,
             }}
           >
-            Step 1 / 3
+            Create Your Own Pattern
           </div>
           <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Pattern Lab
@@ -238,7 +266,7 @@ export function StagePatternLab() {
                 marginBottom: 2,
               }}
             >
-              Step 1 / 3
+              Pattern Lab
             </div>
             <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
               Pattern Lab
@@ -480,20 +508,21 @@ export function StagePatternLab() {
             }}
           >
             <Label T={T}>
-              {activePresetId ? "Edit Preset" : "Save to Library"}
+              {editingPresetId ? "Edit Preset" : "Save Preset"}
             </Label>
             <div style={{ fontSize: 10, color: T.mut, marginBottom: 8 }}>
-              Store this layer stack for quick reuse.
+              Save a new preset any time. Select one from Library only when you
+              want to update it.
             </div>
-            {activePresetId && (
+            {editingPresetId && (
               <div style={{ fontSize: 10, color: T.mut, marginBottom: 8 }}>
-                Editing: <strong>{presetName}</strong>
+                Editing: <strong>{editingPreset?.name || presetName}</strong>
               </div>
             )}
             <input
               value={presetName}
               onChange={(e) => setPresetName(e.target.value)}
-              placeholder="Preset name…"
+              placeholder="Preset name (optional)"
               style={{
                 width: "100%",
                 padding: "9px 11px",
@@ -510,31 +539,39 @@ export function StagePatternLab() {
             />
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: activePresetId ? "1fr auto" : "1fr",
+                display: "flex",
+                flexDirection: "column",
                 gap: 6,
-                alignItems: "center",
               }}
             >
               <Button
-                onClick={savePreset}
-                disabled={!presetName.trim()}
+                onClick={saveAsNewPreset}
+                small
                 T={T}
-                style={{ minHeight: 38 }}
+                style={{ minHeight: 36, width: "100%" }}
               >
-                {activePresetId ? "Update Preset" : "Save to Library"}
+                Save New Preset
               </Button>
-              {activePresetId && (
+              {editingPresetId && (
                 <Button
-                  onClick={() => {
-                    setPresetName("");
-                    dispatch({ type: SET_ACTIVE_LAYER, id: null });
-                  }}
-                  variant="secondary"
+                  onClick={updateSelectedPreset}
+                  disabled={!presetName.trim()}
+                  small
                   T={T}
-                  style={{ minHeight: 38 }}
+                  style={{ minHeight: 36, width: "100%" }}
                 >
-                  Cancel
+                  Update Selected
+                </Button>
+              )}
+              {editingPresetId && (
+                <Button
+                  onClick={stopEditingPreset}
+                  variant="secondary"
+                  small
+                  T={T}
+                  style={{ minHeight: 36, width: "100%" }}
+                >
+                  Stop Editing
                 </Button>
               )}
             </div>
@@ -548,6 +585,11 @@ export function StagePatternLab() {
                 }}
               >
                 {savedMsg}
+              </div>
+            )}
+            {!editingPresetId && (
+              <div style={{ marginTop: 8, fontSize: 10, color: T.dim }}>
+                Tip: tap any library preset below to edit and update it.
               </div>
             )}
           </div>
@@ -573,19 +615,20 @@ export function StagePatternLab() {
                         background: "#111",
                         borderRadius: 4,
                         overflow: "hidden",
-                        border: `1px solid ${activePresetId === pr.id ? "#00e5ff" : T.brd}`,
+                        border: `1px solid ${editingPresetId === pr.id ? "#00e5ff" : T.brd}`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         cursor: "pointer",
                         boxShadow:
-                          activePresetId === pr.id
+                          editingPresetId === pr.id
                             ? "0 0 8px rgba(0,229,255,0.4)"
                             : "none",
                         transition: "all 0.15s",
                       }}
                       onClick={() => {
                         dispatch({ type: LOAD_PRESET, id: pr.id });
+                        setEditingPresetId(pr.id);
                         setPresetName(pr.name);
                       }}
                     >
@@ -1003,11 +1046,8 @@ export function StagePatternLab() {
           zIndex: 150,
         }}
       >
-        <Button variant="secondary" small={false} T={T} onClick={goBack}>
-          ← Back
-        </Button>
-        <Button onClick={toNext} T={T}>
-          {library.length === 0 ? "Skip →" : "To Ring Studio →"}
+        <Button small={false} T={T} onClick={goBack}>
+          Return to Studio
         </Button>
       </div>
     </div>

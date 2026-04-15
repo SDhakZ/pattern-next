@@ -30,6 +30,7 @@ export function RingStudioLeftPanel({
   ringSetupMode,
   dispatch,
   updRing,
+  onCreatePattern,
 }) {
   const panelCardStyle = {
     padding: 10,
@@ -56,7 +57,7 @@ export function RingStudioLeftPanel({
   return (
     <aside
       style={{
-        width: 340,
+        width: 380,
         flexShrink: 0,
         height: "100%",
         minHeight: 0,
@@ -80,7 +81,7 @@ export function RingStudioLeftPanel({
             marginBottom: 2,
           }}
         >
-          Step 2 / 3
+          Step 3 / 4
         </div>
         <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
           Ring Studio
@@ -259,6 +260,21 @@ export function RingStudioLeftPanel({
 
         {ringSetupMode === "motif" ? (
           <>
+            <Button
+              small
+              variant="primary"
+              T={T}
+              onClick={onCreatePattern}
+              style={{
+                width: "100%",
+                fontSize: 10,
+                padding: "8px 10px",
+                minHeight: 38,
+                marginBottom: 8,
+              }}
+            >
+              Create your own pattern
+            </Button>
             <Label T={T}>Pattern Picker</Label>
             <div
               style={{

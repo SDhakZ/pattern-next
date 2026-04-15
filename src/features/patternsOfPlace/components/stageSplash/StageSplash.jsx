@@ -38,6 +38,18 @@ export function StageSplash() {
       <div style={{ textAlign: "center", maxWidth: 600 }}>
         <div
           style={{
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.3em",
+            color: T.mut,
+            textTransform: "uppercase",
+            marginBottom: 14,
+          }}
+        >
+          Step 1 / 4
+        </div>
+        <div
+          style={{
             fontSize: 13,
             fontWeight: 700,
             letterSpacing: "0.4em",

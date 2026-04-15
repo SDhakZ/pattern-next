@@ -10,7 +10,7 @@ export function StageTemplatePicker() {
   const [activeId, setActiveId] = useState(null);
 
   const choose = (tpl) => dispatch({ type: SELECT_TEMPLATE, template: tpl });
-  const goBack = () => dispatch({ type: SET_STAGE, stage: 1 });
+  const goBack = () => dispatch({ type: SET_STAGE, stage: 0 });
 
   return (
     <div
@@ -52,7 +52,7 @@ export function StageTemplatePicker() {
           marginBottom: 16,
         }}
       >
-        Step 2 / 3
+        Step 2 / 4
       </div>
       <h2
         style={{

@@ -6,6 +6,7 @@ import { PREVIEW_BG_OPTIONS } from "../../data/constants/backgrounds.js";
 import { FONT, FONT_MONO } from "../../data/constants/themes.js";
 import { tangentSize } from "../../domain/geometry.js";
 import { ColorPicker } from "../shared/ColorPicker.jsx";
+import { DEFAULT_COLORS } from "../../data/constants/defaults.js";
 
 export function RingStudioRightPanel({
   T,
@@ -17,10 +18,12 @@ export function RingStudioRightPanel({
   updCl,
   updRing,
 }) {
+  const isPresetActive = ringSetupMode === "preset" || !!activeRing.presetId;
+
   return (
     <aside
       style={{
-        width: 340,
+        width: 380,
         flexShrink: 0,
         height: "100%",
         minHeight: 0,
@@ -96,13 +99,28 @@ export function RingStudioRightPanel({
         </div>
       </div>
 
-      <ColorPicker
-        key={activeRing.id}
-        label="Ring Colors"
-        colors={activeRing.colors ?? DEFAULT_COLORS}
-        onChange={(c) => updRing("colors", c)}
-        T={T}
-      />
+      {isPresetActive ? (
+        <div
+          style={{
+            fontSize: 11,
+            color: T.mut,
+            padding: "8px 10px",
+            background: T.surf2,
+            borderRadius: 8,
+            marginBottom: 8,
+          }}
+        >
+          Ring colors are controlled by the selected preset.
+        </div>
+      ) : (
+        <ColorPicker
+          key={activeRing.id}
+          label="Ring Colors"
+          colors={activeRing.colors ?? DEFAULT_COLORS}
+          onChange={(c) => updRing("colors", c)}
+          T={T}
+        />
+      )}
 
       <Divider T={T} />
 
