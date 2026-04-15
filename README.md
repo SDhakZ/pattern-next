@@ -1,36 +1,164 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Patterns of Place - One-Time QR Code Backend
 
-## Getting Started
+A Next.js + Supabase backend for generating and validating one-time-use QR codes.
 
-First, run the development server:
+## Features
+
+- ✅ Secure one-time QR code generation
+- ✅ Atomic token validation (prevents race conditions)
+- ✅ Token expiry enforcement
+- ✅ Scan tracking and analytics
+- ✅ RESTful API for code generation and redemption
+- ✅ React component for QR display
+
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Set Up Supabase
+
+1. Create a free Supabase project at [supabase.com](https://supabase.com)
+2. Open the SQL editor and run the schema from [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)
+3. Copy your API keys from **Project Settings > API**
+
+### 3. Configure Environment
+
+Create a `.env.local` file:
+
+```bash
+cp .env.example .env.local
+```
+
+Fill in your Supabase credentials:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key_here
+SUPABASE_SECRET_KEY=your_secret_key_here
+NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000
+QR_TOKEN_EXPIRY_HOURS=24
+RESEND_API_KEY=your_resend_api_key_here
+RESEND_FROM_EMAIL=Patterns of Place <onboarding@resend.dev>
+```
+
+Compatibility note: the app also accepts legacy key names (`NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`) if you already use them.
+
+For email delivery, add a Resend API key. The default sender works for local testing; for production, use a verified sender domain.
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to open Patterns of Place.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Generate a postcard in Finalize stage, click **Generate QR Download**, and scan once to open a one-time download page for both front and reverse SVG files.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To email a postcard link, enter a recipient email in Finalize and click **Send via Email**.
 
-## Learn More
+## API Endpoints
 
-To learn more about Next.js, take a look at the following resources:
+### Create a QR Code
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**POST** `/api/qr-codes`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Request:
 
-## Deploy on Vercel
+```json
+{
+  "redirectUrl": "https://your-app.com/page",
+  "metadata": { "campaign": "summer-2024" }
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Response:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```json
+{
+  "id": "uuid-here",
+  "qrUrl": "http://localhost:3000/qr/token-hash",
+  "token": "raw-token-for-display",
+  "expiresAt": "2024-04-16T10:20:30.000Z"
+}
+```
+
+### Validate/Redeem a QR Code
+
+**GET** `/api/qr/[token]`
+
+Success Response (status 200):
+
+```json
+{
+  "status": "success",
+  "message": "QR code validated successfully",
+  "redirectUrl": "https://your-app.com/page",
+  "payload": { "campaign": "summer-2024" }
+}
+```
+
+Already Used Response (status 410):
+
+```json
+{
+  "error": "QR code has already been used",
+  "status": "already-used",
+  "usedAt": "2024-04-15T12:00:00.000Z"
+}
+```
+
+## QR Download Flow (Patterns of Place)
+
+1. In Finalize stage, the app builds front and reverse SVG strings.
+2. It calls `POST /api/qr-codes` and stores those SVGs in `qr_codes.payload`.
+3. The API returns a one-time URL like `/qr/<token>`.
+4. Scanning `/qr/<token>` redeems the token via `GET /api/qr/[token]`.
+5. The token page exposes buttons to download both SVG files.
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── qr-codes/          # Create endpoint
+│   │   └── qr/[token]/        # Validate endpoint
+│   ├── components/
+│   │   └── QRGenerator.tsx     # React component
+│   └── page.tsx               # Home page
+├── lib/
+│   ├── supabase.ts            # Supabase client
+│   └── tokenUtils.ts          # Token generation
+```
+
+## Security Considerations
+
+- Tokens are hashed before storage (raw token only in URL)
+- Atomic database updates prevent race conditions
+- Service role key stored server-side only
+- Rate limiting recommended for production
+- Deploy on Vercel for automatic HTTPS
+
+## Deployment
+
+1. Push to GitHub
+2. Connect to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
+
+```bash
+npm run build
+```
+
+## Next Steps
+
+- [ ] Add user authentication
+- [ ] Implement rate limiting
+- [ ] Add analytics dashboard
+- [ ] Set up automatic token cleanup job
+- [ ] Add Vercel Edge Functions for global QR validation
