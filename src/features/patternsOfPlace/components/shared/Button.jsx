@@ -15,18 +15,20 @@ export function Button({
   T,
 }) {
   const [active, setActive] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const base = {
     fontFamily: FONT,
     fontWeight: 600,
     cursor: disabled ? "not-allowed" : "pointer",
-    borderRadius: 4,
-    transition: "all 0.12s cubic-bezier(.4,0,.2,1)",
-    opacity: disabled ? 0.4 : 1,
+    borderRadius: 999,
+    transition:
+      "transform 0.12s cubic-bezier(.4,0,.2,1), box-shadow 0.14s ease, opacity 0.12s ease",
+    opacity: disabled ? 0.55 : 1,
     border: "none",
     outline: "none",
     fontSize: small ? 13 : 14,
-    padding: small ? "10px 16px" : "14px 24px",
+    padding: small ? "10px 18px" : "14px 26px",
     letterSpacing: "0.02em",
     minHeight: small ? 44 : 48,
     minWidth: small ? 44 : 48,
@@ -36,11 +38,16 @@ export function Button({
     touchAction: "manipulation",
     WebkitUserSelect: "none",
     userSelect: "none",
-    transform: active && !disabled ? "scale(0.98)" : "scale(1)",
+    transform: active && !disabled ? "scale(0.985)" : "scale(1)",
     boxShadow:
-      active && !disabled && variant === "primary"
-        ? "inset 0 2px 4px rgba(0,0,0,0.2)"
-        : "none",
+      active && !disabled
+        ? "inset 0 2px 6px rgba(0,0,0,0.22)"
+        : variant === "primary"
+          ? "0 4px 12px rgba(0,0,0,0.2)"
+          : "0 2px 8px rgba(0,0,0,0.08)",
+    ...(focused && !disabled
+      ? { boxShadow: `0 0 0 3px ${T.gold}66, 0 4px 12px rgba(0,0,0,0.2)` }
+      : {}),
   };
 
   const variants = {
@@ -65,6 +72,7 @@ export function Button({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       onMouseDown={() => !disabled && setActive(true)}
@@ -72,6 +80,8 @@ export function Button({
       onMouseLeave={() => setActive(false)}
       onTouchStart={() => !disabled && setActive(true)}
       onTouchEnd={() => setActive(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       style={{ ...base, ...variants[variant], ...style }}
     >
       {children}

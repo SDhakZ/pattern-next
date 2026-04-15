@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { hashToken } from "@/lib/tokenUtils";
+import { supabase } from "@/features/lib/supabase";
+import { hashToken } from "@/features/lib/tokenUtils";
 
 export async function GET(
   request: NextRequest,

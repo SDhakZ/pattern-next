@@ -3,6 +3,7 @@ import { ColorHarmonyWheel } from "./ColorHarmonyWheel.jsx";
 import { FONT, FONT_MONO } from "../../data/constants/themes.js";
 
 const COLOR_LABELS = ["Dark", "Mid", "Accent", "Alt", "Light"];
+const PALETTE_SIZE = 5;
 
 const PICKER_MODES = [
   { id: "harmony", label: "Harmony" },
@@ -204,6 +205,22 @@ function buildPalette(baseHex, mode) {
   });
 }
 
+function normalizePalette(colors, fallbackPalette = []) {
+  const safeFallback =
+    Array.isArray(fallbackPalette) && fallbackPalette.length > 0
+      ? fallbackPalette
+      : ["#3a2417", "#6e4630", "#9a6650", "#c89a78", "#efd9c5"];
+  const next = Array.isArray(colors)
+    ? colors.filter(Boolean).slice(0, PALETTE_SIZE)
+    : [];
+
+  while (next.length < PALETTE_SIZE) {
+    next.push(safeFallback[next.length] ?? safeFallback[0]);
+  }
+
+  return next;
+}
+
 function wheelMarker(color, index, count) {
   const { h, s } = hexToHsl(color);
   const angle = ((h - 90) * Math.PI) / 180;
@@ -230,12 +247,12 @@ export function ColorPicker({ label, colors, onChange, T }) {
   const [pickerMode, setPickerMode] = useState("harmony");
   const [harmonyMode, setHarmonyMode] = useState("complementary");
   const [dragging, setDragging] = useState(false);
-  const [newManualColor, setNewManualColor] = useState("#3a2417");
 
-  const currentColors =
-    Array.isArray(colors) && colors.length > 0
-      ? colors
-      : buildPalette("#3a2417", harmonyMode);
+  const harmonyFallback = buildPalette("#3a2417", harmonyMode);
+  const currentColors = normalizePalette(
+    Array.isArray(colors) && colors.length > 0 ? colors : harmonyFallback,
+    harmonyFallback,
+  );
 
   const baseHsl = useMemo(
     () => hexToHsl(currentColors[0] ?? "#3a2417"),
@@ -274,10 +291,11 @@ export function ColorPicker({ label, colors, onChange, T }) {
   }, [dragging, harmonyMode, onChange, pickerMode]);
 
   const commitColors = (nextColors) => {
+    const normalized = normalizePalette(nextColors, currentColors);
     if (pickerMode === "manual") {
-      manualColorsRef.current = [...nextColors];
+      manualColorsRef.current = [...normalized];
     }
-    onChange(nextColors);
+    onChange(normalized);
   };
 
   const setPaletteMode = (nextMode) => {
@@ -296,8 +314,9 @@ export function ColorPicker({ label, colors, onChange, T }) {
       manualColorsRef.current && manualColorsRef.current.length > 0
         ? manualColorsRef.current
         : currentColors;
-    manualColorsRef.current = [...nextManualColors];
-    onChange([...nextManualColors]);
+    const normalized = normalizePalette(nextManualColors, currentColors);
+    manualColorsRef.current = [...normalized];
+    onChange(normalized);
   };
 
   const updateColor = (index, value) => {
@@ -327,41 +346,15 @@ export function ColorPicker({ label, colors, onChange, T }) {
 
   const applyManualPalette = (palette) => {
     setPickerMode("manual");
-    manualColorsRef.current = [...palette];
-    onChange([...palette]);
-  };
-
-  const addManualColor = () => {
-    const next = [...currentColors, newManualColor];
-    commitColors(next);
-  };
-
-  const removeManualColor = (index) => {
-    if (currentColors.length <= 1) return;
-    const next = currentColors.filter(
-      (_, currentIndex) => currentIndex !== index,
-    );
-    commitColors(next);
+    const normalized = normalizePalette(palette, currentColors);
+    manualColorsRef.current = [...normalized];
+    onChange(normalized);
   };
 
   const colorList = currentColors.length > 0 ? currentColors : ["#3a2417"];
 
   return (
     <div style={{ marginBottom: 10 }}>
-      <div
-        style={{
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: "0.05em",
-          textTransform: "uppercase",
-          color: T.mut,
-          marginBottom: 6,
-          fontFamily: FONT,
-        }}
-      >
-        {label}
-      </div>
-
       <div
         style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}
       >
@@ -397,6 +390,9 @@ export function ColorPicker({ label, colors, onChange, T }) {
         <ColorHarmonyWheel colors={colorList} onChange={onChange} T={T} />
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
+          <div style={{ fontSize: 10, color: T.mut }}>
+            Manual mode uses 5 motif colors. Tap a slot to update it.
+          </div>
           <div
             style={{
               display: "grid",
@@ -405,187 +401,110 @@ export function ColorPicker({ label, colors, onChange, T }) {
             }}
           >
             {MANUAL_PALETTES.map((palette) => (
-              <button
-                key={palette.id}
-                type="button"
-                onClick={() => applyManualPalette(palette.colors)}
-                style={{
-                  padding: 0,
-                  borderRadius: 8,
-                  border: `1px solid ${T.brd}`,
-                  background: T.surf1,
-                  cursor: "pointer",
-                  overflow: "hidden",
-                  textAlign: "left",
-                }}
-              >
-                <div style={{ display: "flex", height: 24 }}>
-                  {palette.colors.map((color) => (
-                    <div key={color} style={{ flex: 1, background: color }} />
-                  ))}
-                </div>
-                <div
-                  style={{
-                    padding: "6px 8px 7px",
-                    fontSize: 10,
-                    fontFamily: FONT,
-                    fontWeight: 700,
-                    color: T.txt,
-                  }}
-                >
-                  {palette.label}
-                </div>
-              </button>
+              (() => {
+                const normalized = normalizePalette(palette.colors, currentColors);
+                const isSelected = normalized.every(
+                  (color, index) =>
+                    color.toLowerCase() === currentColors[index].toLowerCase(),
+                );
+                return (
+                  <button
+                    key={palette.id}
+                    type="button"
+                    onClick={() => applyManualPalette(palette.colors)}
+                    style={{
+                      padding: 0,
+                      borderRadius: 10,
+                      border: `1px solid ${isSelected ? T.gold : T.brd}`,
+                      background: isSelected ? `${T.gold}1a` : T.surf1,
+                      cursor: "pointer",
+                      overflow: "hidden",
+                      textAlign: "left",
+                    }}
+                  >
+                    <div style={{ display: "flex", height: 24 }}>
+                      {normalized.map((color, index) => (
+                        <div key={`${palette.id}-${index}`} style={{ flex: 1, background: color }} />
+                      ))}
+                    </div>
+                    <div
+                      style={{
+                        padding: "6px 8px 7px",
+                        fontSize: 10,
+                        fontFamily: FONT,
+                        fontWeight: 700,
+                        color: isSelected ? T.gold : T.txt,
+                      }}
+                    >
+                      {palette.label}
+                    </div>
+                  </button>
+                );
+              })()
             ))}
           </div>
 
           <div
             style={{
               display: "flex",
-              gap: 8,
-              alignItems: "end",
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <span
-                style={{ fontSize: 7, color: T.dim, fontFamily: FONT_MONO }}
-              >
-                Add your color
-              </span>
-              <input
-                type="color"
-                value={newManualColor}
-                onChange={(event) => setNewManualColor(event.target.value)}
-                style={{
-                  width: 64,
-                  height: 30,
-                  border: `1px solid ${T.brd}`,
-                  borderRadius: 4,
-                  cursor: "pointer",
-                  padding: 2,
-                  background: "transparent",
-                }}
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={addManualColor}
-              style={{
-                padding: "8px 10px",
-                fontSize: 11,
-                fontFamily: FONT,
-                fontWeight: 700,
-                color: T.txt,
-                background: T.surf2,
-                border: `1px solid ${T.brd}`,
-                borderRadius: 6,
-                cursor: "pointer",
-              }}
-            >
-              Add color
-            </button>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
+              flexDirection: "column",
               gap: 6,
             }}
           >
             {currentColors.map((color, index) => (
               <div
-                key={`${color}-${index}`}
+                key={`slot-${index}`}
                 style={{
                   border: `1px solid ${T.brd}`,
-                  borderRadius: 8,
-                  overflow: "hidden",
+                  borderRadius: 10,
                   background: T.surf1,
+                  display: "grid",
+                  gridTemplateColumns: "auto auto 1fr",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "8px 10px",
                 }}
               >
-                <div
+                <span
                   style={{
-                    height: 28,
-                    background: color,
-                    borderBottom: `1px solid ${T.brd}`,
-                  }}
-                />
-                <div
-                  style={{
-                    padding: 6,
-                    display: "grid",
-                    gap: 6,
+                    fontSize: 10,
+                    color: T.txt,
+                    fontWeight: 700,
+                    minWidth: 54,
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 6,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 7,
-                        color: T.dim,
-                        fontFamily: FONT_MONO,
-                      }}
-                    >
-                      {COLOR_LABELS[index] ?? `Color ${index + 1}`}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeManualColor(index)}
-                      disabled={currentColors.length <= 1}
-                      style={{
-                        padding: "2px 6px",
-                        fontSize: 8,
-                        fontFamily: FONT,
-                        fontWeight: 700,
-                        color: currentColors.length <= 1 ? T.dim : T.txt,
-                        background: "transparent",
-                        border: `1px solid ${T.brd}`,
-                        borderRadius: 999,
-                        cursor:
-                          currentColors.length <= 1 ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={(event) => updateColor(index, event.target.value)}
-                    style={{
-                      width: "100%",
-                      height: 28,
-                      border: `1px solid ${T.brd}`,
-                      borderRadius: 4,
-                      cursor: "pointer",
-                      padding: 2,
-                      background: "transparent",
-                    }}
-                  />
-                  <input
-                    value={color}
-                    onChange={(event) => updateColor(index, event.target.value)}
-                    spellCheck={false}
-                    style={{
-                      width: "100%",
-                      padding: "6px 7px",
-                      borderRadius: 6,
-                      border: `1px solid ${T.brd}`,
-                      background: T.surf2,
-                      color: T.txt,
-                      fontFamily: FONT_MONO,
-                      fontSize: 10,
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
+                  {COLOR_LABELS[index] ?? `Color ${index + 1}`}
+                </span>
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(event) => updateColor(index, event.target.value)}
+                  style={{
+                    width: 42,
+                    height: 32,
+                    border: `1px solid ${T.brd}`,
+                    borderRadius: 7,
+                    cursor: "pointer",
+                    padding: 2,
+                    background: "transparent",
+                  }}
+                />
+                <input
+                  value={color}
+                  onChange={(event) => updateColor(index, event.target.value)}
+                  spellCheck={false}
+                  style={{
+                    width: "100%",
+                    padding: "8px 9px",
+                    borderRadius: 8,
+                    border: `1px solid ${T.brd}`,
+                    background: T.surf2,
+                    color: T.txt,
+                    fontFamily: FONT_MONO,
+                    fontSize: 11,
+                    boxSizing: "border-box",
+                  }}
+                />
               </div>
             ))}
           </div>

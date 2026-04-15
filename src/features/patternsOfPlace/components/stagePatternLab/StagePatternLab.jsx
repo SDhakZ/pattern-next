@@ -186,9 +186,6 @@ export function StagePatternLab() {
           flexShrink: 0,
         }}
       >
-        <Button variant="secondary" small={false} T={T} onClick={goBack}>
-          ← Back
-        </Button>
         <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
           <div
             style={{
@@ -263,68 +260,114 @@ export function StagePatternLab() {
             }}
           >
             <Label T={T}>Layers ({layers.length})</Label>
-            <div
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: 4,
+              marginBottom: 8,
+            }}
+          >
+            <Button
+              small
+              variant="secondary"
+              T={T}
+              onClick={addLayer}
               style={{
-                display: "flex",
-                gap: 3,
-                flexWrap: "wrap",
-                alignItems: "center",
+                fontSize: 10,
+                padding: "7px 8px",
+                minHeight: 34,
+                minWidth: 0,
               }}
             >
-              <Button small variant="ghost" T={T} onClick={addLayer}>
-                +
-              </Button>
-              <Button
-                small
-                variant="ghost"
-                T={T}
-                onClick={duplicateLayer}
-                disabled={!active}
-              >
-                ⧉
-              </Button>
-              <Button
-                small
-                variant="ghost"
-                T={T}
-                onClick={removeLayer}
-                disabled={layers.length <= 1}
-              >
-                −
-              </Button>
-            </div>
+              + Add
+            </Button>
+            <Button
+              small
+              variant="secondary"
+              T={T}
+              onClick={duplicateLayer}
+              disabled={!active}
+              style={{
+                fontSize: 10,
+                padding: "7px 8px",
+                minHeight: 34,
+                minWidth: 0,
+              }}
+            >
+              Duplicate
+            </Button>
+            <Button
+              small
+              variant="danger"
+              T={T}
+              onClick={removeLayer}
+              disabled={layers.length <= 1}
+              style={{
+                fontSize: 10,
+                padding: "7px 8px",
+                minHeight: 34,
+                minWidth: 0,
+              }}
+            >
+              Remove
+            </Button>
           </div>
           <div
             style={{
               display: "flex",
               gap: 4,
               flexWrap: "wrap",
-              marginBottom: 8,
+              alignItems: "center",
+              marginBottom: 10,
             }}
           >
             <Button
               small
-              variant="ghost"
+              variant="secondary"
               T={T}
               onClick={copyLayerColors}
               disabled={!active}
+              style={{
+                fontSize: 10,
+                padding: "6px 10px",
+                minHeight: 30,
+                minWidth: 0,
+                letterSpacing: "0.01em",
+              }}
             >
-              Copy colors
+              Copy layer colors
             </Button>
             <Button
               small
-              variant="ghost"
+              variant="secondary"
               T={T}
               onClick={pasteLayerColors}
               disabled={!copiedColors}
+              style={{
+                fontSize: 10,
+                padding: "6px 10px",
+                minHeight: 30,
+                minWidth: 0,
+                letterSpacing: "0.01em",
+              }}
             >
-              Paste colors
+              Paste layer colors
             </Button>
             {copyMsg && (
               <span
-                style={{ fontSize: 10, color: T.gold, alignSelf: "center" }}
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: T.gold,
+                  border: `1px solid ${T.gold}88`,
+                  background: `${T.gold}1f`,
+                  borderRadius: 999,
+                  padding: "2px 8px",
+                }}
               >
-                {copyMsg}
+                {copyMsg} colors
               </span>
             )}
           </div>
@@ -426,127 +469,86 @@ export function StagePatternLab() {
           </div>
           <Divider T={T} />
 
-          {/* ── Color Palette ── */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Label T={T}>Color Palette</Label>
-          </div>
-
-          <ColorPicker
-            key={active.id}
-            label="Manual Colors"
-            colors={active.colors}
-            onChange={(c) => upd("colors", c)}
-            T={T}
-          />
-          <Divider T={T} />
-
-          {/* ── Transform ── */}
-          <SliderControl
-            label="X offset"
-            val={active.x}
-            min={-1}
-            max={1}
-            step={0.05}
-            onChange={(v) => upd("x", v)}
-            display={active.x.toFixed(2)}
-            T={T}
-          />
-          <SliderControl
-            label="Y offset"
-            val={active.y}
-            min={-1}
-            max={1}
-            step={0.05}
-            onChange={(v) => upd("y", v)}
-            display={active.y.toFixed(2)}
-            T={T}
-          />
-          <SliderControl
-            label="Scale"
-            val={active.scale}
-            min={0.2}
-            max={3}
-            step={0.05}
-            onChange={(v) => upd("scale", v)}
-            display={`${active.scale.toFixed(2)}×`}
-            T={T}
-          />
-          <SliderControl
-            label="Rotation"
-            val={active.rotation}
-            min={0}
-            max={360}
-            onChange={(v) => upd("rotation", v)}
-            display={`${active.rotation}°`}
-            T={T}
-          />
-
           {/* ── Save Preset ── */}
-          <Label T={T}>
-            {activePresetId ? "Edit Preset" : "Save to Library"}
-          </Label>
-          {activePresetId && (
-            <div style={{ fontSize: 10, color: T.mut, marginBottom: 8 }}>
-              Editing: <strong>{presetName}</strong>
-            </div>
-          )}
-          <input
-            value={presetName}
-            onChange={(e) => setPresetName(e.target.value)}
-            placeholder="Preset name…"
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              fontSize: 12,
-              fontFamily: FONT,
-              background: T.surf2,
-              color: T.txt,
-              border: `1px solid ${T.brd}`,
-              borderRadius: 4,
-              outline: "none",
-              boxSizing: "border-box",
-              marginBottom: 6,
-            }}
-          />
           <div
             style={{
-              display: "flex",
-              gap: 6,
-              alignItems: "center",
+              border: `1px solid ${T.brd}`,
+              borderRadius: 12,
+              background: T.surf1,
+              padding: "10px 10px 12px",
               marginBottom: 12,
             }}
           >
-            <Button
-              onClick={savePreset}
-              disabled={!presetName.trim()}
-              T={T}
-              style={{ flex: 1 }}
-            >
-              {activePresetId ? "Update" : "Save Preset"}
-            </Button>
+            <Label T={T}>
+              {activePresetId ? "Edit Preset" : "Save to Library"}
+            </Label>
+            <div style={{ fontSize: 10, color: T.mut, marginBottom: 8 }}>
+              Store this layer stack for quick reuse.
+            </div>
             {activePresetId && (
-              <Button
-                onClick={() => {
-                  setPresetName("");
-                  dispatch({ type: SET_ACTIVE_LAYER, id: null });
-                }}
-                variant="secondary"
-                T={T}
-              >
-                Cancel
-              </Button>
+              <div style={{ fontSize: 10, color: T.mut, marginBottom: 8 }}>
+                Editing: <strong>{presetName}</strong>
+              </div>
             )}
+            <input
+              value={presetName}
+              onChange={(e) => setPresetName(e.target.value)}
+              placeholder="Preset name…"
+              style={{
+                width: "100%",
+                padding: "9px 11px",
+                fontSize: 12,
+                fontFamily: FONT,
+                background: T.surf2,
+                color: T.txt,
+                border: `1px solid ${T.brd}`,
+                borderRadius: 10,
+                outline: "none",
+                boxSizing: "border-box",
+                marginBottom: 8,
+              }}
+            />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: activePresetId ? "1fr auto" : "1fr",
+                gap: 6,
+                alignItems: "center",
+              }}
+            >
+              <Button
+                onClick={savePreset}
+                disabled={!presetName.trim()}
+                T={T}
+                style={{ minHeight: 38 }}
+              >
+                {activePresetId ? "Update Preset" : "Save to Library"}
+              </Button>
+              {activePresetId && (
+                <Button
+                  onClick={() => {
+                    setPresetName("");
+                    dispatch({ type: SET_ACTIVE_LAYER, id: null });
+                  }}
+                  variant="secondary"
+                  T={T}
+                  style={{ minHeight: 38 }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
             {savedMsg && (
-              <span style={{ fontSize: 11, color: "#4caf50", fontWeight: 700 }}>
+              <div
+                style={{
+                  marginTop: 8,
+                  fontSize: 10,
+                  color: "#4caf50",
+                  fontWeight: 700,
+                }}
+              >
                 {savedMsg}
-              </span>
+              </div>
             )}
           </div>
 
@@ -634,10 +636,6 @@ export function StagePatternLab() {
               </div>
             </>
           )}
-
-          <Button onClick={toNext} T={T}>
-            {library.length === 0 ? "Skip →" : "To Ring Studio →"}
-          </Button>
         </aside>
 
         {/* ── Tile Preview ── */}
@@ -680,7 +678,7 @@ export function StagePatternLab() {
               borderRadius: 10,
               padding: 30,
               backgroundImage:
-                "radial-gradient(circle at 50% 35%, rgba(255,255,255,0.05), transparent 48%), linear-gradient(180deg, #1a1a1a 0%, #101010 100%)",
+                "radial-gradient(circle at 50% 30%, rgba(255,255,255,0.11), transparent 52%), linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.2) 100%)",
               border: `1px solid ${T.brd}`,
               boxShadow: "0 16px 48px rgba(0,0,0,0.45)",
               touchAction: "none",
@@ -752,9 +750,6 @@ export function StagePatternLab() {
             }}
           >
             <Label T={T}>Color Palette</Label>
-            <Button small variant="ghost" T={T} onClick={copyLayerColors}>
-              Copy active
-            </Button>
           </div>
           <ColorPicker
             key={active.id}
@@ -806,68 +801,6 @@ export function StagePatternLab() {
             T={T}
           />
 
-          {/* ── Save Preset ── */}
-          <Label T={T}>
-            {activePresetId ? "Edit Preset" : "Save to Library"}
-          </Label>
-          {activePresetId && (
-            <div style={{ fontSize: 10, color: T.mut, marginBottom: 8 }}>
-              Editing: <strong>{presetName}</strong>
-            </div>
-          )}
-          <input
-            value={presetName}
-            onChange={(e) => setPresetName(e.target.value)}
-            placeholder="Preset name…"
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              fontSize: 12,
-              fontFamily: FONT,
-              background: T.surf2,
-              color: T.txt,
-              border: `1px solid ${T.brd}`,
-              borderRadius: 4,
-              outline: "none",
-              boxSizing: "border-box",
-              marginBottom: 6,
-            }}
-          />
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <Button
-              onClick={savePreset}
-              disabled={!presetName.trim()}
-              T={T}
-              style={{ flex: 1 }}
-            >
-              {activePresetId ? "Update" : "Save Preset"}
-            </Button>
-            {activePresetId && (
-              <Button
-                onClick={() => {
-                  setPresetName("");
-                  dispatch({ type: SET_ACTIVE_LAYER, id: null });
-                }}
-                variant="secondary"
-                T={T}
-              >
-                Cancel
-              </Button>
-            )}
-            {savedMsg && (
-              <span style={{ fontSize: 11, color: "#4caf50", fontWeight: 700 }}>
-                {savedMsg}
-              </span>
-            )}
-          </div>
-
           {/* ── Background ── */}
           <Label T={T}>Preview Background</Label>
           <div
@@ -875,10 +808,19 @@ export function StagePatternLab() {
               marginTop: 4,
               display: "flex",
               flexDirection: "column",
-              gap: 8,
+              gap: 10,
             }}
           >
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <div style={{ fontSize: 10, color: T.mut }}>
+              Pick a backdrop to view the motifs better
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gap: 6,
+              }}
+            >
               {PREVIEW_BG_OPTIONS.map((option) => {
                 const isActive = previewBgColor === option.color;
                 return (
@@ -889,32 +831,52 @@ export function StagePatternLab() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 6,
-                      padding: "4px 6px",
-                      borderRadius: 999,
+                      justifyContent: "space-between",
+                      gap: 8,
+                      minHeight: 36,
+                      padding: "7px 10px",
+                      borderRadius: 10,
                       border: `1px solid ${isActive ? T.gold : T.brd}`,
-                      background: isActive ? T.surf2 : "transparent",
-                      color: isActive ? T.gold : T.mut,
+                      background: isActive ? `${T.gold}1a` : T.surf1,
+                      color: isActive ? T.gold : T.txt,
                       cursor: "pointer",
+                      boxShadow: isActive
+                        ? "0 0 0 1px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.18)"
+                        : "none",
                     }}
                   >
                     <span
-                      style={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: "50%",
-                        background: option.color,
-                        border: "1px solid rgba(255,255,255,0.2)",
-                      }}
-                    />
+                      style={{ display: "flex", alignItems: "center", gap: 7 }}
+                    >
+                      <span
+                        style={{
+                          width: 14,
+                          height: 14,
+                          borderRadius: "50%",
+                          background: option.color,
+                          border: "1px solid rgba(255,255,255,0.24)",
+                          boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.2)",
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontFamily: FONT,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {option.name}
+                      </span>
+                    </span>
                     <span
                       style={{
                         fontSize: 10,
-                        fontFamily: FONT,
                         fontWeight: 700,
+                        color: isActive ? T.gold : T.dim,
+                        opacity: isActive ? 1 : 0.65,
                       }}
                     >
-                      {option.name}
+                      {isActive ? "Selected" : ""}
                     </span>
                   </button>
                 );
@@ -922,8 +884,52 @@ export function StagePatternLab() {
             </div>
             <div
               style={{
+                display: "flex",
+                gap: 6,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setPreviewBgColor("#101010")}
+                style={{
+                  padding: "7px 10px",
+                  fontSize: 10,
+                  fontFamily: FONT,
+                  fontWeight: 700,
+                  borderRadius: 8,
+                  border: `1px solid ${previewBgColor === "#101010" ? T.gold : T.brd}`,
+                  background:
+                    previewBgColor === "#101010" ? `${T.gold}14` : T.surf2,
+                  color: previewBgColor === "#101010" ? T.gold : T.txt,
+                  cursor: "pointer",
+                }}
+              >
+                Dark default
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewBgColor("#f5f1e7")}
+                style={{
+                  padding: "7px 10px",
+                  fontSize: 10,
+                  fontFamily: FONT,
+                  fontWeight: 700,
+                  borderRadius: 8,
+                  border: `1px solid ${previewBgColor === "#f5f1e7" ? T.gold : T.brd}`,
+                  background:
+                    previewBgColor === "#f5f1e7" ? `${T.gold}14` : T.surf2,
+                  color: previewBgColor === "#f5f1e7" ? T.gold : T.txt,
+                  cursor: "pointer",
+                }}
+              >
+                Light paper
+              </button>
+            </div>
+            <div
+              style={{
                 display: "grid",
-                gridTemplateColumns: "1fr auto",
+                gridTemplateColumns: "1fr auto auto",
                 gap: 8,
                 alignItems: "center",
               }}
@@ -935,14 +941,29 @@ export function StagePatternLab() {
                 aria-label="Preview background color"
                 style={{
                   width: "100%",
-                  height: 30,
+                  height: 34,
                   border: `1px solid ${T.brd}`,
-                  borderRadius: 6,
+                  borderRadius: 8,
                   cursor: "pointer",
                   padding: 2,
                   background: "transparent",
                 }}
               />
+              <div
+                style={{
+                  fontSize: 10,
+                  fontFamily: FONT_MONO,
+                  color: T.mut,
+                  minWidth: 70,
+                  textAlign: "center",
+                  padding: "7px 8px",
+                  borderRadius: 8,
+                  border: `1px solid ${T.brd}`,
+                  background: T.surf1,
+                }}
+              >
+                {previewBgColor.toUpperCase()}
+              </div>
               <button
                 type="button"
                 onClick={() => setPreviewBgColor("#101010")}
@@ -962,110 +983,33 @@ export function StagePatternLab() {
               </button>
             </div>
           </div>
-
-          {/* ── Library ── */}
-          {library.length > 0 && (
-            <>
-              <Label T={T}>Library ({library.length})</Label>
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 8,
-                  marginBottom: 12,
-                }}
-              >
-                {library.map((pr) => (
-                  <div key={pr.id} style={{ position: "relative" }}>
-                    <div
-                      style={{
-                        width: 52,
-                        height: 52,
-                        background: "#111",
-                        borderRadius: 4,
-                        overflow: "hidden",
-                        border: `1px solid ${activePresetId === pr.id ? "#00e5ff" : T.brd}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        boxShadow:
-                          activePresetId === pr.id
-                            ? "0 0 8px rgba(0,229,255,0.4)"
-                            : "none",
-                        transition: "all 0.15s",
-                      }}
-                      onClick={() => {
-                        dispatch({ type: LOAD_PRESET, id: pr.id });
-                        setPresetName(pr.name);
-                      }}
-                    >
-                      <PatternTile layers={pr.layers} size={52} />
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 9,
-                        color: T.mut,
-                        textAlign: "center",
-                        marginTop: 2,
-                        maxWidth: 52,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {pr.name}
-                    </div>
-                    <button
-                      onClick={() =>
-                        dispatch({ type: DELETE_PRESET, id: pr.id })
-                      }
-                      aria-label={`Delete preset ${pr.name}`}
-                      style={{
-                        position: "absolute",
-                        top: -4,
-                        right: -4,
-                        width: 14,
-                        height: 14,
-                        borderRadius: "50%",
-                        background: "#e05a5a",
-                        color: "#fff",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: 9,
-                        fontWeight: 700,
-                        lineHeight: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </aside>
       </div>
 
-      <footer
+      <div
         style={{
+          position: "fixed",
+          left: "50%",
+          bottom: 20,
+          transform: "translateX(-50%)",
           display: "flex",
-          justifyContent: "flex-end",
           alignItems: "center",
           gap: 12,
-          padding: "16px 24px",
-          borderTop: `1px solid ${T.brd}`,
+          padding: 12,
+          borderRadius: 999,
           background: T.surf,
-          flexShrink: 0,
+          border: `1px solid ${T.brd}`,
+          boxShadow: `0 12px 32px ${T.shadow}`,
+          zIndex: 150,
         }}
       >
+        <Button variant="secondary" small={false} T={T} onClick={goBack}>
+          ← Back
+        </Button>
         <Button onClick={toNext} T={T}>
           {library.length === 0 ? "Skip →" : "To Ring Studio →"}
         </Button>
-      </footer>
+      </div>
     </div>
   );
 }

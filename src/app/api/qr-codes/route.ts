@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { generateToken } from "@/lib/tokenUtils";
+import { supabase } from "@/features/lib/supabase";
+import { generateToken } from "@/features/lib/tokenUtils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Return QR code URL and metadata
-    const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || request.nextUrl.origin;
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_BASE_URL || request.nextUrl.origin;
     const qrUrl = `${baseUrl}/qr/${token}`;
 
     return NextResponse.json({
