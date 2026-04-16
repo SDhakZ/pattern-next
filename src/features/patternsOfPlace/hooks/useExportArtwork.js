@@ -112,109 +112,66 @@ function buildReverseSVG(
   // Background
   parts.push(`<rect width="${W}" height="${H}" fill="${bgColor}"/>`);
 
-  if (template === "luxury") {
-    // Luxury template: split layout with decorative left, writing right
-    const borderColor = "#C9A646";
-    parts.push(
-      `<rect x="2" y="2" width="${W - 4}" height="${H - 4}" fill="none" stroke="${borderColor}" stroke-width="4" rx="8"/>`,
-    );
-    parts.push(
-      `<line x1="${W / 2}" y1="0" x2="${W / 2}" y2="${H}" stroke="${borderColor}" stroke-width="2"/>`,
-    );
+  // ── Note area ──
+  const noteLabelY = pad + fsLabel;
+  parts.push(
+    `<text x="${pad}" y="${noteLabelY}" font-family="${font}" font-size="${fsLabel}" letter-spacing="${Math.round(fsLabel * 0.25)}" fill="${mut}">NOTE</text>`,
+  );
 
-    // Right: Writing area
-    const rightX = W / 2;
-    const labelY = pad + fsLabel + Math.round(8 * layoutSc);
+  const noteLineStartY = noteLabelY + Math.round(16 * layoutSc);
+  const noteLineGap = Math.round(18 * layoutSc) + 1;
+  for (let i = 0; i < 5; i++) {
+    const ly = noteLineStartY + i * noteLineGap;
     parts.push(
-      `<text x="${rightX + pad}" y="${labelY}" font-family="${font}" font-size="${fsLabel}" font-weight="600" letter-spacing="${Math.round(fsLabel * 0.1)}" fill="${gold}">Patterns of Place</text>`,
+      `<line x1="${pad}" y1="${ly}" x2="${leftW - pad}" y2="${ly}" stroke="${brd}" stroke-width="1.5"/>`,
     );
-    parts.push(
-      `<line x1="${rightX + pad}" y1="${labelY + Math.round(8 * layoutSc)}" x2="${rightX + W / 2 - pad}" y2="${labelY + Math.round(8 * layoutSc)}" stroke="${gold}" stroke-width="1"/>`,
-    );
-
-    const toY = labelY + Math.round(20 * layoutSc);
-    parts.push(
-      `<text x="${rightX + pad}" y="${toY}" font-family="${font}" font-size="${fsTiny}" text-transform="uppercase" letter-spacing="${Math.round(fsTiny * 0.1)}" fill="${gold}">To:</text>`,
-    );
-    for (let i = 0; i < 4; i++) {
-      const ly = toY + Math.round((i + 1) * 12 * layoutSc);
-      parts.push(
-        `<line x1="${rightX + pad}" y1="${ly}" x2="${rightX + W / 2 - pad}" y2="${ly}" stroke="${brd}" stroke-width="1"/>`,
-      );
-    }
-
-    const fromY = toY + Math.round(20 * layoutSc) + Math.round(48 * layoutSc);
-    parts.push(
-      `<text x="${rightX + pad}" y="${fromY}" font-family="${font}" font-size="${fsTiny}" text-transform="uppercase" letter-spacing="${Math.round(fsTiny * 0.1)}" fill="${gold}">From:</text>`,
-    );
-    for (let i = 0; i < 2; i++) {
-      const ly = fromY + Math.round((i + 1) * 12 * layoutSc);
-      parts.push(
-        `<line x1="${rightX + pad}" y1="${ly}" x2="${rightX + W / 2 - pad}" y2="${ly}" stroke="${brd}" stroke-width="1"/>`,
-      );
-    }
-  } else {
-    // ── Note area ──
-    const noteLabelY = pad + fsLabel;
-    parts.push(
-      `<text x="${pad}" y="${noteLabelY}" font-family="${font}" font-size="${fsLabel}" letter-spacing="${Math.round(fsLabel * 0.25)}" fill="${mut}">NOTE</text>`,
-    );
-
-    const noteLineStartY = noteLabelY + Math.round(16 * layoutSc);
-    const noteLineGap = Math.round(18 * layoutSc) + 1;
-    for (let i = 0; i < 5; i++) {
-      const ly = noteLineStartY + i * noteLineGap;
-      parts.push(
-        `<line x1="${pad}" y1="${ly}" x2="${leftW - pad}" y2="${ly}" stroke="${brd}" stroke-width="1.5"/>`,
-      );
-    }
-
-    // From label + line
-    const fromLabelY = H - pad - Math.round(40 * layoutSc);
-    parts.push(
-      `<text x="${pad}" y="${fromLabelY}" font-family="${font}" font-size="${fsLabel}" letter-spacing="${Math.round(fsLabel * 0.2)}" fill="${mut}">FROM</text>`,
-    );
-    parts.push(
-      `<line x1="${pad}" y1="${fromLabelY + Math.round(8 * layoutSc)}" x2="${leftW - pad}" y2="${fromLabelY + Math.round(8 * layoutSc)}" stroke="${brd}" stroke-width="1.5"/>`,
-    );
-
-    // Branding
-    parts.push(
-      `<text x="${pad}" y="${H - pad}" font-family="${font}" font-size="${fsBody}" letter-spacing="${Math.round(fsBody * 0.1)}" fill="${dim}">Patterns of Place · 2026</text>`,
-    );
-
-    // ── Address area ──
-    // Stamp box
-    const stampW = Math.round(44 * layoutSc);
-    const stampH = Math.round(54 * layoutSc);
-    const stampX = rightX + rightW - padRight - stampW;
-    const stampY = padRight;
-    parts.push(
-      `<rect x="${stampX}" y="${stampY}" width="${stampW}" height="${stampH}" fill="none" stroke="${brd}" stroke-width="2" rx="4"/>`,
-    );
-    const innerSW = Math.round(28 * layoutSc),
-      innerSH = Math.round(38 * layoutSc);
-    parts.push(
-      `<rect x="${stampX + (stampW - innerSW) / 2}" y="${stampY + (stampH - innerSH) / 2}" width="${innerSW}" height="${innerSH}" fill="${brd}" rx="2" opacity="0.6"/>`,
-    );
-
-    // To label
-    const toLabelY = H - padRight - Math.round(100 * layoutSc);
-    parts.push(
-      `<text x="${rightX + padRight}" y="${toLabelY}" font-family="${font}" font-size="${fsTiny}" letter-spacing="${Math.round(fsTiny * 0.15)}" fill="${dim}">TO</text>`,
-    );
-
-    // Address lines
-    const addrWidths = [0.9, 0.74, 0.74, 0.55];
-    const addrAreaW = rightW - 2 * padRight;
-    const addrGap = Math.round(18 * layoutSc);
-    addrWidths.forEach((w, i) => {
-      const ly = toLabelY + Math.round(addrGap * (i + 1));
-      parts.push(
-        `<line x1="${rightX + padRight}" y1="${ly}" x2="${rightX + padRight + addrAreaW * w}" y2="${ly}" stroke="${brd}" stroke-width="1.5"/>`,
-      );
-    });
   }
+
+  // From label + line
+  const fromLabelY = H - pad - Math.round(40 * layoutSc);
+  parts.push(
+    `<text x="${pad}" y="${fromLabelY}" font-family="${font}" font-size="${fsLabel}" letter-spacing="${Math.round(fsLabel * 0.2)}" fill="${mut}">FROM</text>`,
+  );
+  parts.push(
+    `<line x1="${pad}" y1="${fromLabelY + Math.round(8 * layoutSc)}" x2="${leftW - pad}" y2="${fromLabelY + Math.round(8 * layoutSc)}" stroke="${brd}" stroke-width="1.5"/>`,
+  );
+
+  // Branding
+  parts.push(
+    `<text x="${pad}" y="${H - pad}" font-family="${font}" font-size="${fsBody}" letter-spacing="${Math.round(fsBody * 0.1)}" fill="${dim}">Patterns of Place · 2026</text>`,
+  );
+
+  // ── Address area ──
+  // Stamp box
+  const stampW = Math.round(44 * layoutSc);
+  const stampH = Math.round(54 * layoutSc);
+  const stampX = rightX + rightW - padRight - stampW;
+  const stampY = padRight;
+  parts.push(
+    `<rect x="${stampX}" y="${stampY}" width="${stampW}" height="${stampH}" fill="none" stroke="${brd}" stroke-width="2" rx="4"/>`,
+  );
+  const innerSW = Math.round(28 * layoutSc),
+    innerSH = Math.round(38 * layoutSc);
+  parts.push(
+    `<rect x="${stampX + (stampW - innerSW) / 2}" y="${stampY + (stampH - innerSH) / 2}" width="${innerSW}" height="${innerSH}" fill="${brd}" rx="2" opacity="0.6"/>`,
+  );
+
+  // To label
+  const toLabelY = H - padRight - Math.round(100 * layoutSc);
+  parts.push(
+    `<text x="${rightX + padRight}" y="${toLabelY}" font-family="${font}" font-size="${fsTiny}" letter-spacing="${Math.round(fsTiny * 0.15)}" fill="${dim}">TO</text>`,
+  );
+
+  // Address lines
+  const addrWidths = [0.9, 0.74, 0.74, 0.55];
+  const addrAreaW = rightW - 2 * padRight;
+  const addrGap = Math.round(18 * layoutSc);
+  addrWidths.forEach((w, i) => {
+    const ly = toLabelY + Math.round(addrGap * (i + 1));
+    parts.push(
+      `<line x1="${rightX + padRight}" y1="${ly}" x2="${rightX + padRight + addrAreaW * w}" y2="${ly}" stroke="${brd}" stroke-width="1.5"/>`,
+    );
+  });
 
   // ── Reverse rings ──
   reverseRings.forEach((ring) => {

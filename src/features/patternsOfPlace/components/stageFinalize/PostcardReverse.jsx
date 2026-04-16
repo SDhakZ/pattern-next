@@ -23,40 +23,70 @@ export function PostcardReverse({
   template = "default",
   clusters = [],
 }) {
-  const isLuxury = template === "luxury";
   const pad = Math.round(H * 0.08);
   const padRight = Math.round(H * 0.07);
   const sc = H / 480; // scale factor for rings, matches Studio convention
-  const renderClusters = (scaleW = W) => clusters.map(cl => {
-    const ox = cl.x * scaleW;
-    const oy = cl.y * H;
-    return (
-      <div key={cl.id} style={{ position: 'absolute', left: ox, top: oy, width: 0, height: 0 }} >
-        {cl.rings.map(r => {
-          const preset = library.find(p => p.id === r.presetId);
-          const rs = r.radius * sc;
-          const tileSize = Math.max(5, tangentSize(rs, r.count));
-          const MC = MOTIFS[r.motifId ?? 0] || MOTIFS[0];
-          return (
-            <div key={r.id} style={{ position: 'absolute', left: 0, top: 0, width: 0, height: 0 }} >
-              {Array.from({ length: r.count }).map((_, mi) => {
-                const angle = (360 / r.count) * mi;
-                const pos = polar(rs, angle);
-                return (
-                  <div key={mi} style={{ position: 'absolute', left: pos.x, top: pos.y, transform: `translate(-50%,-50%) rotate(${angle}deg)`, width: tileSize, height: tileSize }} >
-                    {preset ? <PatternTile layers={preset.layers} size={tileSize} /> : <MC c={r.colors ?? DEFAULT_COLORS} size={tileSize} />}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-    );
-  });
-  const borderStyle = isLuxury
-    ? { border: `2px solid #C9A646`, boxShadow: `0 0 10px rgba(201, 164, 70, 0.5)` }
-    : { border: `1px solid ${T.brd}` };
+  const renderClusters = (scaleW = W) =>
+    clusters.map((cl) => {
+      const ox = cl.x * scaleW;
+      const oy = cl.y * H;
+      return (
+        <div
+          key={cl.id}
+          style={{
+            position: "absolute",
+            left: ox,
+            top: oy,
+            width: 0,
+            height: 0,
+          }}
+        >
+          {cl.rings.map((r) => {
+            const preset = library.find((p) => p.id === r.presetId);
+            const rs = r.radius * sc;
+            const tileSize = Math.max(5, tangentSize(rs, r.count));
+            const MC = MOTIFS[r.motifId ?? 0] || MOTIFS[0];
+            return (
+              <div
+                key={r.id}
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  width: 0,
+                  height: 0,
+                }}
+              >
+                {Array.from({ length: r.count }).map((_, mi) => {
+                  const angle = (360 / r.count) * mi;
+                  const pos = polar(rs, angle);
+                  return (
+                    <div
+                      key={mi}
+                      style={{
+                        position: "absolute",
+                        left: pos.x,
+                        top: pos.y,
+                        transform: `translate(-50%,-50%) rotate(${angle}deg)`,
+                        width: tileSize,
+                        height: tileSize,
+                      }}
+                    >
+                      {preset ? (
+                        <PatternTile layers={preset.layers} size={tileSize} />
+                      ) : (
+                        <MC c={r.colors ?? DEFAULT_COLORS} size={tileSize} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      );
+    });
+  const borderStyle = { border: `1px solid ${T.brd}` };
 
   return (
     <div
@@ -65,224 +95,132 @@ export function PostcardReverse({
         height: H,
         background: bgColor,
         borderRadius: 6,
-        ...(isLuxury ? { display: "flex" } : { position: "relative" }),
+        position: "relative",
         flexShrink: 0,
         fontFamily: FONT,
         overflow: "hidden",
         ...borderStyle,
       }}
     >
-      {isLuxury ? (
-        <>
-          <div
-            style={{
-              flex: 1,
-              background: bgColor,
-              position: "relative",
-            }}
-          >
-            {renderClusters(W / 2)}
-          </div>
+      <>
+        <CardCanvas
+          clusters={clusters}
+          bgColor={bgColor}
+          W={W}
+          H={H}
+          library={library}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+          }}
+        >
           <div
             style={{
               flex: 1,
               padding: pad,
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
+              justifyContent: "space-between",
+              borderRight: `1px solid white`,
               position: "relative",
               zIndex: 1,
+              background: "rgba(0,0,0,0.7)",
             }}
           >
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <div>
               <div
                 style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: "#C9A646",
-                  marginBottom: 8,
+                  fontSize: 8,
+                  letterSpacing: "0.25em",
+                  textTransform: "uppercase",
+                  color: "white",
+                  marginBottom: 16,
                 }}
               >
-                Patterns of Place
+                Note
               </div>
-              <div
-                style={{
-                  height: 1,
-                  background: "#C9A646",
-                  width: "60%",
-                  margin: "0 auto",
-                }}
-              />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  style={{ height: 1, background: "white", marginBottom: 18 }}
+                />
+              ))}
             </div>
-            <div style={{ width: "100%", textAlign: "left" }}>
+            <div>
               <div
                 style={{
-                  fontSize: 10,
-                  color: "#C9A646",
-                  marginBottom: 8,
+                  fontSize: 8,
+                  letterSpacing: "0.2em",
                   textTransform: "uppercase",
-                  letterSpacing: "0.1em",
+                  color: "white",
+                  marginBottom: 8,
                 }}
               >
-                To:
+                From
               </div>
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: 1,
-                    background: T.brd,
-                    marginBottom: 12,
-                    width: "90%",
-                  }}
-                />
-              ))}
+              <div
+                style={{ height: 1, background: "white", marginBottom: 8 }}
+              />
               <div
                 style={{
-                  fontSize: 10,
-                  color: "#C9A646",
-                  marginTop: 20,
-                  marginBottom: 8,
-                  textTransform: "uppercase",
+                  fontSize: 9,
+                  color: "white",
                   letterSpacing: "0.1em",
+                  marginTop: 14,
                 }}
               >
-                From:
+                Patterns of Place · 2026
               </div>
-              {[1, 2].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: 1,
-                    background: T.brd,
-                    marginBottom: 12,
-                    width: "90%",
-                  }}
-                />
-              ))}
             </div>
           </div>
-        </>
-      ) : (
-        <>
-          <CardCanvas
-            clusters={clusters}
-            bgColor={bgColor}
-            W={W}
-            H={H}
-            library={library}
-          />
           <div
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
+              width: "30%",
+              padding: padRight,
               display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              position: "relative",
+              zIndex: 1,
+              background: "rgba(0,0,0,0.7)",
             }}
           >
             <div
               style={{
-                flex: 1,
-                padding: pad,
+                width: "100%",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
-                borderRight: `1px solid white`,
-                position: "relative",
-                zIndex: 1,
-                background: "rgba(0,0,0,0.7)",
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: 8,
-                    letterSpacing: "0.25em",
-                    textTransform: "uppercase",
-                    color: "white",
-                    marginBottom: 16,
-                  }}
-                >
-                  Note
-                </div>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    style={{ height: 1, background: "white", marginBottom: 18 }}
-                  />
-                ))}
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontSize: 8,
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "white",
-                    marginBottom: 8,
-                  }}
-                >
-                  From
-                </div>
-                <div style={{ height: 1, background: "white", marginBottom: 8 }} />
-                <div
-                  style={{
-                    fontSize: 9,
-                    color: "white",
-                    letterSpacing: "0.1em",
-                    marginTop: 14,
-                  }}
-                >
-                  Patterns of Place · 2026
-                </div>
-              </div>
-            </div>
-            <div
-              style={{
-                width: "30%",
-                padding: padRight,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                alignItems: "flex-end",
-                position: "relative",
-                zIndex: 1,
-                background: "rgba(0,0,0,0.7)",
+                gap: 10,
               }}
             >
               <div
                 style={{
-                  width: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
+                  fontSize: 7,
+                  color: "white",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  marginBottom: 4,
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 7,
-                    color: "white",
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    marginBottom: 4,
-                  }}
-                >
-                  To
-                </div>
-                {[90, 74, 74, 55].map((w, i) => (
-                  <div
-                    key={i}
-                    style={{ height: 1, width: `${w}%`, background: "white" }}
-                  />
-                ))}
+                To
               </div>
+              {[90, 74, 74, 55].map((w, i) => (
+                <div
+                  key={i}
+                  style={{ height: 1, width: `${w}%`, background: "white" }}
+                />
+              ))}
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </>
 
       {reverseRings.map((ring) => {
         const preset = library.find((p) => p.id === ring.presetId);
