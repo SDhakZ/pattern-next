@@ -60,7 +60,12 @@ export const CardCanvas = memo(function CardCanvas({
             }}
           >
             {cl.rings.map((r) => {
-              const preset = library.find((p) => p.id === r.presetId);
+              const ringPatternLayers = Array.isArray(r.patternLayers)
+                ? r.patternLayers
+                : null;
+              const preset = ringPatternLayers
+                ? null
+                : library.find((p) => p.id === r.presetId);
               const rs = r.radius * s;
               const tileSize = Math.max(5, tangentSize(rs, r.count));
               const isActiveR = isActiveCl && r.id === activeRingId;
@@ -99,7 +104,9 @@ export const CardCanvas = memo(function CardCanvas({
                           transform: `translate(-50%,-50%) rotate(${angle}deg)`,
                         }}
                       >
-                        {preset ? (
+                        {ringPatternLayers ? (
+                          <PatternTile layers={ringPatternLayers} size={tileSize} />
+                        ) : preset ? (
                           <PatternTile layers={preset.layers} size={tileSize} />
                         ) : (
                           <MC c={r.colors ?? DEFAULT_COLORS} size={tileSize} />

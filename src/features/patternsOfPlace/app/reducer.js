@@ -56,6 +56,20 @@ export const makeLayer = (motifIndex = 0) => ({
   colors: [...DEFAULT_COLORS],
 });
 
+const cloneLayer = (layer) => ({
+  ...layer,
+  colors: [...(layer.colors ?? DEFAULT_COLORS)],
+});
+
+const normalizeColors = (value) => {
+  if (!Array.isArray(value)) return value;
+  const next = value.slice(0, DEFAULT_COLORS.length);
+  while (next.length < DEFAULT_COLORS.length) {
+    next.push(DEFAULT_COLORS[next.length]);
+  }
+  return next;
+};
+
 export const makeRing = (index = 0) => ({
   id: makeId(),
   count: 6 + index * 4,
@@ -63,6 +77,7 @@ export const makeRing = (index = 0) => ({
   motifId: index % MOTIF_COUNT,
   colors: [...DEFAULT_COLORS],
   presetId: null,
+  patternLayers: null,
 });
 
 export const makeCluster = (tpl, motifSeed = 0) => {
@@ -136,8 +151,10 @@ export const initialState = {
 export function reducer(state, action) {
   const nextValue =
     action.key === "colors" && Array.isArray(action.value)
-      ? [...action.value]
-      : action.value;
+      ? normalizeColors(action.value)
+      : action.key === "patternLayers" && Array.isArray(action.value)
+        ? action.value.map(cloneLayer)
+        : action.value;
 
   switch (action.type) {
     // Navigation
@@ -171,7 +188,7 @@ export function reducer(state, action) {
     case DUPLICATE_LAYER: {
       const original = state.editor.layers.find((l) => l.id === action.id);
       if (!original) return state;
-      const clone = { ...original, id: makeId(), colors: [...original.colors] };
+      const clone = { ...cloneLayer(original), id: makeId() };
       const layers = state.editor.layers.reduce((acc, layer) => {
         acc.push(layer);
         if (layer.id === action.id) acc.push(clone);
@@ -201,7 +218,7 @@ export function reducer(state, action) {
       const preset = {
         id: makeId(),
         name: action.name,
-        layers: state.editor.layers.map((l) => ({ ...l })),
+        layers: state.editor.layers.map(cloneLayer),
       };
       return { ...state, library: [...state.library, preset] };
     }
@@ -214,7 +231,7 @@ export function reducer(state, action) {
     case LOAD_PRESET: {
       const preset = state.library.find((p) => p.id === action.id);
       if (!preset) return state;
-      const layers = preset.layers.map((l) => ({ ...l }));
+      const layers = preset.layers.map(cloneLayer);
       return {
         ...state,
         editor: { ...state.editor, layers },
@@ -234,7 +251,7 @@ export function reducer(state, action) {
             ? {
                 ...p,
                 name: typeof action.name === "string" ? action.name : p.name,
-                layers: state.editor.layers.map((l) => ({ ...l })),
+                layers: state.editor.layers.map(cloneLayer),
               }
             : p,
         ),
@@ -304,17 +321,19 @@ export function reducer(state, action) {
           ),
         },
       };
-    case SET_ACTIVE_CLUSTER:
+    case SET_ACTIVE_CLUSTER: {
+      const newCluster = state.editor.clusters.find((c) => c.id === action.id);
+      if (!newCluster) return state;
+      const newActiveRingId = newCluster?.rings?.[0]?.id ?? null;
       return {
         ...state,
         ui: {
           ...state.ui,
           activeClusterId: action.id,
-          activeRingId:
-            state.editor.clusters.find((c) => c.id === action.id)?.rings[0]
-              ?.id ?? null,
+          activeRingId: newActiveRingId,
         },
       };
+    }
 
     // Studio rings
     case ADD_RING: {
@@ -348,6 +367,11 @@ export function reducer(state, action) {
       );
       if (!activeCl || activeCl.rings.length <= 1) return state;
       const remaining = activeCl.rings.filter((r) => r.id !== action.id);
+
+      // Ensure the new activeRingId actually exists in remaining rings
+      const newActiveRingId = remaining[remaining.length - 1]?.id ?? null;
+      if (!newActiveRingId) return state;
+
       return {
         ...state,
         editor: {
@@ -356,16 +380,30 @@ export function reducer(state, action) {
             c.id === state.ui.activeClusterId ? { ...c, rings: remaining } : c,
           ),
         },
-        ui: { ...state.ui, activeRingId: remaining[remaining.length - 1].id },
+        ui: { ...state.ui, activeRingId: newActiveRingId },
       };
     }
-    case UPDATE_RING:
+    case UPDATE_RING: {
+      // Always resolve ring updates by explicit cluster+ring targeting.
+      const targetClusterId =
+        action.clusterId ??
+        state.editor.clusters.find((c) => c.rings.some((r) => r.id === action.id))
+          ?.id;
+      if (!targetClusterId) return state;
+
+      const targetCluster = state.editor.clusters.find(
+        (c) => c.id === targetClusterId,
+      );
+      const ringExists = targetCluster?.rings?.some((r) => r.id === action.id);
+
+      if (!ringExists) return state;
+
       return {
         ...state,
         editor: {
           ...state.editor,
           clusters: state.editor.clusters.map((c) =>
-            c.id === state.ui.activeClusterId
+            c.id === targetClusterId
               ? {
                   ...c,
                   rings: c.rings.map((r) =>
@@ -376,8 +414,16 @@ export function reducer(state, action) {
           ),
         },
       };
-    case SET_ACTIVE_RING:
+    }
+    case SET_ACTIVE_RING: {
+      const targetClusterId = action.clusterId ?? state.ui.activeClusterId;
+      const targetCluster = state.editor.clusters.find(
+        (c) => c.id === targetClusterId,
+      );
+      const ringExists = targetCluster?.rings?.some((r) => r.id === action.id);
+      if (!ringExists) return state;
       return { ...state, ui: { ...state.ui, activeRingId: action.id } };
+    }
 
     // Background
     case SET_BG_COLOR:

@@ -86,7 +86,7 @@ export function StagePatternLab() {
   const duplicateLayer = () =>
     dispatch({ type: DUPLICATE_LAYER, id: activeLayerId });
   const copyLayerColors = () => {
-    setCopiedColors(active.colors);
+    setCopiedColors([...active.colors]);
     setCopyMsg("Copied");
     setTimeout(() => setCopyMsg(""), 2000);
   };
@@ -469,7 +469,7 @@ export function StagePatternLab() {
               marginBottom: 10,
             }}
           >
-            {SELECTABLE_MOTIFS.map(({ id, component: MC, name }) => {
+            {SELECTABLE_MOTIFS.map(({ id, previewComponent: MCP, name }) => {
               const isActive = active.motifId === id;
               return (
                 <button
@@ -490,7 +490,7 @@ export function StagePatternLab() {
                     transition: "all 0.15s",
                   }}
                 >
-                  <MC c={active.colors} size={46} />
+                  <MCP size={46} />
                 </button>
               );
             })}

@@ -161,7 +161,7 @@ function hueToXY(hue, sat, cx, cy, radius) {
 
 const DISC_SIZE = 200;
 
-export function ColorHarmonyWheel({ colors, onChange, T }) {
+export function ColorHarmonyWheel({ colors, onChange, layerCount = 5, T }) {
   const canvasRef = useRef(null);
   const draggingRef = useRef(false);
 
@@ -194,7 +194,7 @@ export function ColorHarmonyWheel({ colors, onChange, T }) {
     ctx.lineWidth = 1;
     const mainPos = hueToXY(hsv.h, hsv.s, cx, cy, radius);
     mode.offsets.forEach((off, i) => {
-      if (i === 0) return;
+      if (i === 0 || i >= layerCount) return;
       const hue = (((hsv.h + off) % 360) + 360) % 360;
       const pos = hueToXY(hue, hsv.s, cx, cy, radius);
       ctx.beginPath();
@@ -206,7 +206,7 @@ export function ColorHarmonyWheel({ colors, onChange, T }) {
 
     // Draw harmony handles (smaller, behind main)
     mode.offsets.forEach((off, i) => {
-      if (i === 0) return;
+      if (i === 0 || i >= layerCount) return;
       const hue = (((hsv.h + off) % 360) + 360) % 360;
       const pos = hueToXY(hue, hsv.s, cx, cy, radius);
       drawHandle(ctx, pos.x, pos.y, palette[i], 7, false);
@@ -389,7 +389,7 @@ export function ColorHarmonyWheel({ colors, onChange, T }) {
           height: 32,
         }}
       >
-        {palette.map((c, i) => (
+        {palette.slice(0, layerCount).map((c, i) => (
           <div
             key={i}
             title={c}

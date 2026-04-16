@@ -81,9 +81,16 @@ export function StageStudio() {
 
   const updRing = useCallback(
     (key, value) => {
-      dispatch({ type: UPDATE_RING, id: activeRingId, key, value });
+      if (!activeClusterId || !activeRingId) return;
+      dispatch({
+        type: UPDATE_RING,
+        clusterId: activeClusterId,
+        id: activeRingId,
+        key,
+        value,
+      });
     },
-    [dispatch, activeRingId],
+    [dispatch, activeClusterId, activeRingId],
   );
 
   const finalize = () => dispatch({ type: SET_STAGE, stage: 4 });

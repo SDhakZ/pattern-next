@@ -290,36 +290,38 @@ function ReversePanel({ T, state, dispatch }) {
                   marginBottom: 8,
                 }}
               >
-                {SELECTABLE_MOTIFS.map(({ id, component: MC, name }) => {
-                  const isActive = active.motifId === id;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => {
-                        upd("motifId", id);
-                        upd("presetId", null);
-                      }}
-                      aria-label={name}
-                      style={{
-                        aspectRatio: "1",
-                        padding: 1,
-                        border: `1.5px solid ${isActive ? "#00e5ff" : T.brd}`,
-                        background: isActive
-                          ? "rgba(0,229,255,0.1)"
-                          : "transparent",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: 3,
-                        overflow: "hidden",
-                        transition: "all 0.15s",
-                      }}
-                    >
-                      <MC c={active.colors ?? DEFAULT_COLORS} size={46} />
-                    </button>
-                  );
-                })}
+                {SELECTABLE_MOTIFS.map(
+                  ({ id, previewComponent: MCP, name }) => {
+                    const isActive = active.motifId === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => {
+                          upd("motifId", id);
+                          upd("presetId", null);
+                        }}
+                        aria-label={name}
+                        style={{
+                          aspectRatio: "1",
+                          padding: 1,
+                          border: `1.5px solid ${isActive ? "#00e5ff" : T.brd}`,
+                          background: isActive
+                            ? "rgba(0,229,255,0.1)"
+                            : "transparent",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: 3,
+                          overflow: "hidden",
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        <MCP size={46} />
+                      </button>
+                    );
+                  },
+                )}
               </div>
               <ColorPicker
                 key={active.id}
