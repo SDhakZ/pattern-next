@@ -387,8 +387,9 @@ export function reducer(state, action) {
       // Always resolve ring updates by explicit cluster+ring targeting.
       const targetClusterId =
         action.clusterId ??
-        state.editor.clusters.find((c) => c.rings.some((r) => r.id === action.id))
-          ?.id;
+        state.editor.clusters.find((c) =>
+          c.rings.some((r) => r.id === action.id),
+        )?.id;
       if (!targetClusterId) return state;
 
       const targetCluster = state.editor.clusters.find(

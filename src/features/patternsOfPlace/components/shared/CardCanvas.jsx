@@ -105,7 +105,10 @@ export const CardCanvas = memo(function CardCanvas({
                         }}
                       >
                         {ringPatternLayers ? (
-                          <PatternTile layers={ringPatternLayers} size={tileSize} />
+                          <PatternTile
+                            layers={ringPatternLayers}
+                            size={tileSize}
+                          />
                         ) : preset ? (
                           <PatternTile layers={preset.layers} size={tileSize} />
                         ) : (
