@@ -354,7 +354,6 @@ export function RingStudioLeftPanel({
                       key={preset.id}
                       onClick={() => {
                         updRing("presetId", preset.id);
-                        updRing("motifId", undefined);
                         updRing("patternLayers", preset.layers);
                       }}
                       style={{

@@ -3,6 +3,32 @@ import { MOTIFS } from "../../data/motifs/motifRegistry.js";
 import { PatternTile } from "./PatternTile.jsx";
 import { tangentSize, polar } from "../../domain/geometry.js";
 import { DEFAULT_COLORS } from "../../data/constants/defaults.js";
+import { renderNewMotifMarkup } from "../../data/motifs/newMotifs.jsx";
+
+function sanitizeScopeId(value) {
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function scopeMotifMarkup(markup, scopeId) {
+  if (!markup) return markup;
+  const prefix = `sc_${sanitizeScopeId(scopeId)}_`;
+
+  // Scope style selectors such as `.cls-1, .cls-2` to avoid global class collisions.
+  let scoped = markup.replace(/\.cls-([a-zA-Z0-9_-]+)/g, `.${prefix}cls-$1`);
+
+  // Scope class attributes on SVG nodes to match rewritten selectors.
+  scoped = scoped.replace(/class="([^"]+)"/g, (_, classValue) => {
+    const nextClassValue = classValue
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((name) => (name.startsWith("cls-") ? `${prefix}${name}` : name))
+      .join(" ");
+
+    return `class="${nextClassValue}"`;
+  });
+
+  return scoped;
+}
 
 /**
  * Renders the postcard canvas: clusters of rings of motifs on a background.
@@ -70,6 +96,13 @@ export const CardCanvas = memo(function CardCanvas({
               const tileSize = Math.max(5, tangentSize(rs, r.count));
               const isActiveR = isActiveCl && r.id === activeRingId;
               const MC = MOTIFS[r.motifId ?? 0] || MOTIFS[0];
+              const motifMarkup = renderNewMotifMarkup(
+                r.motifId ?? 0,
+                r.colors ?? DEFAULT_COLORS,
+              );
+              const scopedMotifMarkup = motifMarkup
+                ? scopeMotifMarkup(motifMarkup, `${cl.id}_${r.id}`)
+                : null;
 
               return (
                 <div key={r.id}>
@@ -111,6 +144,13 @@ export const CardCanvas = memo(function CardCanvas({
                           />
                         ) : preset ? (
                           <PatternTile layers={preset.layers} size={tileSize} />
+                        ) : motifMarkup ? (
+                          <div
+                            style={{ width: tileSize, height: tileSize }}
+                            dangerouslySetInnerHTML={{
+                              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="${tileSize}" height="${tileSize}" style="display:block">${scopedMotifMarkup}</svg>`,
+                            }}
+                          />
                         ) : (
                           <MC c={r.colors ?? DEFAULT_COLORS} size={tileSize} />
                         )}

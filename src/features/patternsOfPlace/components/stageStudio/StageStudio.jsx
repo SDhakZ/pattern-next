@@ -74,23 +74,24 @@ export function StageStudio() {
 
   const updCl = useCallback(
     (key, value) => {
-      dispatch({ type: UPDATE_CLUSTER, id: activeClusterId, key, value });
+      if (!activeCl?.id) return;
+      dispatch({ type: UPDATE_CLUSTER, id: activeCl.id, key, value });
     },
-    [dispatch, activeClusterId],
+    [dispatch, activeCl?.id],
   );
 
   const updRing = useCallback(
     (key, value) => {
-      if (!activeClusterId || !activeRingId) return;
+      if (!activeCl?.id || !activeRing?.id) return;
       dispatch({
         type: UPDATE_RING,
-        clusterId: activeClusterId,
-        id: activeRingId,
+        clusterId: activeCl.id,
+        id: activeRing.id,
         key,
         value,
       });
     },
-    [dispatch, activeClusterId, activeRingId],
+    [dispatch, activeCl?.id, activeRing?.id],
   );
 
   const finalize = () => dispatch({ type: SET_STAGE, stage: 4 });
@@ -163,6 +164,26 @@ export function StageStudio() {
       gestureRef.current = null;
     }
   };
+
+  const debugRows = clusters.flatMap((cluster, clusterIndex) =>
+    cluster.rings.map((ring, ringIndex) => ({
+      clusterId: cluster.id,
+      clusterIndex,
+      ringId: ring.id,
+      ringIndex,
+      motifId: ring.motifId,
+      presetId: ring.presetId,
+      hasPatternLayers:
+        Array.isArray(ring.patternLayers) && ring.patternLayers.length > 0,
+      c0: ring.colors?.[0] ?? "-",
+      c1: ring.colors?.[1] ?? "-",
+      c2: ring.colors?.[2] ?? "-",
+      c3: ring.colors?.[3] ?? "-",
+      c4: ring.colors?.[4] ?? "-",
+      isActiveCluster: cluster.id === activeClusterId,
+      isActiveRing: ring.id === activeRingId,
+    })),
+  );
 
   if (!activeCl || !activeRing) return null;
 
@@ -298,6 +319,126 @@ export function StageStudio() {
             <span style={{ color: "#ff6b35", fontWeight: 700 }}>
               ● orange dot
             </span>
+          </div>
+          <div
+            style={{
+              width: 600,
+              maxWidth: "100%",
+              border: `1px solid ${T.brd}`,
+              background: T.surf,
+              borderRadius: 8,
+              padding: 8,
+              fontSize: 10,
+              color: T.txt,
+              overflowX: "auto",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 6,
+                fontWeight: 700,
+                color: T.gold,
+              }}
+            >
+              <span>Debug State</span>
+              <span>
+                activeClusterId: {String(activeClusterId)} | activeRingId:{" "}
+                {String(activeRingId)}
+              </span>
+            </div>
+
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontFamily: FONT_MONO,
+              }}
+            >
+              <thead>
+                <tr>
+                  {[
+                    "cluster",
+                    "ring",
+                    "clusterId",
+                    "ringId",
+                    "motif",
+                    "preset",
+                    "layers",
+                    "c0",
+                    "c1",
+                    "c2",
+                    "c3",
+                    "c4",
+                    "active",
+                  ].map((head) => (
+                    <th
+                      key={head}
+                      style={{
+                        borderBottom: `1px solid ${T.brd}`,
+                        padding: "4px 6px",
+                        textAlign: "left",
+                        whiteSpace: "nowrap",
+                        color: T.mut,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {head}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {debugRows.map((row) => (
+                  <tr
+                    key={`${row.clusterId}-${row.ringId}`}
+                    style={{
+                      background:
+                        row.isActiveCluster && row.isActiveRing
+                          ? `${T.gold}22`
+                          : row.isActiveCluster
+                            ? `${T.gold}12`
+                            : "transparent",
+                    }}
+                  >
+                    <td style={{ padding: "4px 6px" }}>
+                      C{row.clusterIndex + 1}
+                    </td>
+                    <td style={{ padding: "4px 6px" }}>R{row.ringIndex + 1}</td>
+                    <td style={{ padding: "4px 6px" }}>{row.clusterId}</td>
+                    <td style={{ padding: "4px 6px" }}>{row.ringId}</td>
+                    <td style={{ padding: "4px 6px" }}>{row.motifId}</td>
+                    <td style={{ padding: "4px 6px" }}>
+                      {row.presetId ?? "-"}
+                    </td>
+                    <td style={{ padding: "4px 6px" }}>
+                      {row.hasPatternLayers ? "yes" : "no"}
+                    </td>
+                    <td style={{ padding: "4px 6px", color: row.c0 }}>
+                      {row.c0}
+                    </td>
+                    <td style={{ padding: "4px 6px", color: row.c1 }}>
+                      {row.c1}
+                    </td>
+                    <td style={{ padding: "4px 6px", color: row.c2 }}>
+                      {row.c2}
+                    </td>
+                    <td style={{ padding: "4px 6px", color: row.c3 }}>
+                      {row.c3}
+                    </td>
+                    <td style={{ padding: "4px 6px", color: row.c4 }}>
+                      {row.c4}
+                    </td>
+                    <td style={{ padding: "4px 6px" }}>
+                      {row.isActiveCluster ? "C" : "-"}
+                      {row.isActiveRing ? "R" : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </main>
 

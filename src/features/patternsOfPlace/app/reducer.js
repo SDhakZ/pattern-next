@@ -34,15 +34,20 @@ import { makeId } from "../utils/id.js";
 import {
   DEFAULT_COLORS,
   DEFAULT_BG_COLOR,
-  MAX_RINGS_PER_CLUSTER,
 } from "../data/constants/defaults.js";
 import { REVERSE_TEMPLATES } from "../data/constants/templates.js";
+import { MOTIF_COUNT } from "../data/motifs/motifMeta.js";
 import {
-  MOTIF_COUNT,
-  SELECTABLE_MOTIFS,
-} from "../data/motifs/motifRegistry.js";
-
-const SELECTABLE_MOTIF_IDS = SELECTABLE_MOTIFS.map((motif) => motif.id);
+  selectTemplateState,
+  addClusterState,
+  removeClusterState,
+  updateClusterState,
+  setActiveClusterState,
+  addRingState,
+  removeRingState,
+  updateRingState,
+  setActiveRingState,
+} from "../ringEngineV2/ringState.js";
 
 // ─── Factories ────────────────────────────────────────────────────────────────
 
@@ -68,36 +73,6 @@ const normalizeColors = (value) => {
     next.push(DEFAULT_COLORS[next.length]);
   }
   return next;
-};
-
-export const makeRing = (index = 0) => ({
-  id: makeId(),
-  count: 6 + index * 4,
-  radius: 80 + index * 80,
-  motifId: index % MOTIF_COUNT,
-  colors: [...DEFAULT_COLORS],
-  presetId: null,
-  patternLayers: null,
-});
-
-export const makeCluster = (tpl, motifSeed = 0) => {
-  const fallbackMotifId = 0;
-  const selectableMotifId =
-    SELECTABLE_MOTIF_IDS[motifSeed % SELECTABLE_MOTIF_IDS.length] ??
-    fallbackMotifId;
-  const rings = [
-    {
-      ...makeRing(0),
-      motifId: selectableMotifId,
-    },
-  ];
-  return {
-    id: makeId(),
-    x: tpl.x,
-    y: tpl.y,
-    scale: tpl.scale,
-    rings,
-  };
 };
 
 /**
@@ -261,170 +236,28 @@ export function reducer(state, action) {
 
     // Template selection → initializes clusters + advances to Studio stage
     case SELECT_TEMPLATE: {
-      const clusters = action.template.clusters.map((t, index) =>
-        makeCluster(t, index),
-      );
-      const firstCluster = clusters[0];
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          selectedTemplate: action.template,
-          clusters,
-        },
-        ui: {
-          ...state.ui,
-          stage: 2,
-          activeClusterId: firstCluster.id,
-          activeRingId: firstCluster.rings[0].id,
-        },
-      };
+      return selectTemplateState(state, action.template);
     }
 
     // Studio clusters
-    case ADD_CLUSTER: {
-      const nc = makeCluster({
-        x: 0.25 + Math.random() * 0.5,
-        y: 0.25 + Math.random() * 0.5,
-        scale: 0.7,
-      });
-      return {
-        ...state,
-        editor: { ...state.editor, clusters: [...state.editor.clusters, nc] },
-        ui: {
-          ...state.ui,
-          activeClusterId: nc.id,
-          activeRingId: nc.rings[0].id,
-        },
-      };
-    }
-    case REMOVE_CLUSTER: {
-      if (state.editor.clusters.length <= 1) return state;
-      const remaining = state.editor.clusters.filter((c) => c.id !== action.id);
-      return {
-        ...state,
-        editor: { ...state.editor, clusters: remaining },
-        ui: {
-          ...state.ui,
-          activeClusterId: remaining[0].id,
-          activeRingId: remaining[0].rings[0].id,
-        },
-      };
-    }
+    case ADD_CLUSTER:
+      return addClusterState(state);
+    case REMOVE_CLUSTER:
+      return removeClusterState(state, action.id);
     case UPDATE_CLUSTER:
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === action.id ? { ...c, [action.key]: action.value } : c,
-          ),
-        },
-      };
-    case SET_ACTIVE_CLUSTER: {
-      const newCluster = state.editor.clusters.find((c) => c.id === action.id);
-      if (!newCluster) return state;
-      const newActiveRingId = newCluster?.rings?.[0]?.id ?? null;
-      return {
-        ...state,
-        ui: {
-          ...state.ui,
-          activeClusterId: action.id,
-          activeRingId: newActiveRingId,
-        },
-      };
-    }
+      return updateClusterState(state, action.id, action.key, action.value);
+    case SET_ACTIVE_CLUSTER:
+      return setActiveClusterState(state, action.id);
 
     // Studio rings
-    case ADD_RING: {
-      const activeCl = state.editor.clusters.find(
-        (c) => c.id === state.ui.activeClusterId,
-      );
-      if (!activeCl || activeCl.rings.length >= MAX_RINGS_PER_CLUSTER)
-        return state;
-      const maxRadius = Math.max(...activeCl.rings.map((r) => r.radius));
-      const nr = {
-        ...makeRing(0),
-        count: 20,
-        radius: Math.min(maxRadius + 24, 400),
-      };
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === state.ui.activeClusterId
-              ? { ...c, rings: [...c.rings, nr] }
-              : c,
-          ),
-        },
-        ui: { ...state.ui, activeRingId: nr.id },
-      };
-    }
-    case REMOVE_RING: {
-      const activeCl = state.editor.clusters.find(
-        (c) => c.id === state.ui.activeClusterId,
-      );
-      if (!activeCl || activeCl.rings.length <= 1) return state;
-      const remaining = activeCl.rings.filter((r) => r.id !== action.id);
-
-      // Ensure the new activeRingId actually exists in remaining rings
-      const newActiveRingId = remaining[remaining.length - 1]?.id ?? null;
-      if (!newActiveRingId) return state;
-
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === state.ui.activeClusterId ? { ...c, rings: remaining } : c,
-          ),
-        },
-        ui: { ...state.ui, activeRingId: newActiveRingId },
-      };
-    }
-    case UPDATE_RING: {
-      // Always resolve ring updates by explicit cluster+ring targeting.
-      const targetClusterId =
-        action.clusterId ??
-        state.editor.clusters.find((c) =>
-          c.rings.some((r) => r.id === action.id),
-        )?.id;
-      if (!targetClusterId) return state;
-
-      const targetCluster = state.editor.clusters.find(
-        (c) => c.id === targetClusterId,
-      );
-      const ringExists = targetCluster?.rings?.some((r) => r.id === action.id);
-
-      if (!ringExists) return state;
-
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === targetClusterId
-              ? {
-                  ...c,
-                  rings: c.rings.map((r) =>
-                    r.id === action.id ? { ...r, [action.key]: nextValue } : r,
-                  ),
-                }
-              : c,
-          ),
-        },
-      };
-    }
-    case SET_ACTIVE_RING: {
-      const targetClusterId = action.clusterId ?? state.ui.activeClusterId;
-      const targetCluster = state.editor.clusters.find(
-        (c) => c.id === targetClusterId,
-      );
-      const ringExists = targetCluster?.rings?.some((r) => r.id === action.id);
-      if (!ringExists) return state;
-      return { ...state, ui: { ...state.ui, activeRingId: action.id } };
-    }
+    case ADD_RING:
+      return addRingState(state);
+    case REMOVE_RING:
+      return removeRingState(state, action.id);
+    case UPDATE_RING:
+      return updateRingState(state, action);
+    case SET_ACTIVE_RING:
+      return setActiveRingState(state, action);
 
     // Background
     case SET_BG_COLOR:

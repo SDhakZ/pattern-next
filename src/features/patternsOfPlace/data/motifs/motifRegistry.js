@@ -26,6 +26,13 @@ import {
   M11_PNG,
   M12_PNG,
 } from "./pngMotifs.jsx";
+import {
+  MOTIF_META,
+  MOTIF_COUNT,
+  MOTIF_NAMES,
+  SELECTABLE_MOTIF_NAMES,
+  MOTIF_LAYER_COUNTS,
+} from "./motifMeta.js";
 
 export const MOTIFS = [
   M01,
@@ -42,124 +49,25 @@ export const MOTIFS = [
   M12,
 ];
 
-export const SELECTABLE_MOTIFS = [
-  {
-    id: 0,
-    name: "Motif 1",
-    component: M01,
-    previewComponent: M01_PNG,
-    previewColors: ["#fdad17", "#260e50", "#fdad17", "#260e50", "#fdad17"],
-    layerCount: 2,
-  },
-  {
-    id: 1,
-    name: "Motif 2",
-    component: M02,
-    previewComponent: M02_PNG,
-    previewColors: ["#ffad14", "#260e50", "#110c19", "#ffad14", "#260e50"],
-    layerCount: 3,
-  },
-  {
-    id: 2,
-    name: "Motif 3",
-    component: M03,
-    previewComponent: M03_PNG,
-    previewColors: ["#f7b118", "#260e50", "#f7b118", "#260e50", "#f7b118"],
-    layerCount: 2,
-  },
-  {
-    id: 3,
-    name: "Motif 4",
-    component: M04,
-    previewComponent: M04_PNG,
-    previewColors: ["#fbad19", "#281050", "#fbad19", "#281050", "#fbad19"],
-    layerCount: 2,
-  },
-  {
-    id: 4,
-    name: "Motif 5",
-    component: M05,
-    previewComponent: M05_PNG,
-    previewColors: ["#fbb112", "#260e50", "#3f1970", "#58256c", "#fbb112"],
-    layerCount: 4,
-  },
-  {
-    id: 5,
-    name: "Motif 6",
-    component: M06,
-    previewComponent: M06_PNG,
-    previewColors: ["#fbad19", "#db8321", "#260e50", "#fbad19", "#db8321"],
-    layerCount: 3,
-  },
-  {
-    id: 6,
-    name: "Motif 7",
-    component: M07,
-    previewComponent: M07_PNG,
-    previewColors: ["#f9b115", "#e8c048", "#260e50", "#f9b115", "#260e50"],
-    layerCount: 3,
-  },
-  {
-    id: 7,
-    name: "Motif 8",
-    component: M08,
-    previewComponent: M08_PNG,
-    previewColors: ["#fbad19", "#db8321", "#fbad19", "#db8321", "#fbad19"],
-    layerCount: 2,
-  },
-  {
-    id: 8,
-    name: "Motif 9",
-    component: M09,
-    previewComponent: M09_PNG,
-    previewColors: ["#fdb10e", "#260e50", "#692e68", "#fdb10e", "#260e50"],
-    layerCount: 3,
-  },
-  {
-    id: 9,
-    name: "Motif 10",
-    component: M10,
-    previewComponent: M10_PNG,
-    previewColors: ["#ffb700", "#fea228", "#2c007f", "#1a0061", "#ffb700"],
-    layerCount: 4,
-  },
-  {
-    id: 10,
-    name: "Motif 11",
-    component: M11,
-    previewComponent: M11_PNG,
-    previewColors: ["#ffb700", "#fea228", "#2c007f", "#260e50", "#1a0061"],
-    layerCount: 5,
-  },
-  {
-    id: 11,
-    name: "Motif 12",
-    component: M12,
-    previewComponent: M12_PNG,
-    previewColors: ["#ff910b", "#ffad00", "#260e50", "#2c007f", "#edad23"],
-    layerCount: 5,
-  },
+const PREVIEW_COMPONENTS = [
+  M01_PNG,
+  M02_PNG,
+  M03_PNG,
+  M04_PNG,
+  M05_PNG,
+  M06_PNG,
+  M07_PNG,
+  M08_PNG,
+  M09_PNG,
+  M10_PNG,
+  M11_PNG,
+  M12_PNG,
 ];
 
-export const MOTIF_NAMES = [
-  "Motif 1",
-  "Motif 2",
-  "Motif 3",
-  "Motif 4",
-  "Motif 5",
-  "Motif 6",
-  "Motif 7",
-  "Motif 8",
-  "Motif 9",
-  "Motif 10",
-  "Motif 11",
-  "Motif 12",
-];
+export const SELECTABLE_MOTIFS = MOTIF_META.map((meta) => ({
+  ...meta,
+  component: MOTIFS[meta.id],
+  previewComponent: PREVIEW_COMPONENTS[meta.id],
+}));
 
-export const SELECTABLE_MOTIF_NAMES = SELECTABLE_MOTIFS.map(
-  (motif) => motif.name,
-);
-
-export const MOTIF_COUNT = MOTIFS.length;
-
-export const MOTIF_LAYER_COUNTS = SELECTABLE_MOTIFS.map((m) => m.layerCount);
+export { MOTIF_NAMES, SELECTABLE_MOTIF_NAMES, MOTIF_COUNT, MOTIF_LAYER_COUNTS };
