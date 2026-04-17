@@ -100,6 +100,71 @@ function buildFrontSVG(clusters, bgColor, library, W, H) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="${bgColor}"/><rect x="10" y="10" width="${W - 20}" height="${H - 20}" rx="4" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>${parts.join("")}</svg>`;
 }
 
+function buildClusterPatternParts(clusters, library, W, H) {
+  const sc = H / 480;
+  const parts = [];
+
+  clusters.forEach((cl) => {
+    const s = sc * cl.scale;
+    const ox = cl.x * W;
+    const oy = cl.y * H;
+    cl.rings.forEach((r) => {
+      const ringPatternLayers = Array.isArray(r.patternLayers)
+        ? r.patternLayers
+        : null;
+      const preset = ringPatternLayers
+        ? null
+        : library.find((p) => p.id === r.presetId);
+      const tileLayers = ringPatternLayers ?? preset?.layers ?? null;
+      const rs = r.radius * s;
+      const tileSize = Math.max(5, tangentSize(rs, r.count));
+      const presetFit = tileLayers ? presetFitScale(tileLayers) : 1;
+
+      for (let mi = 0; mi < r.count; mi++) {
+        const angle = (360 / r.count) * mi;
+        const { x, y } = polar(rs, angle);
+        const cx = ox + x;
+        const cy = oy + y;
+
+        if (tileLayers) {
+          const tileX = cx - tileSize / 2;
+          const tileY = cy - tileSize / 2;
+          const half = tileSize / 2;
+          tileLayers.forEach((layer) => {
+            const sz = Math.max(
+              4,
+              Math.round(tileSize * 0.5 * layer.scale * presetFit),
+            );
+            const lx = half + layer.x * half * presetFit - sz / 2;
+            const ly = half + layer.y * half * presetFit - sz / 2;
+            const [la, lb, lc, ld, le] = layer.colors;
+            const sc1000 = (sz / 1000).toFixed(6);
+            const scopedMarkup = scopeMotifMarkup(
+              getInlineSVG(layer.motifId, la, lb, lc, ld, le),
+              `reverse_bg_${cl.id}_${r.id}_${mi}_${layer.id}`,
+            );
+            parts.push(
+              `<g transform="translate(${tileX.toFixed(2)},${tileY.toFixed(2)}) rotate(${angle.toFixed(2)},${half.toFixed(2)},${half.toFixed(2)})"><g transform="translate(${lx.toFixed(2)},${ly.toFixed(2)}) rotate(${layer.rotation.toFixed(2)},${(sz / 2).toFixed(2)},${(sz / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g></g>`,
+            );
+          });
+        } else if (r.motifId !== undefined) {
+          const [ra, rb, rc, rd, re] = r.colors ?? DEFAULT_COLORS;
+          const sc1000 = (tileSize / 1000).toFixed(6);
+          const scopedMarkup = scopeMotifMarkup(
+            getInlineSVG(r.motifId, ra, rb, rc, rd, re),
+            `reverse_bg_${cl.id}_${r.id}_${mi}`,
+          );
+          parts.push(
+            `<g transform="translate(${(cx - tileSize / 2).toFixed(2)},${(cy - tileSize / 2).toFixed(2)}) rotate(${angle.toFixed(2)},${(tileSize / 2).toFixed(2)},${(tileSize / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g>`,
+          );
+        }
+      }
+    });
+  });
+
+  return parts;
+}
+
 // ─── Reverse SVG builder ──────────────────────────────────────────────────────
 
 function buildReverseSVG(
@@ -110,6 +175,7 @@ function buildReverseSVG(
   W,
   H,
   template = "default",
+  clusters = [],
 ) {
   const sc = H / 480; // ring scale — same reference as preview
   const layoutSc = H / 440; // layout scale — matches preview canvas height
@@ -134,6 +200,7 @@ function buildReverseSVG(
 
   // Background
   parts.push(`<rect width="${W}" height="${H}" fill="${bgColor}"/>`);
+  parts.push(...buildClusterPatternParts(clusters, library, W, H));
 
   // ── Note area ──
   const noteLabelY = pad + fsLabel;
@@ -282,6 +349,7 @@ export function useExportArtwork({
       EXPORT_W,
       EXPORT_H,
       template,
+      clusters,
     );
     return { frontSvg, reverseSvg };
   }, [clusters, bgColor, library, reverseRings, T, template]);

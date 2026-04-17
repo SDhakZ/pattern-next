@@ -66,7 +66,9 @@ export default function QrTokenPage() {
 
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<ValidationResponse | null>(null);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadingSide, setDownloadingSide] = useState<
+    "front" | "reverse" | null
+  >(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -108,7 +110,7 @@ export default function QrTokenPage() {
   const downloadPng = async (side: "front" | "reverse") => {
     if (!hasDownloadPayload) return;
     const svgText = side === "front" ? payload.frontSvg! : payload.reverseSvg!;
-    setIsDownloading(true);
+    setDownloadingSide(side);
     try {
       const pngUrl = await svgToPngDataUrl(svgText, EXPORT_W, EXPORT_H);
       triggerDownload(`patterns-of-place-${side}.png`, pngUrl);
@@ -118,7 +120,7 @@ export default function QrTokenPage() {
       const fallbackUrl = URL.createObjectURL(fallbackBlob);
       triggerDownload(`patterns-of-place-${side}.svg`, fallbackUrl);
     } finally {
-      setIsDownloading(false);
+      setDownloadingSide(null);
     }
   };
 
@@ -159,17 +161,21 @@ export default function QrTokenPage() {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => downloadPng("front")}
-              disabled={isDownloading}
+              disabled={downloadingSide !== null}
               className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
             >
-              {isDownloading ? "Preparing..." : "Download Front (PNG)"}
+              {downloadingSide === "front"
+                ? "Preparing..."
+                : "Download Front (PNG)"}
             </button>
             <button
               onClick={() => downloadPng("reverse")}
-              disabled={isDownloading}
+              disabled={downloadingSide !== null}
               className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
             >
-              {isDownloading ? "Preparing..." : "Download Reverse (PNG)"}
+              {downloadingSide === "reverse"
+                ? "Preparing..."
+                : "Download Reverse (PNG)"}
             </button>
           </div>
         ) : (
