@@ -26,6 +26,7 @@ import { ColorPicker } from "../shared/ColorPicker.jsx";
 import { PatternTile } from "../shared/PatternTile.jsx";
 import {
   MOTIFS,
+  MOTIF_LAYER_COUNTS,
   MOTIF_NAMES,
   SELECTABLE_MOTIFS,
 } from "../../data/motifs/motifRegistry.js";
@@ -60,6 +61,7 @@ export function StagePatternLab() {
   const previewRef = useRef(null);
   const gestureRef = useRef(null);
   const editingPreset = library.find((preset) => preset.id === editingPresetId);
+  const activeLayerCount = MOTIF_LAYER_COUNTS[active?.motifId] ?? 5;
 
   const buildDefaultPresetName = () => {
     const existingNames = new Set(
@@ -804,6 +806,7 @@ export function StagePatternLab() {
             label="Manual Colors"
             colors={active.colors}
             onChange={(c) => upd("colors", c)}
+            layerCount={activeLayerCount}
             T={T}
           />
           <Divider T={T} />

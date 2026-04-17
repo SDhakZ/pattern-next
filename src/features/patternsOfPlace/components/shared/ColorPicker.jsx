@@ -243,8 +243,7 @@ function wheelMarker(color, index, count) {
 
 export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
   const [pickerMode, setPickerMode] = useState("manual");
-  const [selectedManualPaletteId, setSelectedManualPaletteId] =
-    useState(null);
+  const [selectedManualPaletteId, setSelectedManualPaletteId] = useState(null);
 
   const harmonyFallback = buildPalette("#3a2417", DEFAULT_HARMONY_MODE);
   const currentColors = normalizePalette(
@@ -261,7 +260,8 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
     const matchingPalette = MANUAL_PALETTES.find((palette) => {
       const normalized = normalizePalette(palette.colors, currentColors);
       return normalized.every(
-        (color, index) => color.toLowerCase() === currentColors[index].toLowerCase(),
+        (color, index) =>
+          color.toLowerCase() === currentColors[index].toLowerCase(),
       );
     });
     setSelectedManualPaletteId(matchingPalette?.id ?? null);
@@ -354,7 +354,10 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
               padding: "6px 8px",
             }}
           >
-            Manual preset: {selectedManualPaletteId ? selectedManualPaletteId : "None (custom)"}
+            Manual preset:{" "}
+            {selectedManualPaletteId
+              ? selectedManualPaletteId
+              : "None (custom)"}
           </div>
           <div
             style={{
@@ -374,7 +377,9 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
                   <button
                     key={palette.id}
                     type="button"
-                    onClick={() => applyManualPalette(palette.id, palette.colors)}
+                    onClick={() =>
+                      applyManualPalette(palette.id, palette.colors)
+                    }
                     style={{
                       padding: 0,
                       borderRadius: 10,
