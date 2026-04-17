@@ -15,16 +15,49 @@ type ValidationResponse = {
   };
 };
 
-function downloadSvgFile(fileName: string, svgText: string) {
-  const blob = new Blob([svgText], { type: "image/svg+xml" });
-  const url = URL.createObjectURL(blob);
+const EXPORT_W = 1800;
+const EXPORT_H = 1200;
+
+function triggerDownload(fileName: string, href: string) {
   const a = document.createElement("a");
-  a.href = url;
+  a.href = href;
   a.download = fileName;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    if (href.startsWith("blob:")) URL.revokeObjectURL(href);
+  }, 1000);
+}
+
+function svgToPngDataUrl(svgText: string, width: number, height: number) {
+  return new Promise<string>((resolve, reject) => {
+    const img = new Image();
+    const dataUri =
+      "data:image/svg+xml;base64," +
+      btoa(unescape(encodeURIComponent(svgText)));
+
+    img.onload = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const canvas = document.createElement("canvas");
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        reject(new Error("Canvas context unavailable"));
+        return;
+      }
+
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/png", 0.95));
+    };
+
+    img.onerror = () => reject(new Error("Failed to render SVG"));
+    img.src = dataUri;
+  });
 }
 
 export default function QrTokenPage() {
@@ -33,6 +66,7 @@ export default function QrTokenPage() {
 
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<ValidationResponse | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -71,6 +105,23 @@ export default function QrTokenPage() {
     typeof payload.frontSvg === "string" &&
     typeof payload.reverseSvg === "string";
 
+  const downloadPng = async (side: "front" | "reverse") => {
+    if (!hasDownloadPayload) return;
+    const svgText = side === "front" ? payload.frontSvg! : payload.reverseSvg!;
+    setIsDownloading(true);
+    try {
+      const pngUrl = await svgToPngDataUrl(svgText, EXPORT_W, EXPORT_H);
+      triggerDownload(`patterns-of-place-${side}.png`, pngUrl);
+    } catch {
+      // Fallback keeps redemption useful even if PNG conversion fails in browser
+      const fallbackBlob = new Blob([svgText], { type: "image/svg+xml" });
+      const fallbackUrl = URL.createObjectURL(fallbackBlob);
+      triggerDownload(`patterns-of-place-${side}.svg`, fallbackUrl);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
@@ -107,26 +158,18 @@ export default function QrTokenPage() {
         {hasDownloadPayload ? (
           <div className="flex flex-col gap-3">
             <button
-              onClick={() =>
-                downloadSvgFile(
-                  "patterns-of-place-front.svg",
-                  payload.frontSvg!,
-                )
-              }
+              onClick={() => downloadPng("front")}
+              disabled={isDownloading}
               className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
             >
-              Download Front (SVG)
+              {isDownloading ? "Preparing..." : "Download Front (PNG)"}
             </button>
             <button
-              onClick={() =>
-                downloadSvgFile(
-                  "patterns-of-place-reverse.svg",
-                  payload.reverseSvg!,
-                )
-              }
+              onClick={() => downloadPng("reverse")}
+              disabled={isDownloading}
               className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
             >
-              Download Reverse (SVG)
+              {isDownloading ? "Preparing..." : "Download Reverse (PNG)"}
             </button>
           </div>
         ) : (
