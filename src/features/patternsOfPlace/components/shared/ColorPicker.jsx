@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ColorHarmonyWheel } from "./ColorHarmonyWheel.jsx";
 import { FONT, FONT_MONO } from "../../data/constants/themes.js";
 
@@ -6,8 +6,8 @@ const COLOR_LABELS = ["Dark", "Mid", "Accent", "Alt", "Light"];
 const PALETTE_SIZE = 5;
 
 const PICKER_MODES = [
-  { id: "harmony", label: "Harmony" },
   { id: "manual", label: "Manual" },
+  { id: "harmony", label: "Harmony" },
 ];
 
 const HARMONY_MODES = [
@@ -63,6 +63,8 @@ const HARMONY_PRESETS = {
     { offset: 0, sat: 0.24, light: 0.3 },
   ],
 };
+
+const DEFAULT_HARMONY_MODE = "complementary";
 
 const MANUAL_PALETTES = [
   {
@@ -240,83 +242,45 @@ function wheelMarker(color, index, count) {
 }
 
 export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
-  const wheelRef = useRef(null);
-  const manualColorsRef = useRef(
-    Array.isArray(colors) && colors.length > 0 ? [...colors] : null,
-  );
-  const [pickerMode, setPickerMode] = useState("harmony");
-  const [harmonyMode, setHarmonyMode] = useState("complementary");
-  const [dragging, setDragging] = useState(false);
+  const [pickerMode, setPickerMode] = useState("manual");
+  const [selectedManualPaletteId, setSelectedManualPaletteId] =
+    useState(null);
 
-  const harmonyFallback = buildPalette("#3a2417", harmonyMode);
+  const harmonyFallback = buildPalette("#3a2417", DEFAULT_HARMONY_MODE);
   const currentColors = normalizePalette(
     Array.isArray(colors) && colors.length > 0 ? colors : harmonyFallback,
     harmonyFallback,
   );
 
-  const baseHsl = useMemo(
-    () => hexToHsl(currentColors[0] ?? "#3a2417"),
+  const colorSignature = useMemo(
+    () => currentColors.map((color) => color.toLowerCase()).join("|"),
     [currentColors],
   );
 
   useEffect(() => {
-    if (!dragging || pickerMode !== "harmony") return;
-
-    const handleMove = (event) => {
-      const rect = wheelRef.current?.getBoundingClientRect();
-      if (!rect) return;
-
-      const x = event.clientX - (rect.left + rect.width / 2);
-      const y = event.clientY - (rect.top + rect.height / 2);
-      const radius = rect.width / 2;
-      const distance = Math.min(Math.sqrt(x * x + y * y), radius);
-      const angle = (Math.atan2(y, x) * 180) / Math.PI;
-      const saturation = clamp(distance / radius, 0, 1);
-      const nextBase = hslToHex(
-        wrapHue(angle + 90),
-        saturation * 0.92 + 0.08,
-        0.52,
+    const matchingPalette = MANUAL_PALETTES.find((palette) => {
+      const normalized = normalizePalette(palette.colors, currentColors);
+      return normalized.every(
+        (color, index) => color.toLowerCase() === currentColors[index].toLowerCase(),
       );
-      onChange(buildPalette(nextBase, harmonyMode));
-    };
-
-    const handleUp = () => setDragging(false);
-
-    window.addEventListener("pointermove", handleMove);
-    window.addEventListener("pointerup", handleUp);
-    return () => {
-      window.removeEventListener("pointermove", handleMove);
-      window.removeEventListener("pointerup", handleUp);
-    };
-  }, [dragging, harmonyMode, onChange, pickerMode]);
+    });
+    setSelectedManualPaletteId(matchingPalette?.id ?? null);
+  }, [colorSignature]);
 
   const commitColors = (nextColors) => {
     const normalized = normalizePalette(nextColors, currentColors);
     if (pickerMode === "manual") {
-      manualColorsRef.current = [...normalized];
+      setSelectedManualPaletteId(null);
     }
     onChange(normalized);
   };
 
-  const setPaletteMode = (nextMode) => {
-    setHarmonyMode(nextMode);
-    onChange(buildPalette(currentColors[0] ?? "#3a2417", nextMode));
-  };
-
   const switchToHarmony = () => {
     setPickerMode("harmony");
-    onChange(buildPalette(currentColors[0] ?? "#3a2417", harmonyMode));
   };
 
   const switchToManual = () => {
     setPickerMode("manual");
-    const nextManualColors =
-      manualColorsRef.current && manualColorsRef.current.length > 0
-        ? manualColorsRef.current
-        : currentColors;
-    const normalized = normalizePalette(nextManualColors, currentColors);
-    manualColorsRef.current = [...normalized];
-    onChange(normalized);
   };
 
   const updateColor = (index, value) => {
@@ -325,29 +289,10 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
     commitColors(next);
   };
 
-  const applyWheelBase = (event) => {
-    const rect = wheelRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const x = event.clientX - (rect.left + rect.width / 2);
-    const y = event.clientY - (rect.top + rect.height / 2);
-    const radius = rect.width / 2;
-    const distance = Math.min(Math.sqrt(x * x + y * y), radius);
-    const angle = (Math.atan2(y, x) * 180) / Math.PI;
-    const saturation = clamp(distance / radius, 0, 1);
-    const nextBase = hslToHex(
-      wrapHue(angle + 90),
-      saturation * 0.92 + 0.08,
-      0.52,
-    );
-    onChange(buildPalette(nextBase, harmonyMode));
-    setDragging(true);
-  };
-
-  const applyManualPalette = (palette) => {
+  const applyManualPalette = (paletteId, palette) => {
     setPickerMode("manual");
     const normalized = normalizePalette(palette, currentColors);
-    manualColorsRef.current = [...normalized];
+    setSelectedManualPaletteId(paletteId);
     onChange(normalized);
   };
 
@@ -387,11 +332,29 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
       </div>
 
       {pickerMode === "harmony" ? (
-        <ColorHarmonyWheel colors={colorList} onChange={onChange} layerCount={layerCount} T={T} />
+        <ColorHarmonyWheel
+          colors={colorList}
+          onChange={onChange}
+          layerCount={layerCount}
+          T={T}
+          emitOnInteractionOnly
+        />
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
           <div style={{ fontSize: 10, color: T.mut }}>
             Manual mode uses 5 motif colors. Tap a slot to update it.
+          </div>
+          <div
+            style={{
+              fontSize: 10,
+              color: selectedManualPaletteId ? T.gold : T.mut,
+              border: `1px solid ${selectedManualPaletteId ? T.gold : T.brd}`,
+              background: selectedManualPaletteId ? `${T.gold}14` : T.surf1,
+              borderRadius: 8,
+              padding: "6px 8px",
+            }}
+          >
+            Manual preset: {selectedManualPaletteId ? selectedManualPaletteId : "None (custom)"}
           </div>
           <div
             style={{
@@ -406,15 +369,12 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
                   palette.colors,
                   currentColors,
                 );
-                const isSelected = normalized.every(
-                  (color, index) =>
-                    color.toLowerCase() === currentColors[index].toLowerCase(),
-                );
+                const isSelected = selectedManualPaletteId === palette.id;
                 return (
                   <button
                     key={palette.id}
                     type="button"
-                    onClick={() => applyManualPalette(palette.colors)}
+                    onClick={() => applyManualPalette(palette.id, palette.colors)}
                     style={{
                       padding: 0,
                       borderRadius: 10,

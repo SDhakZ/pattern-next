@@ -161,9 +161,16 @@ function hueToXY(hue, sat, cx, cy, radius) {
 
 const DISC_SIZE = 200;
 
-export function ColorHarmonyWheel({ colors, onChange, layerCount = 5, T }) {
+export function ColorHarmonyWheel({
+  colors,
+  onChange,
+  layerCount = 5,
+  T,
+  emitOnInteractionOnly = false,
+}) {
   const canvasRef = useRef(null);
   const draggingRef = useRef(false);
+  const hasInteractedRef = useRef(false);
 
   // Derive HSV from first color in the palette
   const [hsv, setHsv] = useState(() => {
@@ -218,10 +225,11 @@ export function ColorHarmonyWheel({ colors, onChange, layerCount = 5, T }) {
 
   // Emit palette whenever HSV/harmony changes
   useEffect(() => {
+    if (emitOnInteractionOnly && !hasInteractedRef.current) return;
     const palette = generatePalette(hsv.h, hsv.s, hsv.v, harmonyId);
     onChange(palette);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hsv, harmonyId]);
+  }, [hsv, harmonyId, emitOnInteractionOnly]);
 
   const applyPointer = useCallback(
     (e) => {
@@ -242,6 +250,7 @@ export function ColorHarmonyWheel({ colors, onChange, layerCount = 5, T }) {
 
   const onPointerDown = useCallback(
     (e) => {
+      hasInteractedRef.current = true;
       draggingRef.current = true;
       e.currentTarget.setPointerCapture(e.pointerId);
       applyPointer(e);
@@ -344,9 +353,10 @@ export function ColorHarmonyWheel({ colors, onChange, layerCount = 5, T }) {
             max={1}
             step={0.01}
             value={hsv.v}
-            onChange={(e) =>
-              setHsv((prev) => ({ ...prev, v: parseFloat(e.target.value) }))
-            }
+            onChange={(e) => {
+              hasInteractedRef.current = true;
+              setHsv((prev) => ({ ...prev, v: parseFloat(e.target.value) }));
+            }}
             style={{
               width: "100%",
               position: "relative",
