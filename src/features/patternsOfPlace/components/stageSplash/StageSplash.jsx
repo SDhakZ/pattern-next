@@ -1,105 +1,150 @@
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
-import { SET_STAGE, SET_THEME } from "../../app/actions.js";
-import { Button } from "../shared/Button.jsx";
-import { FONT } from "../../data/constants/themes.js";
+import { SET_STAGE } from "../../app/actions.js";
+import pngPOP from "../../../../assets/welcome.png";
+import logo from "../../../../assets/Logo.png";
 
 export function StageSplash() {
-  const { state, dispatch, T } = usePatternsOfPlace();
-  const { theme } = state.ui;
+  const { dispatch } = usePatternsOfPlace();
+  const bgSrc = typeof pngPOP === "string" ? pngPOP : pngPOP?.src;
 
-  const toggleTheme = () =>
-    dispatch({ type: SET_THEME, theme: theme === "dark" ? "light" : "dark" });
   const start = () => dispatch({ type: SET_STAGE, stage: 1 });
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: T.bg,
+        backgroundColor: "#050505",
+        backgroundImage: `url(${bgSrc})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: FONT,
         position: "relative",
         padding: "40px",
       }}
     >
-      <Button
-        variant="secondary"
-        small={false}
-        T={T}
-        onClick={toggleTheme}
-        style={{ position: "fixed", top: 28, right: 28, zIndex: 100 }}
+      <div
+        style={{
+          flex: 1,
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        {theme === "dark" ? "☀ Light" : "◐ Dark"}
-      </Button>
-
-      <div style={{ textAlign: "center", maxWidth: 600 }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: "0.3em",
-            color: T.mut,
-            textTransform: "uppercase",
-            marginBottom: 14,
-          }}
-        >
-          Step 1 / 4
+        <div style={{ textAlign: "center", maxWidth: 700 }}>
+          <img
+            src={typeof logo === "string" ? logo : logo?.src}
+            alt="Patterns of Place"
+            style={{
+              width: "min(78vw, 320px)",
+              height: "auto",
+              display: "block",
+              margin: "0 auto 12px",
+              filter: "drop-shadow(0 0 16px rgba(231,175,26,0.3))",
+            }}
+          />
+          <p
+            style={{
+              fontFamily: "Cormorant Garamond, Georgia, serif",
+              fontSize: "clamp(24px, 2.2vw, 24px)",
+              color: "rgba(242,222,176,0.92)",
+              margin: "24px 0 0",
+              lineHeight: 1.2,
+            }}
+          >
+            A piece of Nepal, patterned by you.
+          </p>
         </div>
-        <div
-          style={{
-            fontSize: 13,
-            fontWeight: 700,
-            letterSpacing: "0.4em",
-            color: T.gold,
-            textTransform: "uppercase",
-            marginBottom: 24,
-          }}
-        >
-          Generative Postcard Kiosk
-        </div>
-        <h1
-          style={{
-            fontSize: 72,
-            fontWeight: 800,
-            color: T.txt,
-            margin: "0 0 16px",
-            letterSpacing: "-0.03em",
-            lineHeight: 1.2,
-          }}
-        >
-          Patterns
-          <br />
-          of Place
-        </h1>
-        <p
-          style={{
-            fontSize: 18,
-            color: T.mut,
-            marginBottom: 56,
-            marginTop: 20,
-            lineHeight: 1.6,
-          }}
-        >
-          Compose a keepsake from Newari architectural motifs
-        </p>
-        <Button
-          onClick={start}
-          variant="primary"
-          small={false}
-          T={T}
-          style={{
-            fontSize: 16,
-            padding: "16px 32px",
-            minHeight: 56,
-            margin: "0 auto",
-          }}
-        >
-          Begin →
-        </Button>
       </div>
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: 202,
+          transform: "translateX(-50%)",
+        }}
+      >
+        <button
+          onClick={start}
+          className="beginButton"
+          style={{
+            minWidth: 150,
+            padding: "12px 34px",
+            borderRadius: 999,
+            border: "1px solid rgba(233, 175, 24, 0.75)",
+            background:
+              "linear-gradient(180deg, rgba(22,22,22,0.88), rgba(8,8,8,0.94))",
+            color: "#e7af1a",
+            fontFamily: "DM Sans, system-ui, sans-serif",
+            fontSize: 24,
+            fontWeight: 500,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            boxShadow:
+              "0 0 0 1px rgba(233,175,24,0.25), 0 0 18px rgba(233,175,24,0.35), inset 0 -10px 24px rgba(0,0,0,0.5)",
+          }}
+        >
+          Begin
+        </button>
+      </div>
+      <style jsx>{`
+        .beginButton {
+          animation: beginPulse 2.8s ease-in-out infinite;
+          transition:
+            transform 140ms ease,
+            box-shadow 140ms ease,
+            filter 140ms ease;
+          will-change: transform, box-shadow;
+        }
+
+        .beginButton:hover {
+          transform: translateY(-2px) scale(1.02);
+          box-shadow:
+            0 0 0 1px rgba(233, 175, 24, 0.3),
+            0 0 26px rgba(233, 175, 24, 0.5),
+            inset 0 -10px 24px rgba(0, 0, 0, 0.5);
+          filter: brightness(1.06);
+        }
+
+        .beginButton:active {
+          transform: translateY(1px) scale(0.96);
+          box-shadow:
+            0 0 0 1px rgba(233, 175, 24, 0.2),
+            0 0 14px rgba(233, 175, 24, 0.28),
+            inset 0 -8px 18px rgba(0, 0, 0, 0.55);
+          filter: brightness(0.98);
+        }
+
+        @keyframes beginPulse {
+          0%,
+          100% {
+            transform: translateY(0) scale(1);
+            box-shadow:
+              0 0 0 1px rgba(233, 175, 24, 0.22),
+              0 0 18px rgba(233, 175, 24, 0.32),
+              inset 0 -10px 24px rgba(0, 0, 0, 0.5);
+          }
+
+          50% {
+            transform: translateY(-1px) scale(1.015);
+            box-shadow:
+              0 0 0 1px rgba(233, 175, 24, 0.34),
+              0 0 28px rgba(233, 175, 24, 0.5),
+              inset 0 -10px 24px rgba(0, 0, 0, 0.5);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .beginButton {
+            animation: none;
+          }
+        }
+      `}</style>
     </div>
   );
 }
