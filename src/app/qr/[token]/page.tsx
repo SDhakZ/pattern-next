@@ -2,6 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { Crimson_Pro, Outfit } from "next/font/google";
+import logo from "@/assets/Logo.png";
+
+const crimsonPro = Crimson_Pro({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
 
 type ValidationResponse = {
   status?: string;
@@ -66,9 +78,19 @@ export default function QrTokenPage() {
 
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<ValidationResponse | null>(null);
+  const logoSrc = typeof logo === "string" ? logo : logo?.src;
+  const [isMobile, setIsMobile] = useState(false);
   const [downloadingSide, setDownloadingSide] = useState<
     "front" | "reverse" | null
   >(null);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    const syncMobile = () => setIsMobile(media.matches);
+    syncMobile();
+    media.addEventListener("change", syncMobile);
+    return () => media.removeEventListener("change", syncMobile);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -107,6 +129,14 @@ export default function QrTokenPage() {
     typeof payload.frontSvg === "string" &&
     typeof payload.reverseSvg === "string";
 
+  const loadingBg = isMobile
+    ? "radial-gradient(1100px 800px at 0% 0%, rgba(127, 0, 0, 0.7), transparent 35%), radial-gradient(900px 700px at 100% 100%,rgba(176, 136, 51, 0.7), transparent 35%), linear-gradient(180deg, #070707 0%, #1a0202 55%, #120101 100%)"
+    : "radial-gradient(1100px 800px at 0% 0%, rgba(127, 0, 0, 1), transparent 55%), radial-gradient(900px 700px at 100% 100%, rgba(176, 136, 51, 1), transparent 60%), linear-gradient(180deg, #070707 0%, #1a0202 55%, #120101 100%)";
+
+  const successBg = isMobile
+    ? "radial-gradient(1100px 800px at 0% 0%, rgba(127, 0, 0, 0.7), transparent 45%), radial-gradient(900px 700px at 100% 100%,rgba(176, 136, 51, 0.7), transparent 45%), linear-gradient(180deg, #070707 0%, #1a0202 55%, #120101 100%)"
+    : "radial-gradient(1100px 800px at 0% 0%, rgba(127, 0, 0, 1), transparent 55%), radial-gradient(900px 700px at 100% 100%, rgba(176, 136, 51, 1), transparent 60%), linear-gradient(180deg, #070707 0%, #1a0202 55%, #120101 100%)";
+
   const downloadPng = async (side: "front" | "reverse") => {
     if (!hasDownloadPayload) return;
     const svgText = side === "front" ? payload.frontSvg! : payload.reverseSvg!;
@@ -126,9 +156,22 @@ export default function QrTokenPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold">Validating QR code...</h1>
+      <main
+        style={{
+          minHeight: "100dvh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          color: "#f3dfb7",
+          fontFamily: outfit.style.fontFamily,
+          background: loadingBg,
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <h1 style={{ fontSize: 30, fontWeight: 700, margin: 0 }}>
+            Validating QR code...
+          </h1>
         </div>
       </main>
     );
@@ -136,10 +179,44 @@ export default function QrTokenPage() {
 
   if (!result || result.status !== "success") {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="max-w-md w-full rounded-xl border border-gray-200 bg-white p-6">
-          <h1 className="text-2xl font-semibold mb-2">QR code unavailable</h1>
-          <p className="text-sm text-gray-700">
+      <main
+        style={{
+          minHeight: "100dvh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          color: "#f3dfb7",
+          fontFamily: outfit.style.fontFamily,
+          background: loadingBg,
+        }}
+      >
+        <div
+          style={{
+            width: "min(92vw, 460px)",
+            borderRadius: 18,
+            border: "1px solid rgba(227,172,32,0.35)",
+            padding: "22px 20px",
+            background: "rgba(5,6,10,0.78)",
+            boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
+          }}
+        >
+          <h1
+            style={{
+              margin: "0 0 10px",
+              fontSize: "clamp(30px, 7vw, 44px)",
+              color: "#e3ac20",
+              lineHeight: 1,
+              letterSpacing: "-0.01em",
+              fontWeight: 600,
+              fontFamily: crimsonPro.style.fontFamily,
+            }}
+          >
+            QR code unavailable
+          </h1>
+          <p
+            style={{ margin: 0, fontSize: 15, color: "rgba(243,223,183,0.9)" }}
+          >
             {result?.error ||
               "This QR code is invalid, expired, or already used."}
           </p>
@@ -149,41 +226,130 @@ export default function QrTokenPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
-      <div className="max-w-lg w-full rounded-xl border border-gray-200 bg-white p-6">
-        <h1 className="text-2xl font-semibold mb-2">Your postcard is ready</h1>
-        <p className="text-sm text-gray-600 mb-5">
-          This QR code is valid and has been redeemed. Download both sides
-          below.
-        </p>
+    <main
+      style={{
+        minHeight: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "48px 24px 36px",
+        position: "relative",
+        overflow: "hidden",
+        color: "#f3dfb7",
+        fontFamily: outfit.style.fontFamily,
+        background: successBg,
+      }}
+    >
+      <div
+        style={{
+          width: "min(92vw, 380px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 20,
+          textAlign: "center",
+          marginTop: -80,
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            marginBottom: 20,
+            fontSize: "clamp(22px, 5vw, 38px)",
+            color: "#e3ac20",
+            lineHeight: 1,
+            letterSpacing: "-0.01em",
+            fontWeight: 600,
+            fontFamily: crimsonPro.style.fontFamily,
+          }}
+        >
+          Your postcard is ready.
+        </h1>
 
         {hasDownloadPayload ? (
-          <div className="flex flex-col gap-3">
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              gap: 16,
+            }}
+          >
             <button
               onClick={() => downloadPng("front")}
               disabled={downloadingSide !== null}
-              className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
+              style={{
+                width: "80%",
+                minHeight: 54,
+                borderRadius: 999,
+                border: "1px solid #b08700",
+                background: "#050a13",
+                color: "#eedebe",
+                fontSize: "20px",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                textTransform: "uppercase",
+                cursor: downloadingSide ? "not-allowed" : "pointer",
+              }}
             >
-              {downloadingSide === "front"
-                ? "Preparing..."
-                : "Download Front (PNG)"}
+              {downloadingSide === "front" ? "Preparing..." : "Download Front"}
             </button>
             <button
               onClick={() => downloadPng("reverse")}
               disabled={downloadingSide !== null}
-              className="px-4 py-2 rounded bg-black text-white hover:opacity-90"
+              style={{
+                width: "80%",
+                minHeight: 54,
+                borderRadius: 999,
+                border: "1px solid #b08700",
+                background: "#050a13",
+                color: "#eedebe",
+                fontSize: "20px",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                textTransform: "uppercase",
+                cursor: downloadingSide ? "not-allowed" : "pointer",
+              }}
             >
               {downloadingSide === "reverse"
                 ? "Preparing..."
-                : "Download Reverse (PNG)"}
+                : "Download Reverse"}
             </button>
           </div>
         ) : (
-          <p className="text-sm text-gray-700">
+          <p style={{ margin: 0, fontSize: 15, color: "#DAC698" }}>
             QR validated, but this token does not contain postcard artwork
             payload.
           </p>
         )}
+
+        <p style={{ margin: 0, fontSize: 12, color: "#DAC698" }}>
+          The QR code is valid and has been redeemed.
+        </p>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: 56,
+          left: "50%",
+          transform: "translateX(-50%)",
+          textAlign: "center",
+        }}
+      >
+        <img
+          src={logoSrc}
+          alt="Patterns of Place"
+          style={{
+            width: "clamp(80px, 30vw, 150px)",
+            height: "auto",
+            display: "block",
+            filter: "drop-shadow(0 0 14px rgba(227,172,32,0.32))",
+          }}
+        />
       </div>
     </main>
   );
