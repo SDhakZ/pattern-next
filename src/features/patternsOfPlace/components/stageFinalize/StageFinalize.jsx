@@ -370,7 +370,7 @@ export function StageFinalize() {
                 bgColor={bgColor}
                 W={660}
                 H={440}
-                reverseRings={reverseRings}
+                reverseRings={[]}
                 library={library}
                 activeRingId={activeReverseDecorationId}
                 template={reverseTemplate}
@@ -378,17 +378,6 @@ export function StageFinalize() {
               />
             )}
           </div>
-
-          {!isFront && reverseRings.length > 0 && (
-            <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
-              Active ring:{" "}
-              <span style={{ color: "#00e5ff", fontWeight: 700 }}>
-                cyan dashed
-              </span>
-              {"  ·  "}
-              Use Count / Radius / X / Y sliders to adjust.
-            </div>
-          )}
         </main>
 
         <aside

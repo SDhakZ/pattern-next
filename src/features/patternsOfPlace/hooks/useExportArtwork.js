@@ -168,7 +168,7 @@ function buildClusterPatternParts(clusters, library, W, H) {
 // ─── Reverse SVG builder ──────────────────────────────────────────────────────
 
 function buildReverseSVG(
-  reverseRings,
+  _reverseRings,
   bgColor,
   library,
   T,
@@ -200,7 +200,6 @@ function buildReverseSVG(
 
   // Background
   parts.push(`<rect width="${W}" height="${H}" fill="${bgColor}"/>`);
-  parts.push(...buildClusterPatternParts(clusters, library, W, H));
 
   // ── Note area ──
   const noteLabelY = pad + fsLabel;
@@ -263,55 +262,7 @@ function buildReverseSVG(
     );
   });
 
-  // ── Reverse rings ──
-  reverseRings.forEach((ring) => {
-    const preset = library.find((p) => p.id === ring.presetId);
-    const rs = ring.radius * sc;
-    const tileSize = Math.max(5, tangentSize(rs, ring.count));
-    const presetFit = preset ? presetFitScale(preset.layers) : 1;
-    const ox = ring.x * W;
-    const oy = ring.y * H;
-
-    for (let mi = 0; mi < ring.count; mi++) {
-      const angle = (360 / ring.count) * mi;
-      const { x, y } = polar(rs, angle);
-      const cx = ox + x,
-        cy = oy + y;
-
-      if (preset) {
-        const tileX = cx - tileSize / 2;
-        const tileY = cy - tileSize / 2;
-        const half = tileSize / 2;
-        preset.layers.forEach((layer) => {
-          const sz = Math.max(
-            4,
-            Math.round(tileSize * 0.5 * layer.scale * presetFit),
-          );
-          const lx = half + layer.x * half * presetFit - sz / 2;
-          const ly = half + layer.y * half * presetFit - sz / 2;
-          const [la, lb, lc, ld, le] = layer.colors;
-          const sc1000 = (sz / 1000).toFixed(6);
-          const scopedMarkup = scopeMotifMarkup(
-            getInlineSVG(layer.motifId, la, lb, lc, ld, le),
-            `reverse_${ring.id}_${mi}_${layer.id}`,
-          );
-          parts.push(
-            `<g transform="translate(${tileX.toFixed(2)},${tileY.toFixed(2)}) rotate(${angle.toFixed(2)},${half.toFixed(2)},${half.toFixed(2)})"><g transform="translate(${lx.toFixed(2)},${ly.toFixed(2)}) rotate(${layer.rotation.toFixed(2)},${(sz / 2).toFixed(2)},${(sz / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g></g>`,
-          );
-        });
-      } else if (ring.motifId !== undefined) {
-        const [ra, rb, rc, rd, re] = ring.colors ?? DEFAULT_COLORS;
-        const sc1000 = (tileSize / 1000).toFixed(6);
-        const scopedMarkup = scopeMotifMarkup(
-          getInlineSVG(ring.motifId, ra, rb, rc, rd, re),
-          `reverse_${ring.id}_${mi}`,
-        );
-        parts.push(
-          `<g transform="translate(${(cx - tileSize / 2).toFixed(2)},${(cy - tileSize / 2).toFixed(2)}) rotate(${angle.toFixed(2)},${(tileSize / 2).toFixed(2)},${(tileSize / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g>`,
-        );
-      }
-    }
-  });
+  // Reverse export intentionally omits reverse rings and keeps only base format.
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${parts.join("")}</svg>`;
 }
