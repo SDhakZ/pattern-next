@@ -96,14 +96,12 @@ export function StageSplash() {
         .beginButton {
           animation: beginPulse 2.8s ease-in-out infinite;
           transition:
-            transform 140ms ease,
             box-shadow 140ms ease,
             filter 140ms ease;
-          will-change: transform, box-shadow;
+          will-change: box-shadow, filter;
         }
 
         .beginButton:hover {
-          transform: translateY(-2px) scale(1.02);
           box-shadow:
             0 0 0 1px rgba(233, 175, 24, 0.3),
             0 0 26px rgba(233, 175, 24, 0.5),
@@ -112,7 +110,6 @@ export function StageSplash() {
         }
 
         .beginButton:active {
-          transform: translateY(1px) scale(0.96);
           box-shadow:
             0 0 0 1px rgba(233, 175, 24, 0.2),
             0 0 14px rgba(233, 175, 24, 0.28),
@@ -123,7 +120,6 @@ export function StageSplash() {
         @keyframes beginPulse {
           0%,
           100% {
-            transform: translateY(0) scale(1);
             box-shadow:
               0 0 0 1px rgba(233, 175, 24, 0.22),
               0 0 18px rgba(233, 175, 24, 0.32),
@@ -131,7 +127,6 @@ export function StageSplash() {
           }
 
           50% {
-            transform: translateY(-1px) scale(1.015);
             box-shadow:
               0 0 0 1px rgba(233, 175, 24, 0.34),
               0 0 28px rgba(233, 175, 24, 0.5),
