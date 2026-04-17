@@ -110,7 +110,7 @@ const firstLayer = makeLayer(0);
 
 export const initialState = {
   ui: {
-    stage: 1,
+    stage: 0,
     theme: "dark",
     activeClusterId: null,
     activeRingId: null,
