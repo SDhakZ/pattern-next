@@ -469,31 +469,36 @@ export function StagePatternLab() {
               marginBottom: 10,
             }}
           >
-            {SELECTABLE_MOTIFS.map(({ id, previewComponent: MCP, name }) => {
-              const isActive = active.motifId === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => upd("motifId", id)}
-                  aria-label={name}
-                  style={{
-                    aspectRatio: "1",
-                    padding: 1,
-                    border: `1.5px solid ${isActive ? T.gold : T.brd}`,
-                    background: isActive ? T.surf2 : "transparent",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <MCP size={46} />
-                </button>
-              );
-            })}
+            {SELECTABLE_MOTIFS.map(
+              ({ id, previewComponent: MCP, name, previewColors }) => {
+                const isActive = active.motifId === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      upd("motifId", id);
+                      upd("colors", previewColors);
+                    }}
+                    aria-label={name}
+                    style={{
+                      aspectRatio: "1",
+                      padding: 1,
+                      border: `1.5px solid ${isActive ? T.gold : T.brd}`,
+                      background: isActive ? T.surf2 : "transparent",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 3,
+                      overflow: "hidden",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <MCP size={46} />
+                  </button>
+                );
+              },
+            )}
           </div>
           <Divider T={T} />
 

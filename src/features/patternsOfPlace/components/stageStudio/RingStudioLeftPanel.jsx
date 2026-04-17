@@ -5,9 +5,11 @@ import { ColorPicker } from "../shared/ColorPicker.jsx";
 import { PatternTile } from "../shared/PatternTile.jsx";
 import {
   ADD_CLUSTER,
+  DUPLICATE_CLUSTER,
   REMOVE_CLUSTER,
   SET_ACTIVE_CLUSTER,
   ADD_RING,
+  DUPLICATE_RING,
   REMOVE_RING,
   SET_ACTIVE_RING,
   SET_RING_SETUP_MODE,
@@ -67,26 +69,6 @@ export function RingStudioLeftPanel({
         borderRight: `1px solid ${T.brd}`,
       }}
     >
-      <div style={{ marginBottom: 8 }}>
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: "0.3em",
-            color: T.gold,
-            textTransform: "uppercase",
-            marginBottom: 2,
-          }}
-        >
-          Step 2 / 3
-        </div>
-        <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
-          Ring Studio
-        </div>
-      </div>
-
-      <Divider T={T} />
-
       <div
         style={{
           padding: 10,
@@ -105,7 +87,7 @@ export function RingStudioLeftPanel({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 6,
             marginBottom: 8,
           }}
@@ -118,6 +100,17 @@ export function RingStudioLeftPanel({
             style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
           >
             + Add cluster
+          </Button>
+          <Button
+            small
+            variant="secondary"
+            T={T}
+            onClick={() =>
+              dispatch({ type: DUPLICATE_CLUSTER, id: activeClusterId })
+            }
+            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+          >
+            Duplicate
           </Button>
           <Button
             small
@@ -181,7 +174,7 @@ export function RingStudioLeftPanel({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 6,
             marginBottom: 8,
           }}
@@ -195,6 +188,16 @@ export function RingStudioLeftPanel({
             style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
           >
             + Add ring
+          </Button>
+          <Button
+            small
+            variant="secondary"
+            T={T}
+            onClick={() => dispatch({ type: DUPLICATE_RING, id: activeRingId })}
+            disabled={activeCl.rings.length >= MAX_RINGS_PER_CLUSTER}
+            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+          >
+            Duplicate
           </Button>
           <Button
             small

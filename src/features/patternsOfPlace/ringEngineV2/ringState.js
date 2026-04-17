@@ -79,6 +79,29 @@ function createCluster(tpl) {
   };
 }
 
+function duplicateRing(ring, index = 0) {
+  const normalized = normalizeRing(ring, index);
+  return {
+    ...normalized,
+    id: makeId(),
+    colors: [...normalized.colors],
+    patternLayers: cloneLayers(normalized.patternLayers),
+  };
+}
+
+function duplicateCluster(cluster) {
+  const x = Math.min(0.95, Math.max(0.05, cluster.x + 0.05));
+  const y = Math.min(0.95, Math.max(0.05, cluster.y + 0.05));
+  const rings = cluster.rings.map((ring, index) => duplicateRing(ring, index));
+  return {
+    ...cluster,
+    id: makeId(),
+    x,
+    y,
+    rings,
+  };
+}
+
 function updateRingValue(ring, key, value, ringIndex) {
   const normalizedRing = normalizeRing(ring, ringIndex);
 
@@ -178,6 +201,33 @@ export function removeClusterState(state, clusterId) {
   };
 }
 
+export function duplicateClusterState(state, clusterId) {
+  const sourceClusterId = clusterId ?? state.ui.activeClusterId;
+  const sourceIndex = state.editor.clusters.findIndex(
+    (cluster) => cluster.id === sourceClusterId,
+  );
+  if (sourceIndex < 0) return state;
+
+  const sourceCluster = state.editor.clusters[sourceIndex];
+  const clonedCluster = duplicateCluster(sourceCluster);
+
+  const nextClusters = [...state.editor.clusters];
+  nextClusters.splice(sourceIndex + 1, 0, clonedCluster);
+
+  return {
+    ...state,
+    editor: {
+      ...state.editor,
+      clusters: nextClusters,
+    },
+    ui: {
+      ...state.ui,
+      activeClusterId: clonedCluster.id,
+      activeRingId: clonedCluster.rings[0]?.id ?? null,
+    },
+  };
+}
+
 export function updateClusterState(state, clusterId, key, value) {
   return {
     ...state,
@@ -264,6 +314,44 @@ export function removeRingState(state, ringId) {
     ui: {
       ...state.ui,
       activeRingId: nextActiveRingId,
+    },
+  };
+}
+
+export function duplicateRingState(state, ringId) {
+  const targetCluster = state.editor.clusters.find(
+    (cluster) => cluster.id === state.ui.activeClusterId,
+  );
+  if (!targetCluster || targetCluster.rings.length >= MAX_RINGS_PER_CLUSTER) {
+    return state;
+  }
+
+  const sourceRingId = ringId ?? state.ui.activeRingId;
+  const sourceIndex = targetCluster.rings.findIndex(
+    (ring) => ring.id === sourceRingId,
+  );
+  if (sourceIndex < 0) return state;
+
+  const clonedRing = duplicateRing(
+    targetCluster.rings[sourceIndex],
+    sourceIndex,
+  );
+  const nextRings = [...targetCluster.rings];
+  nextRings.splice(sourceIndex + 1, 0, clonedRing);
+
+  return {
+    ...state,
+    editor: {
+      ...state.editor,
+      clusters: state.editor.clusters.map((cluster) =>
+        cluster.id === targetCluster.id
+          ? { ...cluster, rings: nextRings }
+          : cluster,
+      ),
+    },
+    ui: {
+      ...state.ui,
+      activeRingId: clonedRing.id,
     },
   };
 }

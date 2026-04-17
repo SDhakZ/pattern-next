@@ -15,10 +15,12 @@ import {
   UPDATE_PRESET,
   SELECT_TEMPLATE,
   ADD_CLUSTER,
+  DUPLICATE_CLUSTER,
   REMOVE_CLUSTER,
   UPDATE_CLUSTER,
   SET_ACTIVE_CLUSTER,
   ADD_RING,
+  DUPLICATE_RING,
   REMOVE_RING,
   UPDATE_RING,
   SET_ACTIVE_RING,
@@ -36,20 +38,32 @@ import {
   DEFAULT_BG_COLOR,
 } from "../data/constants/defaults.js";
 import { REVERSE_TEMPLATES } from "../data/constants/templates.js";
-import { MOTIF_COUNT } from "../data/motifs/motifMeta.js";
+import { MOTIF_COUNT, MOTIF_META } from "../data/motifs/motifMeta.js";
 import {
   selectTemplateState,
   addClusterState,
+  duplicateClusterState,
   removeClusterState,
   updateClusterState,
   setActiveClusterState,
   addRingState,
+  duplicateRingState,
   removeRingState,
   updateRingState,
   setActiveRingState,
 } from "../ringEngineV2/ringState.js";
 
 // ─── Factories ────────────────────────────────────────────────────────────────
+
+const getMotifDefaultColors = (motifIndex = 0) => {
+  const motif = MOTIF_META[motifIndex % MOTIF_COUNT] ?? MOTIF_META[0];
+  const source = motif?.previewColors ?? DEFAULT_COLORS;
+  const next = source.slice(0, DEFAULT_COLORS.length);
+  while (next.length < DEFAULT_COLORS.length) {
+    next.push(DEFAULT_COLORS[next.length]);
+  }
+  return next;
+};
 
 export const makeLayer = (motifIndex = 0) => ({
   id: makeId(),
@@ -58,7 +72,7 @@ export const makeLayer = (motifIndex = 0) => ({
   y: 0,
   scale: 1,
   rotation: 0,
-  colors: [...DEFAULT_COLORS],
+  colors: getMotifDefaultColors(motifIndex),
 });
 
 const cloneLayer = (layer) => ({
@@ -242,6 +256,8 @@ export function reducer(state, action) {
     // Studio clusters
     case ADD_CLUSTER:
       return addClusterState(state);
+    case DUPLICATE_CLUSTER:
+      return duplicateClusterState(state, action.id);
     case REMOVE_CLUSTER:
       return removeClusterState(state, action.id);
     case UPDATE_CLUSTER:
@@ -252,6 +268,8 @@ export function reducer(state, action) {
     // Studio rings
     case ADD_RING:
       return addRingState(state);
+    case DUPLICATE_RING:
+      return duplicateRingState(state, action.id);
     case REMOVE_RING:
       return removeRingState(state, action.id);
     case UPDATE_RING:

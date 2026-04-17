@@ -7,7 +7,7 @@ import { FONT, FONT_MONO } from "../../data/constants/themes.js";
 import { tangentSize } from "../../domain/geometry.js";
 import { DEFAULT_COLORS } from "../../data/constants/defaults.js";
 import { MOTIF_LAYER_COUNTS } from "../../data/motifs/motifRegistry.js";
-import { RingColorControls } from "./RingColorControls.jsx";
+import { ColorPicker } from "../shared/ColorPicker.jsx";
 
 export function RingStudioRightPanel({
   T,
@@ -115,8 +115,9 @@ export function RingStudioRightPanel({
           Ring colors are controlled by the selected preset.
         </div>
       ) : (
-        <RingColorControls
+        <ColorPicker
           key={activeRing.id}
+          label="Ring Colors"
           colors={activeRing.colors ?? DEFAULT_COLORS}
           onChange={(c) => updRing("colors", c)}
           layerCount={layerCount}

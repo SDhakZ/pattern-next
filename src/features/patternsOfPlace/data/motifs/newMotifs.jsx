@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useId, useMemo } from "react";
 
 import {
   svg1Raw,
@@ -55,17 +55,48 @@ function withSize(svg, size, blend) {
   );
 }
 
+function sanitizeScopeId(value) {
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function scopeSvgClasses(markup, scopeId) {
+  if (!markup) return markup;
+  const prefix = `sc_${sanitizeScopeId(scopeId)}_`;
+
+  let scoped = markup.replace(/\.cls-([a-zA-Z0-9_-]+)/g, `.${prefix}cls-$1`);
+  scoped = scoped.replace(/class="([^"]+)"/g, (_, classValue) => {
+    const nextClassValue = classValue
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((name) => (name.startsWith("cls-") ? `${prefix}${name}` : name))
+      .join(" ");
+
+    return `class="${nextClassValue}"`;
+  });
+
+  return scoped;
+}
+
 function createMotifComponent(svg, colorMap, defaultPalette = []) {
   return memo(function Motif({ c = defaultPalette, size, blend = "normal" }) {
+    const scopeId = useId();
     const palette = c.length >= 5 ? c : defaultPalette;
-    const filled = replaceColors(
-      svg,
-      Object.fromEntries(
-        Object.entries(colorMap).map(([source, index]) => [
-          source,
-          palette[index] ?? palette[0] ?? source,
-        ]),
-      ),
+    const filled = useMemo(
+      () =>
+        replaceColors(
+          svg,
+          Object.fromEntries(
+            Object.entries(colorMap).map(([source, index]) => [
+              source,
+              palette[index] ?? palette[0] ?? source,
+            ]),
+          ),
+        ),
+      [palette],
+    );
+    const scopedFilled = useMemo(
+      () => scopeSvgClasses(filled, scopeId),
+      [filled, scopeId],
     );
     return (
       <div
@@ -75,7 +106,9 @@ function createMotifComponent(svg, colorMap, defaultPalette = []) {
           overflow: "hidden",
           display: "block",
         }}
-        dangerouslySetInnerHTML={{ __html: withSize(filled, size, blend) }}
+        dangerouslySetInnerHTML={{
+          __html: withSize(scopedFilled, size, blend),
+        }}
       />
     );
   });
@@ -180,24 +213,71 @@ export const M12 = createMotifComponent(
 export function renderNewMotifMarkup(id, palette) {
   const variants = {
     0: { svg: svg1Raw, map: { "#fdad17": 0, "#260e50": 1 }, def: M01_DEFAULT },
-    1: { svg: svg2Raw, map: { "#ffad14": 0, "#260e50": 1, "#110c19": 2 }, def: M02_DEFAULT },
-    2: { svg: svg3Raw, map: { "#f7b118": 0, "#ffad14": 0, "#260e50": 1 }, def: M03_DEFAULT },
+    1: {
+      svg: svg2Raw,
+      map: { "#ffad14": 0, "#260e50": 1, "#110c19": 2 },
+      def: M02_DEFAULT,
+    },
+    2: {
+      svg: svg3Raw,
+      map: { "#f7b118": 0, "#ffad14": 0, "#260e50": 1 },
+      def: M03_DEFAULT,
+    },
     3: { svg: svg4Raw, map: { "#fbad19": 0, "#281050": 1 }, def: M04_DEFAULT },
-    4: { svg: svg5Raw, map: { "#fbb112": 0, "#260e50": 1, "#3f1970": 2, "#58256c": 3 }, def: M05_DEFAULT },
-    5: { svg: svg6Raw, map: { "#fbad19": 0, "#db8321": 1, "#260e50": 2 }, def: M06_DEFAULT },
-    6: { svg: svg7Raw, map: { "#f9b115": 0, "#e8c048": 1, "#260e50": 2 }, def: M07_DEFAULT },
+    4: {
+      svg: svg5Raw,
+      map: { "#fbb112": 0, "#260e50": 1, "#3f1970": 2, "#58256c": 3 },
+      def: M05_DEFAULT,
+    },
+    5: {
+      svg: svg6Raw,
+      map: { "#fbad19": 0, "#db8321": 1, "#260e50": 2 },
+      def: M06_DEFAULT,
+    },
+    6: {
+      svg: svg7Raw,
+      map: { "#f9b115": 0, "#e8c048": 1, "#260e50": 2 },
+      def: M07_DEFAULT,
+    },
     7: { svg: svg8Raw, map: { "#fbad19": 0, "#db8321": 1 }, def: M08_DEFAULT },
-    8: { svg: svg9Raw, map: { "#fdb10e": 0, "#260e50": 1, "#692e68": 2 }, def: M09_DEFAULT },
-    9: { svg: svg10Raw, map: { "#ffb700": 0, "#fea228": 1, "#2c007f": 2, "#1a0061": 3 }, def: M10_DEFAULT },
-    10: { svg: svg11Raw, map: { "#ffb700": 0, "#fea228": 1, "#2c007f": 2, "#260e50": 3, "#1a0061": 4 }, def: M11_DEFAULT },
-    11: { svg: svg12Raw, map: { "#ff910b": 0, "#ffad00": 1, "#260e50": 2, "#2c007f": 3, "#edad23": 4 }, def: M12_DEFAULT },
+    8: {
+      svg: svg9Raw,
+      map: { "#fdb10e": 0, "#260e50": 1, "#692e68": 2 },
+      def: M09_DEFAULT,
+    },
+    9: {
+      svg: svg10Raw,
+      map: { "#ffb700": 0, "#fea228": 1, "#2c007f": 2, "#1a0061": 3 },
+      def: M10_DEFAULT,
+    },
+    10: {
+      svg: svg11Raw,
+      map: {
+        "#ffb700": 0,
+        "#fea228": 1,
+        "#2c007f": 2,
+        "#260e50": 3,
+        "#1a0061": 4,
+      },
+      def: M11_DEFAULT,
+    },
+    11: {
+      svg: svg12Raw,
+      map: {
+        "#ff910b": 0,
+        "#ffad00": 1,
+        "#260e50": 2,
+        "#2c007f": 3,
+        "#edad23": 4,
+      },
+      def: M12_DEFAULT,
+    },
   };
 
   const entry = variants[id];
   if (!entry) return null;
 
-  const basePalette =
-    palette && palette.length >= 5 ? palette : entry.def;
+  const basePalette = palette && palette.length >= 5 ? palette : entry.def;
   const replaced = replaceColors(
     entry.svg,
     Object.fromEntries(

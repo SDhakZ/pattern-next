@@ -7,6 +7,8 @@ import {
   SET_ACTIVE_RING,
   SET_ACTIVE_CLUSTER,
   ADD_RING,
+  DUPLICATE_CLUSTER,
+  DUPLICATE_RING,
 } from "./actions.js";
 import { MOTIF_META } from "../data/motifs/motifMeta.js";
 
@@ -160,4 +162,49 @@ test("changing cluster 2 ring 1 and then cluster 1 ring 2 stays isolated", () =>
     state.editor.clusters[1].rings[0].colors,
     cluster2Ring1Colors,
   );
+});
+
+test("duplicate cluster clones all rings with new ids and selects clone", () => {
+  let state = buildStudioState();
+  const originalCluster = state.editor.clusters[0];
+
+  state = reducer(state, { type: DUPLICATE_CLUSTER, id: originalCluster.id });
+
+  assert.equal(state.editor.clusters.length, 3);
+
+  const duplicatedCluster = state.editor.clusters[1];
+  assert.notEqual(duplicatedCluster.id, originalCluster.id);
+  assert.equal(duplicatedCluster.rings.length, originalCluster.rings.length);
+  assert.notEqual(duplicatedCluster.rings[0].id, originalCluster.rings[0].id);
+  assert.deepEqual(
+    duplicatedCluster.rings[0].colors,
+    originalCluster.rings[0].colors,
+  );
+
+  assert.equal(state.ui.activeClusterId, duplicatedCluster.id);
+  assert.equal(state.ui.activeRingId, duplicatedCluster.rings[0].id);
+});
+
+test("duplicate ring clones selected ring with new id and selects duplicate", () => {
+  let state = buildStudioState();
+  const cluster = state.editor.clusters[0];
+  const originalRing = cluster.rings[0];
+
+  state = reducer(state, { type: SET_ACTIVE_CLUSTER, id: cluster.id });
+  state = reducer(state, {
+    type: SET_ACTIVE_RING,
+    clusterId: cluster.id,
+    id: originalRing.id,
+  });
+  state = reducer(state, { type: DUPLICATE_RING, id: originalRing.id });
+
+  const updatedCluster = state.editor.clusters.find(
+    (entry) => entry.id === cluster.id,
+  );
+  assert.equal(updatedCluster.rings.length, 2);
+
+  const duplicatedRing = updatedCluster.rings[1];
+  assert.notEqual(duplicatedRing.id, originalRing.id);
+  assert.deepEqual(duplicatedRing.colors, originalRing.colors);
+  assert.equal(state.ui.activeRingId, duplicatedRing.id);
 });

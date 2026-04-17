@@ -6,6 +6,27 @@ import { renderNewMotifMarkup } from "../data/motifs/newMotifs.jsx";
 
 // ─── Inline SVG helpers ───────────────────────────────────────────────────────
 
+function sanitizeScopeId(value) {
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function scopeMotifMarkup(markup, scopeId) {
+  if (!markup) return markup;
+  const prefix = `sc_${sanitizeScopeId(scopeId)}_`;
+
+  let scoped = markup.replace(/\.cls-([a-zA-Z0-9_-]+)/g, `.${prefix}cls-$1`);
+  scoped = scoped.replace(/class="([^"]+)"/g, (_, classValue) => {
+    const nextClassValue = classValue
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((name) => (name.startsWith("cls-") ? `${prefix}${name}` : name))
+      .join(" ");
+    return `class="${nextClassValue}"`;
+  });
+
+  return scoped;
+}
+
 function getInlineSVG(id, a, b, c, d, e) {
   const rendered = renderNewMotifMarkup(id, [a, b, c, d, e]);
   if (rendered) return rendered;
@@ -53,15 +74,23 @@ function buildFrontSVG(clusters, bgColor, library, W, H) {
             const ly = half + layer.y * half * presetFit - sz / 2;
             const [la, lb, lc, ld, le] = layer.colors;
             const sc1000 = (sz / 1000).toFixed(6);
+            const scopedMarkup = scopeMotifMarkup(
+              getInlineSVG(layer.motifId, la, lb, lc, ld, le),
+              `front_${cl.id}_${r.id}_${mi}_${layer.id}`,
+            );
             parts.push(
-              `<g transform="translate(${tileX.toFixed(2)},${tileY.toFixed(2)}) rotate(${angle.toFixed(2)},${half.toFixed(2)},${half.toFixed(2)})"><g transform="translate(${lx.toFixed(2)},${ly.toFixed(2)}) rotate(${layer.rotation.toFixed(2)},${(sz / 2).toFixed(2)},${(sz / 2).toFixed(2)}) scale(${sc1000})">${getInlineSVG(layer.motifId, la, lb, lc, ld, le)}</g></g>`,
+              `<g transform="translate(${tileX.toFixed(2)},${tileY.toFixed(2)}) rotate(${angle.toFixed(2)},${half.toFixed(2)},${half.toFixed(2)})"><g transform="translate(${lx.toFixed(2)},${ly.toFixed(2)}) rotate(${layer.rotation.toFixed(2)},${(sz / 2).toFixed(2)},${(sz / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g></g>`,
             );
           });
         } else if (r.motifId !== undefined) {
           const [ra, rb, rc, rd, re] = r.colors ?? DEFAULT_COLORS;
           const sc1000 = (tileSize / 1000).toFixed(6);
+          const scopedMarkup = scopeMotifMarkup(
+            getInlineSVG(r.motifId, ra, rb, rc, rd, re),
+            `front_${cl.id}_${r.id}_${mi}`,
+          );
           parts.push(
-            `<g transform="translate(${(cx - tileSize / 2).toFixed(2)},${(cy - tileSize / 2).toFixed(2)}) rotate(${angle.toFixed(2)},${(tileSize / 2).toFixed(2)},${(tileSize / 2).toFixed(2)}) scale(${sc1000})">${getInlineSVG(r.motifId, ra, rb, rc, rd, re)}</g>`,
+            `<g transform="translate(${(cx - tileSize / 2).toFixed(2)},${(cy - tileSize / 2).toFixed(2)}) rotate(${angle.toFixed(2)},${(tileSize / 2).toFixed(2)},${(tileSize / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g>`,
           );
         }
       }
@@ -195,15 +224,23 @@ function buildReverseSVG(
           const ly = half + layer.y * half * presetFit - sz / 2;
           const [la, lb, lc, ld, le] = layer.colors;
           const sc1000 = (sz / 1000).toFixed(6);
+          const scopedMarkup = scopeMotifMarkup(
+            getInlineSVG(layer.motifId, la, lb, lc, ld, le),
+            `reverse_${ring.id}_${mi}_${layer.id}`,
+          );
           parts.push(
-            `<g transform="translate(${tileX.toFixed(2)},${tileY.toFixed(2)}) rotate(${angle.toFixed(2)},${half.toFixed(2)},${half.toFixed(2)})"><g transform="translate(${lx.toFixed(2)},${ly.toFixed(2)}) rotate(${layer.rotation.toFixed(2)},${(sz / 2).toFixed(2)},${(sz / 2).toFixed(2)}) scale(${sc1000})">${getInlineSVG(layer.motifId, la, lb, lc, ld, le)}</g></g>`,
+            `<g transform="translate(${tileX.toFixed(2)},${tileY.toFixed(2)}) rotate(${angle.toFixed(2)},${half.toFixed(2)},${half.toFixed(2)})"><g transform="translate(${lx.toFixed(2)},${ly.toFixed(2)}) rotate(${layer.rotation.toFixed(2)},${(sz / 2).toFixed(2)},${(sz / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g></g>`,
           );
         });
       } else if (ring.motifId !== undefined) {
         const [ra, rb, rc, rd, re] = ring.colors ?? DEFAULT_COLORS;
         const sc1000 = (tileSize / 1000).toFixed(6);
+        const scopedMarkup = scopeMotifMarkup(
+          getInlineSVG(ring.motifId, ra, rb, rc, rd, re),
+          `reverse_${ring.id}_${mi}`,
+        );
         parts.push(
-          `<g transform="translate(${(cx - tileSize / 2).toFixed(2)},${(cy - tileSize / 2).toFixed(2)}) rotate(${angle.toFixed(2)},${(tileSize / 2).toFixed(2)},${(tileSize / 2).toFixed(2)}) scale(${sc1000})">${getInlineSVG(ring.motifId, ra, rb, rc, rd, re)}</g>`,
+          `<g transform="translate(${(cx - tileSize / 2).toFixed(2)},${(cy - tileSize / 2).toFixed(2)}) rotate(${angle.toFixed(2)},${(tileSize / 2).toFixed(2)},${(tileSize / 2).toFixed(2)}) scale(${sc1000})">${scopedMarkup}</g>`,
         );
       }
     }
