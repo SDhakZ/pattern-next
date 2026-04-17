@@ -4,6 +4,7 @@ import {
 } from "./PatternsOfPlaceProvider.jsx";
 import { selectStage } from "./selectors.js";
 import { StageSplash } from "../components/stageSplash/StageSplash.jsx";
+import { StageInstruction } from "../components/stageInstruction/StageInstruction.jsx";
 import { StageTemplatePicker } from "../components/stageTemplatePicker/StageTemplatePicker.jsx";
 import { StageStudio } from "../components/stageStudio/StageStudio.jsx";
 import { StagePatternLab } from "../components/stagePatternLab/StagePatternLab.jsx";
@@ -15,6 +16,7 @@ const STAGES = [
   StageStudio,
   StagePatternLab,
   StageFinalize,
+  StageInstruction,
 ];
 
 function StageRouter() {

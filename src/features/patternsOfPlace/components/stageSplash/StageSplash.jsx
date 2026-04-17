@@ -7,7 +7,7 @@ export function StageSplash() {
   const { dispatch } = usePatternsOfPlace();
   const bgSrc = typeof pngPOP === "string" ? pngPOP : pngPOP?.src;
 
-  const start = () => dispatch({ type: SET_STAGE, stage: 1 });
+  const start = () => dispatch({ type: SET_STAGE, stage: 5 });
 
   return (
     <div

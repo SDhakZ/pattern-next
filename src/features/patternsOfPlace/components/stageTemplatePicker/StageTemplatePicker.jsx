@@ -10,7 +10,7 @@ export function StageTemplatePicker() {
   const [activeId, setActiveId] = useState(null);
 
   const choose = (tpl) => dispatch({ type: SELECT_TEMPLATE, template: tpl });
-  const goBack = () => dispatch({ type: SET_STAGE, stage: 0 });
+  const goBack = () => dispatch({ type: SET_STAGE, stage: 5 });
 
   return (
     <div
