@@ -74,16 +74,24 @@ export function StageStudio() {
 
   const updCl = useCallback(
     (key, value) => {
-      dispatch({ type: UPDATE_CLUSTER, id: activeClusterId, key, value });
+      if (!activeCl?.id) return;
+      dispatch({ type: UPDATE_CLUSTER, id: activeCl.id, key, value });
     },
-    [dispatch, activeClusterId],
+    [dispatch, activeCl?.id],
   );
 
   const updRing = useCallback(
     (key, value) => {
-      dispatch({ type: UPDATE_RING, id: activeRingId, key, value });
+      if (!activeCl?.id || !activeRing?.id) return;
+      dispatch({
+        type: UPDATE_RING,
+        clusterId: activeCl.id,
+        id: activeRing.id,
+        key,
+        value,
+      });
     },
-    [dispatch, activeRingId],
+    [dispatch, activeCl?.id, activeRing?.id],
   );
 
   const finalize = () => dispatch({ type: SET_STAGE, stage: 4 });

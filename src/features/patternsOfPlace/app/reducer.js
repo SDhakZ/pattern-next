@@ -15,10 +15,12 @@ import {
   UPDATE_PRESET,
   SELECT_TEMPLATE,
   ADD_CLUSTER,
+  DUPLICATE_CLUSTER,
   REMOVE_CLUSTER,
   UPDATE_CLUSTER,
   SET_ACTIVE_CLUSTER,
   ADD_RING,
+  DUPLICATE_RING,
   REMOVE_RING,
   UPDATE_RING,
   SET_ACTIVE_RING,
@@ -34,17 +36,34 @@ import { makeId } from "../utils/id.js";
 import {
   DEFAULT_COLORS,
   DEFAULT_BG_COLOR,
-  MAX_RINGS_PER_CLUSTER,
 } from "../data/constants/defaults.js";
 import { REVERSE_TEMPLATES } from "../data/constants/templates.js";
+import { MOTIF_COUNT, MOTIF_META } from "../data/motifs/motifMeta.js";
 import {
-  MOTIF_COUNT,
-  SELECTABLE_MOTIFS,
-} from "../data/motifs/motifRegistry.js";
-
-const SELECTABLE_MOTIF_IDS = SELECTABLE_MOTIFS.map((motif) => motif.id);
+  selectTemplateState,
+  addClusterState,
+  duplicateClusterState,
+  removeClusterState,
+  updateClusterState,
+  setActiveClusterState,
+  addRingState,
+  duplicateRingState,
+  removeRingState,
+  updateRingState,
+  setActiveRingState,
+} from "../ringEngineV2/ringState.js";
 
 // ─── Factories ────────────────────────────────────────────────────────────────
+
+const getMotifDefaultColors = (motifIndex = 0) => {
+  const motif = MOTIF_META[motifIndex % MOTIF_COUNT] ?? MOTIF_META[0];
+  const source = motif?.previewColors ?? DEFAULT_COLORS;
+  const next = source.slice(0, DEFAULT_COLORS.length);
+  while (next.length < DEFAULT_COLORS.length) {
+    next.push(DEFAULT_COLORS[next.length]);
+  }
+  return next;
+};
 
 export const makeLayer = (motifIndex = 0) => ({
   id: makeId(),
@@ -53,36 +72,21 @@ export const makeLayer = (motifIndex = 0) => ({
   y: 0,
   scale: 1,
   rotation: 0,
-  colors: [...DEFAULT_COLORS],
+  colors: getMotifDefaultColors(motifIndex),
 });
 
-export const makeRing = (index = 0) => ({
-  id: makeId(),
-  count: 6 + index * 4,
-  radius: 80 + index * 80,
-  motifId: index % MOTIF_COUNT,
-  colors: [...DEFAULT_COLORS],
-  presetId: null,
+const cloneLayer = (layer) => ({
+  ...layer,
+  colors: [...(layer.colors ?? DEFAULT_COLORS)],
 });
 
-export const makeCluster = (tpl, motifSeed = 0) => {
-  const fallbackMotifId = 0;
-  const selectableMotifId =
-    SELECTABLE_MOTIF_IDS[motifSeed % SELECTABLE_MOTIF_IDS.length] ??
-    fallbackMotifId;
-  const rings = [
-    {
-      ...makeRing(0),
-      motifId: selectableMotifId,
-    },
-  ];
-  return {
-    id: makeId(),
-    x: tpl.x,
-    y: tpl.y,
-    scale: tpl.scale,
-    rings,
-  };
+const normalizeColors = (value) => {
+  if (!Array.isArray(value)) return value;
+  const next = value.slice(0, DEFAULT_COLORS.length);
+  while (next.length < DEFAULT_COLORS.length) {
+    next.push(DEFAULT_COLORS[next.length]);
+  }
+  return next;
 };
 
 /**
@@ -136,8 +140,10 @@ export const initialState = {
 export function reducer(state, action) {
   const nextValue =
     action.key === "colors" && Array.isArray(action.value)
-      ? [...action.value]
-      : action.value;
+      ? normalizeColors(action.value)
+      : action.key === "patternLayers" && Array.isArray(action.value)
+        ? action.value.map(cloneLayer)
+        : action.value;
 
   switch (action.type) {
     // Navigation
@@ -171,7 +177,7 @@ export function reducer(state, action) {
     case DUPLICATE_LAYER: {
       const original = state.editor.layers.find((l) => l.id === action.id);
       if (!original) return state;
-      const clone = { ...original, id: makeId(), colors: [...original.colors] };
+      const clone = { ...cloneLayer(original), id: makeId() };
       const layers = state.editor.layers.reduce((acc, layer) => {
         acc.push(layer);
         if (layer.id === action.id) acc.push(clone);
@@ -201,7 +207,7 @@ export function reducer(state, action) {
       const preset = {
         id: makeId(),
         name: action.name,
-        layers: state.editor.layers.map((l) => ({ ...l })),
+        layers: state.editor.layers.map(cloneLayer),
       };
       return { ...state, library: [...state.library, preset] };
     }
@@ -214,7 +220,7 @@ export function reducer(state, action) {
     case LOAD_PRESET: {
       const preset = state.library.find((p) => p.id === action.id);
       if (!preset) return state;
-      const layers = preset.layers.map((l) => ({ ...l }));
+      const layers = preset.layers.map(cloneLayer);
       return {
         ...state,
         editor: { ...state.editor, layers },
@@ -234,7 +240,7 @@ export function reducer(state, action) {
             ? {
                 ...p,
                 name: typeof action.name === "string" ? action.name : p.name,
-                layers: state.editor.layers.map((l) => ({ ...l })),
+                layers: state.editor.layers.map(cloneLayer),
               }
             : p,
         ),
@@ -244,140 +250,32 @@ export function reducer(state, action) {
 
     // Template selection → initializes clusters + advances to Studio stage
     case SELECT_TEMPLATE: {
-      const clusters = action.template.clusters.map((t, index) =>
-        makeCluster(t, index),
-      );
-      const firstCluster = clusters[0];
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          selectedTemplate: action.template,
-          clusters,
-        },
-        ui: {
-          ...state.ui,
-          stage: 2,
-          activeClusterId: firstCluster.id,
-          activeRingId: firstCluster.rings[0].id,
-        },
-      };
+      return selectTemplateState(state, action.template);
     }
 
     // Studio clusters
-    case ADD_CLUSTER: {
-      const nc = makeCluster({
-        x: 0.25 + Math.random() * 0.5,
-        y: 0.25 + Math.random() * 0.5,
-        scale: 0.7,
-      });
-      return {
-        ...state,
-        editor: { ...state.editor, clusters: [...state.editor.clusters, nc] },
-        ui: {
-          ...state.ui,
-          activeClusterId: nc.id,
-          activeRingId: nc.rings[0].id,
-        },
-      };
-    }
-    case REMOVE_CLUSTER: {
-      if (state.editor.clusters.length <= 1) return state;
-      const remaining = state.editor.clusters.filter((c) => c.id !== action.id);
-      return {
-        ...state,
-        editor: { ...state.editor, clusters: remaining },
-        ui: {
-          ...state.ui,
-          activeClusterId: remaining[0].id,
-          activeRingId: remaining[0].rings[0].id,
-        },
-      };
-    }
+    case ADD_CLUSTER:
+      return addClusterState(state);
+    case DUPLICATE_CLUSTER:
+      return duplicateClusterState(state, action.id);
+    case REMOVE_CLUSTER:
+      return removeClusterState(state, action.id);
     case UPDATE_CLUSTER:
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === action.id ? { ...c, [action.key]: action.value } : c,
-          ),
-        },
-      };
+      return updateClusterState(state, action.id, action.key, action.value);
     case SET_ACTIVE_CLUSTER:
-      return {
-        ...state,
-        ui: {
-          ...state.ui,
-          activeClusterId: action.id,
-          activeRingId:
-            state.editor.clusters.find((c) => c.id === action.id)?.rings[0]
-              ?.id ?? null,
-        },
-      };
+      return setActiveClusterState(state, action.id);
 
     // Studio rings
-    case ADD_RING: {
-      const activeCl = state.editor.clusters.find(
-        (c) => c.id === state.ui.activeClusterId,
-      );
-      if (!activeCl || activeCl.rings.length >= MAX_RINGS_PER_CLUSTER)
-        return state;
-      const maxRadius = Math.max(...activeCl.rings.map((r) => r.radius));
-      const nr = {
-        ...makeRing(0),
-        count: 20,
-        radius: Math.min(maxRadius + 24, 400),
-      };
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === state.ui.activeClusterId
-              ? { ...c, rings: [...c.rings, nr] }
-              : c,
-          ),
-        },
-        ui: { ...state.ui, activeRingId: nr.id },
-      };
-    }
-    case REMOVE_RING: {
-      const activeCl = state.editor.clusters.find(
-        (c) => c.id === state.ui.activeClusterId,
-      );
-      if (!activeCl || activeCl.rings.length <= 1) return state;
-      const remaining = activeCl.rings.filter((r) => r.id !== action.id);
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === state.ui.activeClusterId ? { ...c, rings: remaining } : c,
-          ),
-        },
-        ui: { ...state.ui, activeRingId: remaining[remaining.length - 1].id },
-      };
-    }
+    case ADD_RING:
+      return addRingState(state);
+    case DUPLICATE_RING:
+      return duplicateRingState(state, action.id);
+    case REMOVE_RING:
+      return removeRingState(state, action.id);
     case UPDATE_RING:
-      return {
-        ...state,
-        editor: {
-          ...state.editor,
-          clusters: state.editor.clusters.map((c) =>
-            c.id === state.ui.activeClusterId
-              ? {
-                  ...c,
-                  rings: c.rings.map((r) =>
-                    r.id === action.id ? { ...r, [action.key]: nextValue } : r,
-                  ),
-                }
-              : c,
-          ),
-        },
-      };
+      return updateRingState(state, action);
     case SET_ACTIVE_RING:
-      return { ...state, ui: { ...state.ui, activeRingId: action.id } };
+      return setActiveRingState(state, action);
 
     // Background
     case SET_BG_COLOR:

@@ -5,18 +5,17 @@ import { ColorPicker } from "../shared/ColorPicker.jsx";
 import { PatternTile } from "../shared/PatternTile.jsx";
 import {
   ADD_CLUSTER,
+  DUPLICATE_CLUSTER,
   REMOVE_CLUSTER,
   SET_ACTIVE_CLUSTER,
   ADD_RING,
+  DUPLICATE_RING,
   REMOVE_RING,
   SET_ACTIVE_RING,
   SET_RING_SETUP_MODE,
 } from "../../app/actions.js";
 import { SELECTABLE_MOTIFS } from "../../data/motifs/motifRegistry.js";
-import {
-  DEFAULT_COLORS,
-  MAX_RINGS_PER_CLUSTER,
-} from "../../data/constants/defaults.js";
+import { MAX_RINGS_PER_CLUSTER } from "../../data/constants/defaults.js";
 import { FONT } from "../../data/constants/themes.js";
 
 export function RingStudioLeftPanel({
@@ -70,26 +69,6 @@ export function RingStudioLeftPanel({
         borderRight: `1px solid ${T.brd}`,
       }}
     >
-      <div style={{ marginBottom: 8 }}>
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: "0.3em",
-            color: T.gold,
-            textTransform: "uppercase",
-            marginBottom: 2,
-          }}
-        >
-          Step 2 / 3
-        </div>
-        <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
-          Ring Studio
-        </div>
-      </div>
-
-      <Divider T={T} />
-
       <div
         style={{
           padding: 10,
@@ -108,7 +87,7 @@ export function RingStudioLeftPanel({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 6,
             marginBottom: 8,
           }}
@@ -121,6 +100,17 @@ export function RingStudioLeftPanel({
             style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
           >
             + Add cluster
+          </Button>
+          <Button
+            small
+            variant="secondary"
+            T={T}
+            onClick={() =>
+              dispatch({ type: DUPLICATE_CLUSTER, id: activeClusterId })
+            }
+            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+          >
+            Duplicate
           </Button>
           <Button
             small
@@ -184,7 +174,7 @@ export function RingStudioLeftPanel({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 6,
             marginBottom: 8,
           }}
@@ -198,6 +188,16 @@ export function RingStudioLeftPanel({
             style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
           >
             + Add ring
+          </Button>
+          <Button
+            small
+            variant="secondary"
+            T={T}
+            onClick={() => dispatch({ type: DUPLICATE_RING, id: activeRingId })}
+            disabled={activeCl.rings.length >= MAX_RINGS_PER_CLUSTER}
+            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+          >
+            Duplicate
           </Button>
           <Button
             small
@@ -223,7 +223,13 @@ export function RingStudioLeftPanel({
             return (
               <button
                 key={ring.id}
-                onClick={() => dispatch({ type: SET_ACTIVE_RING, id: ring.id })}
+                onClick={() =>
+                  dispatch({
+                    type: SET_ACTIVE_RING,
+                    clusterId: activeClusterId,
+                    id: ring.id,
+                  })
+                }
                 style={pillStyle(isActive)}
               >
                 Ring {index + 1}
@@ -284,34 +290,37 @@ export function RingStudioLeftPanel({
                 marginBottom: 8,
               }}
             >
-              {SELECTABLE_MOTIFS.map(({ id, component: MC, name }) => {
-                const isActive = activeRing.motifId === id;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      updRing("motifId", id);
-                      updRing("presetId", null);
-                    }}
-                    aria-label={name}
-                    style={{
-                      aspectRatio: "1",
-                      padding: 2,
-                      border: `1.5px solid ${isActive ? T.gold : T.brd}`,
-                      background: isActive ? `${T.gold}14` : T.bg,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: 10,
-                      overflow: "hidden",
-                      boxShadow: isActive ? `0 0 0 1px ${T.gold}55` : "none",
-                    }}
-                  >
-                    <MC c={activeRing.colors ?? DEFAULT_COLORS} size={46} />
-                  </button>
-                );
-              })}
+              {SELECTABLE_MOTIFS.map(
+                ({ id, previewComponent: MCP, name, previewColors }) => {
+                  const isActive = activeRing.motifId === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        updRing("motifId", id);
+                        updRing("presetId", null);
+                        updRing("patternLayers", null);
+                      }}
+                      aria-label={name}
+                      style={{
+                        aspectRatio: "1",
+                        padding: 2,
+                        border: `1.5px solid ${isActive ? T.gold : T.brd}`,
+                        background: isActive ? `${T.gold}14` : T.bg,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        boxShadow: isActive ? `0 0 0 1px ${T.gold}55` : "none",
+                      }}
+                    >
+                      <MCP size={46} />
+                    </button>
+                  );
+                },
+              )}
             </div>
           </>
         ) : (
@@ -348,7 +357,7 @@ export function RingStudioLeftPanel({
                       key={preset.id}
                       onClick={() => {
                         updRing("presetId", preset.id);
-                        updRing("motifId", undefined);
+                        updRing("patternLayers", preset.layers);
                       }}
                       style={{
                         display: "flex",

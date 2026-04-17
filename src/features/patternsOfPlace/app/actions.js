@@ -21,12 +21,14 @@ export const UPDATE_PRESET = "UPDATE_PRESET";
 // ─── Template + Studio clusters ───────────────────────────────────────────────
 export const SELECT_TEMPLATE = "SELECT_TEMPLATE";
 export const ADD_CLUSTER = "ADD_CLUSTER";
+export const DUPLICATE_CLUSTER = "DUPLICATE_CLUSTER";
 export const REMOVE_CLUSTER = "REMOVE_CLUSTER";
 export const UPDATE_CLUSTER = "UPDATE_CLUSTER";
 export const SET_ACTIVE_CLUSTER = "SET_ACTIVE_CLUSTER";
 
 // ─── Studio rings ─────────────────────────────────────────────────────────────
 export const ADD_RING = "ADD_RING";
+export const DUPLICATE_RING = "DUPLICATE_RING";
 export const REMOVE_RING = "REMOVE_RING";
 export const UPDATE_RING = "UPDATE_RING";
 export const SET_ACTIVE_RING = "SET_ACTIVE_RING";

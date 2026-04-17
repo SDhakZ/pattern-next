@@ -239,7 +239,7 @@ function wheelMarker(color, index, count) {
   };
 }
 
-export function ColorPicker({ label, colors, onChange, T }) {
+export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
   const wheelRef = useRef(null);
   const manualColorsRef = useRef(
     Array.isArray(colors) && colors.length > 0 ? [...colors] : null,
@@ -387,7 +387,7 @@ export function ColorPicker({ label, colors, onChange, T }) {
       </div>
 
       {pickerMode === "harmony" ? (
-        <ColorHarmonyWheel colors={colorList} onChange={onChange} T={T} />
+        <ColorHarmonyWheel colors={colorList} onChange={onChange} layerCount={layerCount} T={T} />
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
           <div style={{ fontSize: 10, color: T.mut }}>
@@ -457,7 +457,7 @@ export function ColorPicker({ label, colors, onChange, T }) {
               gap: 6,
             }}
           >
-            {currentColors.map((color, index) => (
+            {currentColors.slice(0, layerCount).map((color, index) => (
               <div
                 key={`slot-${index}`}
                 style={{
