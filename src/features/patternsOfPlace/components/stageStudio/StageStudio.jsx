@@ -82,6 +82,12 @@ export function StageStudio() {
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+  const touchDistance = (t1, t2) => {
+    const dx = t1.clientX - t2.clientX;
+    const dy = t1.clientY - t2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
   const handlePreviewTouchStart = (event) => {
     if (!activeCl || !previewRef.current) return;
 
@@ -96,11 +102,20 @@ export function StageStudio() {
       };
       return;
     }
+
+    if (touches.length === 2) {
+      const dist = touchDistance(touches[0], touches[1]);
+      gestureRef.current = {
+        mode: "pinch",
+        startDistance: dist,
+        startScale: activeCl.scale,
+      };
+      return;
+    }
   };
 
   const handlePreviewTouchMove = (event) => {
     if (!activeCl || !previewRef.current || !gestureRef.current) return;
-    event.preventDefault();
 
     const rect = previewRef.current.getBoundingClientRect();
     const touches = event.touches;
@@ -111,6 +126,14 @@ export function StageStudio() {
       const dy = (touches[0].clientY - gesture.startTouchY) / rect.height;
       updCl("x", clamp(gesture.startClusterX + dx, 0, 1));
       updCl("y", clamp(gesture.startClusterY + dy, 0, 1));
+      return;
+    }
+
+    if (gesture.mode === "pinch" && touches.length === 2) {
+      const dist = touchDistance(touches[0], touches[1]);
+      const ratio = dist / gesture.startDistance;
+      const newScale = clamp(gesture.startScale * ratio, 0.2, 3);
+      updCl("scale", newScale);
       return;
     }
   };
@@ -131,7 +154,6 @@ export function StageStudio() {
         flexDirection: "column",
         fontFamily: FONT,
         backgroundImage: `
-          linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.9) 100%),
           url(${bgImage.src})
         `,
         backgroundSize: "cover",
@@ -265,14 +287,14 @@ export function StageStudio() {
           <div
             style={{ fontSize: 10, color: studioT.mut, textAlign: "center" }}
           >
-            Touch: drag cluster with one finger.
+            Touch: drag motif with one finger, pinch with two fingers to scale.
           </div>
           <div
             style={{ fontSize: 10, color: studioT.mut, textAlign: "center" }}
           >
             Active ring:{" "}
             <span style={{ color: "#00e5ff", fontWeight: 700 }}>
-              cyan dashed
+              --- Cyan dashed
             </span>
             {"  ·  "}
             Active Cluster:{" "}

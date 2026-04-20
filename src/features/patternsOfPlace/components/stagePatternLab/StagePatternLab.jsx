@@ -800,7 +800,7 @@ export function StagePatternLab() {
           </div>
 
           <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
-            Touch: drag motif with one finger, pinch with two fingers to zoom.
+            Touch: drag motif with one finger, pinch with two fingers to scale.
           </div>
         </main>
 

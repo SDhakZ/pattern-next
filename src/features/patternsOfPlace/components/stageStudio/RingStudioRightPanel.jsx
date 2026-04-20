@@ -121,16 +121,6 @@ export function RingStudioRightPanel({
           display={activeRing.count}
           T={T}
         />
-        <div
-          style={{
-            fontSize: 10,
-            color: T.mut,
-            marginBottom: 10,
-            fontFamily: FONT_MONO,
-          }}
-        >
-          Tile: {Math.round(tangentSize(activeRing.radius, activeRing.count))}px
-        </div>
       </div>
 
       {isPresetActive ? (
