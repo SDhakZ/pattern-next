@@ -150,7 +150,7 @@ export function reducer(state, action) {
     case SET_STAGE:
       return { ...state, ui: { ...state.ui, stage: action.stage } };
     case SET_THEME:
-      return { ...state, ui: { ...state.ui, theme: action.theme } };
+      return { ...state, ui: { ...state.ui, theme: "dark" } };
     case SET_PREVIEW_SIDE:
       return { ...state, ui: { ...state.ui, previewSide: action.side } };
     case SET_RING_SETUP_MODE:

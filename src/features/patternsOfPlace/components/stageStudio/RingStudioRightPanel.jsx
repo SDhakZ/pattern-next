@@ -51,7 +51,6 @@ export function RingStudioRightPanel({
           lineHeight: 1,
           marginBottom: 14,
         }}
-        T={T}
       >
         Cluster Control
       </div>
@@ -98,7 +97,6 @@ export function RingStudioRightPanel({
             lineHeight: 1,
             marginBottom: 14,
           }}
-          T={T}
         >
           Ring Control
         </div>

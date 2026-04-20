@@ -2,7 +2,6 @@ import { useState, useCallback, useRef } from "react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import {
   SET_STAGE,
-  SET_THEME,
   ADD_LAYER,
   REMOVE_LAYER,
   DUPLICATE_LAYER,
@@ -64,7 +63,7 @@ export function StagePatternLab() {
   const layers = selectLayers(state);
   const active = selectActiveLayer(state);
   const library = selectLibrary(state);
-  const { theme, activeLayerId } = state.ui;
+  const { activeLayerId } = state.ui;
 
   const [presetName, setPresetName] = useState("");
   const [editingPresetId, setEditingPresetId] = useState(null);
@@ -140,9 +139,6 @@ export function StagePatternLab() {
   };
 
   const goBack = () => dispatch({ type: SET_STAGE, stage: 2 });
-  const toggleTheme = () =>
-    dispatch({ type: SET_THEME, theme: theme === "dark" ? "light" : "dark" });
-
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const touchDistance = (t1, t2) => {
     const dx = t2.clientX - t1.clientX;
@@ -251,13 +247,7 @@ export function StagePatternLab() {
           >
             Pattern Lab
           </div>
-          <div style={{ fontSize: 11, color: T.mut, marginTop: 4 }}>
-            Layer motifs into a reusable tile
-          </div>
         </div>
-        <Button variant="secondary" small={false} T={T} onClick={toggleTheme}>
-          {theme === "dark" ? "☀" : "◐"}
-        </Button>
       </header>
 
       <div
@@ -277,29 +267,6 @@ export function StagePatternLab() {
             borderRight: `1px solid ${T.brd}`,
           }}
         >
-          <div style={{ marginBottom: 10 }}>
-            <div
-              style={{
-                fontSize: 9,
-                fontWeight: 700,
-                letterSpacing: "0.3em",
-                color: T.gold,
-                textTransform: "uppercase",
-                marginBottom: 2,
-              }}
-            >
-              Pattern Lab
-            </div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
-              Pattern Lab
-            </div>
-            <div style={{ fontSize: 11, color: T.mut, marginTop: 2 }}>
-              Layer motifs into a reusable tile
-            </div>
-          </div>
-
-          <Divider T={T} />
-
           {/* ── Layers ── */}
           <div
             style={{
@@ -1077,21 +1044,16 @@ export function StagePatternLab() {
         }}
       >
         <Button
+          variant="nav"
           small={false}
           T={T}
           onClick={goBack}
           style={{
-            minWidth: 180,
-            minHeight: 52,
-            fontSize: 24,
-            fontFamily:
-              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
-            color: T.gold,
-            border: `1px solid ${T.brd}`,
-            background: "rgba(0,0,0,0.65)",
+            minWidth: 144,
+            minHeight: 48,
           }}
         >
-          Return to Studio
+          Back
         </Button>
       </div>
     </div>

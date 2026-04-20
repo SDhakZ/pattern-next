@@ -1,11 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
-import {
-  SET_STAGE,
-  SET_THEME,
-  UPDATE_CLUSTER,
-  UPDATE_RING,
-} from "../../app/actions.js";
+import { SET_STAGE, UPDATE_CLUSTER, UPDATE_RING } from "../../app/actions.js";
 import {
   selectClusters,
   selectActiveCluster,
@@ -42,13 +37,10 @@ export function StageStudio() {
   const library = selectLibrary(state);
   const bgColor = selectBgColor(state);
   const ringSetupMode = selectRingSetupMode(state);
-  const { theme, activeClusterId, activeRingId } = state.ui;
+  const { activeClusterId, activeRingId } = state.ui;
   const previewRef = useRef(null);
   const gestureRef = useRef(null);
   const [showPatternLabModal, setShowPatternLabModal] = useState(false);
-
-  const toggleTheme = () =>
-    dispatch({ type: SET_THEME, theme: theme === "dark" ? "light" : "dark" });
 
   const updCl = useCallback(
     (key, value) => {
@@ -191,22 +183,6 @@ export function StageStudio() {
             Ring Studio
           </div>
         </div>
-        <Button
-          variant="secondary"
-          small={false}
-          T={studioT}
-          onClick={toggleTheme}
-          style={{
-            minHeight: 42,
-            minWidth: 42,
-            padding: "8px 10px",
-            border: `1px solid ${studioT.brd}`,
-            color: studioT.gold,
-            background: "rgba(0,0,0,0.65)",
-          }}
-        >
-          {theme === "dark" ? "☀" : "◐"}
-        </Button>
       </header>
 
       <div
@@ -334,38 +310,27 @@ export function StageStudio() {
         }}
       >
         <Button
-          variant="secondary"
+          variant="nav"
           small={false}
           T={studioT}
           onClick={goBack}
           style={{
-            minWidth: 142,
-            minHeight: 52,
-            fontSize: 24,
-            fontFamily:
-              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
-            color: studioT.gold,
-            border: `1px solid ${studioT.brd}`,
-            background: "rgba(0,0,0,0.65)",
+            minWidth: 144,
+            minHeight: 48,
           }}
         >
-          ← Back
+          Back
         </Button>
         <Button
+          variant="nav"
           onClick={finalize}
           T={studioT}
           style={{
-            minWidth: 142,
-            minHeight: 52,
-            fontSize: 24,
-            fontFamily:
-              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
-            border: `1px solid ${studioT.brd}`,
-            background: "rgba(227, 176, 59, 0.16)",
-            color: "#f2c86a",
+            minWidth: 144,
+            minHeight: 48,
           }}
         >
-          Finalize →
+          Finalize
         </Button>
       </div>
 

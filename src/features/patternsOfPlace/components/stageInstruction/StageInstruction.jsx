@@ -1,5 +1,6 @@
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import { SET_STAGE } from "../../app/actions.js";
+import { Button } from "../shared/Button.jsx";
 import bg from "../../../../assets/bg.png";
 
 const STEPS = [
@@ -21,6 +22,13 @@ const STEPS = [
 export function StageInstruction() {
   const { dispatch } = usePatternsOfPlace();
   const bgSrc = typeof bg === "string" ? bg : bg?.src;
+  const navT = {
+    gold: "#efbe48",
+    bg: "#030303",
+    surf2: "rgba(0, 0, 0, 0.74)",
+    mut: "#e2b45f",
+    brd: "rgba(239, 190, 72, 0.55)",
+  };
 
   const next = () => dispatch({ type: SET_STAGE, stage: 1 });
   const previous = () => dispatch({ type: SET_STAGE, stage: 0 });
@@ -51,19 +59,29 @@ export function StageInstruction() {
         ))}
       </div>
 
-      <div className="mt-14 flex gap-6">
-        <button
-          className="min-h-12 min-w-36 cursor-pointer rounded-full border border-[rgba(184,137,18,0.9)] bg-[rgba(3,7,16,0.88)] px-8 py-2.5 text-2xl font-bold uppercase tracking-[0.05em] text-[#d7b450] font-['Outfit','DM_Sans',system-ui,sans-serif] shadow-[0_0_0_1px_rgba(184,137,18,0.16),0_0_18px_rgba(184,137,18,0.3),inset_0_-8px_16px_rgba(0,0,0,0.44)]"
-          onClick={previous}
-        >
-          Previous
-        </button>
-        <button
-          className="min-h-12 min-w-36 cursor-pointer rounded-full border border-[rgba(184,137,18,0.9)] bg-[rgba(3,7,16,0.88)] px-8 py-2.5 text-2xl font-bold uppercase tracking-[0.05em] text-[#d7b450] font-['Outfit','DM_Sans',system-ui,sans-serif] shadow-[0_0_0_1px_rgba(184,137,18,0.16),0_0_18px_rgba(184,137,18,0.3),inset_0_-8px_16px_rgba(0,0,0,0.44)]"
-          onClick={next}
-        >
+      <div
+        style={{
+          position: "fixed",
+          left: "50%",
+          bottom: 20,
+          transform: "translateX(-50%)",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: 12,
+          borderRadius: 999,
+          background: "rgba(0, 0, 0, 0.82)",
+          border: "1px solid rgba(184,137,18,0.45)",
+          boxShadow: "0 12px 32px rgba(0,0,0,0.55)",
+          zIndex: 150,
+        }}
+      >
+        <Button variant="nav" small={false} T={navT} onClick={previous}>
+          Back
+        </Button>
+        <Button variant="nav" small={false} T={navT} onClick={next}>
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );

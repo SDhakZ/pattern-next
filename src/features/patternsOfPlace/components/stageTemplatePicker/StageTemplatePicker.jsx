@@ -54,7 +54,7 @@ export function StageTemplatePicker() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: FONT,
+        fontFamily: "Outfit, 'DM Sans', system-ui, sans-serif",
         padding: "40px 20px 84px",
         position: "relative",
         overflow: "hidden",
@@ -149,14 +149,14 @@ export function StageTemplatePicker() {
               </div>
               <div
                 style={{
-                  fontSize: 31,
+                  fontSize: 24,
                   fontWeight: 500,
                   color: "#d7a64a",
                   lineHeight: 1.15,
                   textShadow: highlighted
                     ? "0 0 12px rgba(181, 121, 18, 0.45)"
                     : "none",
-                  fontFamily: DISPLAY_FONT,
+                  fontFamily: "Outfit, 'DM Sans', system-ui, sans-serif",
                 }}
               >
                 {tpl.name}
@@ -168,15 +168,25 @@ export function StageTemplatePicker() {
 
       <div
         style={{
+          position: "fixed",
+          left: "50%",
+          bottom: 20,
+          transform: "translateX(-50%)",
           display: "flex",
-          gap: 22,
           alignItems: "center",
+          gap: 12,
+          padding: 12,
+          borderRadius: 999,
+          background: "rgba(0, 0, 0, 0.82)",
+          border: "1px solid rgba(184,137,18,0.45)",
+          boxShadow: "0 12px 32px rgba(0,0,0,0.55)",
           justifyContent: "center",
           flexWrap: "wrap",
+          zIndex: 150,
         }}
       >
         <Button
-          variant="secondary"
+          variant="nav"
           small={false}
           T={{
             gold: "#efbe48",
@@ -188,20 +198,14 @@ export function StageTemplatePicker() {
           onClick={goBack}
           style={{
             minWidth: 144,
-            minHeight: 56,
-            fontSize: 31,
-            fontWeight: 500,
-            letterSpacing: "0.02em",
-            fontFamily: DISPLAY_FONT,
-            border: "1px solid rgba(239, 190, 72, 0.6)",
-            boxShadow: "0 0 18px rgba(160, 98, 0, 0.24)",
+            minHeight: 48,
           }}
         >
           Back
         </Button>
 
         <Button
-          variant="secondary"
+          variant="nav"
           small={false}
           T={{
             gold: "#efbe48",
@@ -216,17 +220,7 @@ export function StageTemplatePicker() {
           disabled={!activeId}
           style={{
             minWidth: 144,
-            minHeight: 56,
-            fontSize: 31,
-            fontWeight: 500,
-            letterSpacing: "0.02em",
-            fontFamily: DISPLAY_FONT,
-            border: activeId
-              ? "1px solid rgba(239, 190, 72, 0.72)"
-              : "1px solid rgba(167, 122, 40, 0.55)",
-            boxShadow: activeId
-              ? "0 0 24px rgba(198, 132, 0, 0.34)"
-              : "0 0 0 rgba(0,0,0,0)",
+            minHeight: 48,
           }}
         >
           Next

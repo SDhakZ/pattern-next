@@ -3,7 +3,6 @@ import { QRCodeCanvas } from "qrcode.react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import {
   SET_STAGE,
-  SET_THEME,
   SET_PREVIEW_SIDE,
   RESET,
   SET_EXPORT_STATUS,
@@ -24,6 +23,7 @@ import { CardCanvas } from "../shared/CardCanvas.jsx";
 import { PostcardReverse } from "./PostcardReverse.jsx";
 import { useExportArtwork } from "../../hooks/useExportArtwork.js";
 import { FONT } from "../../data/constants/themes.js";
+import bgImage from "../../../../assets/bg.png";
 
 const PANEL_STYLE = {
   width: 380,
@@ -46,7 +46,7 @@ export function StageFinalize() {
   const { isDownloading, statusMessage } = selectExport(state);
   const reverseRings = selectReverseDecorations(state);
   const reverseTemplate = selectReverseTemplate(state);
-  const { theme, activeReverseDecorationId } = state.ui;
+  const { activeReverseDecorationId } = state.ui;
 
   const { downloadJPEG, downloadSVG, getSvgPair } = useExportArtwork({
     clusters,
@@ -61,13 +61,7 @@ export function StageFinalize() {
   const [qrExpiresAt, setQrExpiresAt] = useState("");
   const [qrStatus, setQrStatus] = useState("");
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
-  const [recipientEmail, setRecipientEmail] = useState("");
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [emailStatus, setEmailStatus] = useState("");
-  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail.trim());
 
-  const toggleTheme = () =>
-    dispatch({ type: SET_THEME, theme: theme === "dark" ? "light" : "dark" });
   const goBack = () => dispatch({ type: SET_STAGE, stage: 2 });
   const restart = () => dispatch({ type: RESET });
   const isFront = previewSide === "front";
@@ -133,52 +127,6 @@ export function StageFinalize() {
     return data.qrUrl || "";
   };
 
-  const handleEmail = async () => {
-    const normalizedEmail = recipientEmail.trim();
-
-    if (!normalizedEmail) {
-      setEmailStatus("Enter a recipient email first.");
-      return;
-    }
-
-    if (!emailIsValid) {
-      setEmailStatus("Enter a valid email address.");
-      return;
-    }
-
-    setIsSendingEmail(true);
-    setEmailStatus("Preparing secure link. You can also scan the QR below.");
-
-    try {
-      const qrLink = await ensureQrUrl();
-      const response = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: recipientEmail.trim(),
-          qrUrl: qrLink,
-          expiresAt: qrExpiresAt || null,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Failed to send email");
-      }
-
-      setEmailStatus(
-        `Email sent to ${normalizedEmail}. You can also scan the QR below.`,
-      );
-    } catch (error) {
-      setEmailStatus(
-        error instanceof Error ? error.message : "Failed to send email.",
-      );
-    } finally {
-      setIsSendingEmail(false);
-    }
-  };
-
   const handleGenerateQr = async () => {
     setIsGeneratingQr(true);
     setQrStatus("");
@@ -229,7 +177,7 @@ export function StageFinalize() {
     padding: 10,
     borderRadius: 12,
     border: `1px solid ${T.brd}`,
-    background: T.surf1,
+    background: "rgba(12, 12, 12, 0.88)",
     marginBottom: 10,
   };
 
@@ -240,7 +188,11 @@ export function StageFinalize() {
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT,
-        background: T.bg,
+        backgroundImage: `
+          url(${bgImage.src})
+        `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         overflow: "hidden",
         position: "relative",
       }}
@@ -253,30 +205,16 @@ export function StageFinalize() {
           gap: 16,
           padding: "20px 24px",
           borderBottom: `1px solid ${T.brd}`,
-          background: T.surf,
+          background:
+            "linear-gradient(180deg, rgba(6,6,6,0.98) 0%, rgba(11,8,8,0.96) 100%)",
           flexShrink: 0,
         }}
       >
         <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: "0.3em",
-              color: T.gold,
-              textTransform: "uppercase",
-              marginBottom: 2,
-            }}
-          >
-            Step 3 / 3
-          </div>
           <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Finalize & Share
           </div>
         </div>
-        <Button variant="secondary" small={false} T={T} onClick={toggleTheme}>
-          {theme === "dark" ? "☀" : "◐"}
-        </Button>
       </header>
 
       <div
@@ -291,7 +229,8 @@ export function StageFinalize() {
         <aside
           style={{
             ...PANEL_STYLE,
-            background: T.surf,
+            background:
+              "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
             borderRight: `1px solid ${T.brd}`,
           }}
         >
@@ -323,9 +262,7 @@ export function StageFinalize() {
             </div>
           </div>
         </aside>
-
         <main
-          role="region"
           aria-label="Postcard preview"
           style={{
             flex: 1,
@@ -337,7 +274,8 @@ export function StageFinalize() {
             justifyContent: "center",
             padding: 24,
             gap: 10,
-            background: T.bg,
+            background:
+              "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
             overflow: "hidden",
           }}
         >
@@ -379,11 +317,11 @@ export function StageFinalize() {
             )}
           </div>
         </main>
-
         <aside
           style={{
             ...PANEL_STYLE,
-            background: T.surf,
+            background:
+              "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
             borderLeft: `1px solid ${T.brd}`,
           }}
         >
@@ -471,56 +409,7 @@ export function StageFinalize() {
             )}
           </div>
 
-          <div style={panelCardStyle}>
-            <Label T={T}>Send via Email</Label>
-            <div
-              style={{
-                fontSize: 10,
-                color: T.mut,
-                marginTop: 2,
-                marginBottom: 8,
-              }}
-            >
-              We include the secure QR download link in the email.
-            </div>
-            <input
-              value={recipientEmail}
-              onChange={(event) => {
-                setRecipientEmail(event.target.value);
-                if (emailStatus) setEmailStatus("");
-              }}
-              placeholder="Recipient email"
-              type="email"
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "10px 12px",
-                borderRadius: 8,
-                border: `1px solid ${T.brd}`,
-                background: T.bg,
-                color: T.txt,
-                fontFamily: FONT,
-                fontSize: 12,
-                outline: "none",
-                marginBottom: 8,
-              }}
-            />
-            <Button
-              variant="blue"
-              T={T}
-              onClick={handleEmail}
-              disabled={isSendingEmail || !recipientEmail.trim()}
-            >
-              {isSendingEmail ? "Sending..." : "✉ Send Email"}
-            </Button>
-            {!!recipientEmail.trim() && !emailIsValid && (
-              <div style={{ fontSize: 10, color: "#e05a5a", marginTop: 6 }}>
-                Enter a valid email address.
-              </div>
-            )}
-          </div>
-
-          {(statusMessage || qrStatus || emailStatus) && (
+          {(statusMessage || qrStatus) && (
             <div
               role="status"
               aria-live="polite"
@@ -531,13 +420,12 @@ export function StageFinalize() {
                 textAlign: "center",
                 color:
                   statusMessage.toLowerCase().includes("fail") ||
-                  qrStatus.toLowerCase().includes("fail") ||
-                  emailStatus.toLowerCase().includes("fail")
+                  qrStatus.toLowerCase().includes("fail")
                     ? "#e05a5a"
                     : "#4caf50",
               }}
             >
-              {emailStatus || qrStatus || statusMessage}
+              {qrStatus || statusMessage}
             </div>
           )}
         </aside>
@@ -554,16 +442,28 @@ export function StageFinalize() {
           gap: 12,
           padding: 12,
           borderRadius: 999,
-          background: T.surf,
-          border: `1px solid ${T.brd}`,
-          boxShadow: `0 12px 32px ${T.shadow}`,
+          background: "rgba(0, 0, 0, 0.82)",
+          border: "1px solid rgba(184,137,18,0.45)",
+          boxShadow: "0 12px 32px rgba(0,0,0,0.55)",
           zIndex: 150,
         }}
       >
-        <Button variant="secondary" small={false} T={T} onClick={goBack}>
-          ← Back to Studio
+        <Button
+          variant="nav"
+          small={false}
+          T={T}
+          onClick={goBack}
+          style={{ minWidth: 144, minHeight: 48 }}
+        >
+          Back
         </Button>
-        <Button variant="secondary" small={false} T={T} onClick={restart}>
+        <Button
+          variant="nav"
+          small={false}
+          T={T}
+          onClick={restart}
+          style={{ minWidth: 144, minHeight: 48 }}
+        >
           Start Over
         </Button>
       </div>

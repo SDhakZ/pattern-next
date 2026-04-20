@@ -16,6 +16,7 @@ export function Button({
 }) {
   const [active, setActive] = useState(false);
   const [focused, setFocused] = useState(false);
+  const isNav = variant === "nav";
 
   const base = {
     fontFamily: FONT,
@@ -27,11 +28,11 @@ export function Button({
     opacity: disabled ? 0.55 : 1,
     border: "none",
     outline: "none",
-    fontSize: small ? 13 : 14,
-    padding: small ? "10px 18px" : "14px 26px",
-    letterSpacing: "0.02em",
-    minHeight: small ? 44 : 48,
-    minWidth: small ? 44 : 48,
+    fontSize: isNav ? 24 : small ? 13 : 14,
+    padding: isNav ? "10px 32px" : small ? "10px 18px" : "14px 26px",
+    letterSpacing: isNav ? "0.05em" : "0.02em",
+    minHeight: isNav ? 48 : small ? 44 : 48,
+    minWidth: isNav ? 144 : small ? 44 : 48,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -39,14 +40,23 @@ export function Button({
     WebkitUserSelect: "none",
     userSelect: "none",
     transform: active && !disabled ? "scale(0.985)" : "scale(1)",
-    boxShadow:
-      active && !disabled
+    boxShadow: isNav
+      ? disabled
+        ? "0 0 0 1px rgba(184,137,18,0.2), inset 0 -6px 14px rgba(0,0,0,0.42)"
+        : active
+          ? "0 0 0 1px rgba(214,170,67,0.28), 0 0 12px rgba(214,170,67,0.42), inset 0 2px 8px rgba(0,0,0,0.52)"
+          : "0 0 0 1px rgba(184,137,18,0.2), 0 0 18px rgba(184,137,18,0.34), inset 0 -8px 16px rgba(0,0,0,0.44)"
+      : active && !disabled
         ? "inset 0 2px 6px rgba(0,0,0,0.22)"
         : variant === "primary"
           ? "0 4px 12px rgba(0,0,0,0.2)"
           : "0 2px 8px rgba(0,0,0,0.08)",
     ...(focused && !disabled
-      ? { boxShadow: `0 0 0 3px ${T.gold}66, 0 4px 12px rgba(0,0,0,0.2)` }
+      ? {
+          boxShadow: isNav
+            ? "0 0 0 2px rgba(237,188,71,0.42), 0 0 20px rgba(214,170,67,0.52), inset 0 -8px 16px rgba(0,0,0,0.44)"
+            : `0 0 0 3px ${T.gold}66, 0 4px 12px rgba(0,0,0,0.2)`,
+        }
       : {}),
   };
 
@@ -68,6 +78,14 @@ export function Button({
       border: "1px solid #e05a5a",
     },
     blue: { background: "#1565c0", color: "#ffffff" },
+    nav: {
+      background: "rgba(3,7,16,0.88)",
+      color: "#d7b450",
+      border: "1px solid rgba(184,137,18,0.9)",
+      fontWeight: 400,
+      textTransform: "uppercase",
+      fontFamily: "'Outfit', 'DM Sans', system-ui, sans-serif",
+    },
   };
 
   return (
