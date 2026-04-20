@@ -32,6 +32,7 @@ import {
 } from "../../data/motifs/motifRegistry.js";
 import { PREVIEW_BG_OPTIONS } from "../../data/constants/backgrounds.js";
 import { FONT, FONT_MONO } from "../../data/constants/themes.js";
+import bgImage from "../../../../assets/bg.png";
 
 const PANEL_STYLE = {
   width: 380,
@@ -46,7 +47,20 @@ const PANEL_STYLE = {
 };
 
 export function StagePatternLab() {
-  const { state, dispatch, T } = usePatternsOfPlace();
+  const { state, dispatch, T: baseT } = usePatternsOfPlace();
+  const T = {
+    ...baseT,
+    bg: "#060606",
+    surf: "rgba(9, 9, 9, 0.95)",
+    surf1: "rgba(12, 12, 12, 0.92)",
+    surf2: "rgba(16, 16, 16, 0.9)",
+    brd: "rgba(227, 176, 59, 0.3)",
+    txt: "#f0c75a",
+    mut: "#a08a57",
+    dim: "#776543",
+    gold: "#e3b03b",
+    shadow: "rgba(0,0,0,0.72)",
+  };
   const layers = selectLayers(state);
   const active = selectActiveLayer(state);
   const library = selectLibrary(state);
@@ -196,7 +210,12 @@ export function StagePatternLab() {
     <div
       style={{
         height: "100dvh",
-        background: T.bg,
+        backgroundImage: `
+          linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.9) 100%),
+          url(${bgImage.src})
+        `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT,
@@ -212,27 +231,27 @@ export function StagePatternLab() {
           gap: 16,
           padding: "20px 24px",
           borderBottom: `1px solid ${T.brd}`,
-          background: T.surf,
+          background:
+            "linear-gradient(180deg, rgba(6,6,6,0.98) 0%, rgba(11,8,8,0.96) 100%)",
           flexShrink: 0,
         }}
       >
         <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
           <div
             style={{
-              fontSize: 9,
+              fontSize: 42,
               fontWeight: 700,
-              letterSpacing: "0.3em",
               color: T.gold,
+              letterSpacing: "0.04em",
               textTransform: "uppercase",
-              marginBottom: 2,
+              fontFamily:
+                "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+              lineHeight: 1,
             }}
           >
-            Create Your Own Pattern
-          </div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Pattern Lab
           </div>
-          <div style={{ fontSize: 11, color: T.mut, marginTop: 2 }}>
+          <div style={{ fontSize: 11, color: T.mut, marginTop: 4 }}>
             Layer motifs into a reusable tile
           </div>
         </div>
@@ -253,7 +272,8 @@ export function StagePatternLab() {
         <aside
           style={{
             ...PANEL_STYLE,
-            background: T.surf,
+            background:
+              "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
             borderRight: `1px solid ${T.brd}`,
           }}
         >
@@ -508,8 +528,8 @@ export function StagePatternLab() {
           <div
             style={{
               border: `1px solid ${T.brd}`,
-              borderRadius: 12,
-              background: T.surf1,
+              borderRadius: 10,
+              background: "rgba(5, 5, 5, 0.9)",
               padding: "10px 10px 12px",
               marginBottom: 12,
             }}
@@ -702,7 +722,8 @@ export function StagePatternLab() {
             justifyContent: "center",
             padding: 32,
             gap: 20,
-            background: T.bg,
+            background:
+              "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
             overflow: "hidden",
           }}
         >
@@ -786,7 +807,8 @@ export function StagePatternLab() {
         <aside
           style={{
             ...PANEL_STYLE,
-            background: T.surf,
+            background:
+              "linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(10,7,6,0.92) 100%)",
             borderLeft: `1px solid ${T.brd}`,
           }}
         >
@@ -1048,13 +1070,27 @@ export function StagePatternLab() {
           gap: 12,
           padding: 12,
           borderRadius: 999,
-          background: T.surf,
+          background: "rgba(0, 0, 0, 0.82)",
           border: `1px solid ${T.brd}`,
           boxShadow: `0 12px 32px ${T.shadow}`,
           zIndex: 150,
         }}
       >
-        <Button small={false} T={T} onClick={goBack}>
+        <Button
+          small={false}
+          T={T}
+          onClick={goBack}
+          style={{
+            minWidth: 180,
+            minHeight: 52,
+            fontSize: 24,
+            fontFamily:
+              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+            color: T.gold,
+            border: `1px solid ${T.brd}`,
+            background: "rgba(0,0,0,0.65)",
+          }}
+        >
           Return to Studio
         </Button>
       </div>

@@ -275,9 +275,9 @@ export function StageStudio() {
               cyan dashed
             </span>
             {"  ·  "}
-            Cluster:{" "}
-            <span style={{ color: "#ff6b35", fontWeight: 700 }}>
-              ● orange dot
+            Active Cluster:{" "}
+            <span style={{ color: "#FE28C9", fontWeight: 700 }}>
+              ● Pink dot
             </span>
           </div>
         </main>

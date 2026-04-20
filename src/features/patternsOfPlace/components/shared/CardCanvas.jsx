@@ -170,8 +170,8 @@ export const CardCanvas = memo(function CardCanvas({
                   width: 18,
                   height: 18,
                   borderRadius: "50%",
-                  background: "#ff6b35",
-                  boxShadow: "0 0 0 2px rgba(0,0,0,0.6),0 0 10px #ff6b35",
+                  background: "#FE28C9",
+                  boxShadow: "0 0 0 2px rgba(0,0,0,0.6),0 0 10px #FE28C9",
                   pointerEvents: "none",
                 }}
               />
