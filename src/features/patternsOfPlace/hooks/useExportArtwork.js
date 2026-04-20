@@ -201,6 +201,11 @@ function buildReverseSVG(
   // Background
   parts.push(`<rect width="${W}" height="${H}" fill="${bgColor}"/>`);
 
+  // Vertical separator between note and address areas
+  parts.push(
+    `<line x1="${leftW}" y1="0" x2="${leftW}" y2="${H}" stroke="${brd}" stroke-width="1.5"/>`,
+  );
+
   // ── Note area ──
   const noteLabelY = pad + fsLabel;
   parts.push(
