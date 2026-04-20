@@ -4,144 +4,233 @@ import { SET_STAGE, SELECT_TEMPLATE } from "../../app/actions.js";
 import { Button } from "../shared/Button.jsx";
 import { TEMPLATES } from "../../data/constants/templates.js";
 import { FONT } from "../../data/constants/themes.js";
+import concentricImg from "../../../../assets/layouts/centric.png";
+import diagonalImg from "../../../../assets/layouts/diagnol.png";
+import trinityImg from "../../../../assets/layouts/trinity.png";
+import cornersImg from "../../../../assets/layouts/corners.png";
+import bgImage from "../../../../assets/bg.png";
+
+const LAYOUT_PREVIEWS = {
+  concentric: concentricImg.src,
+  diagonal: diagonalImg.src,
+  trinity: trinityImg.src,
+  corners: cornersImg.src,
+};
+
+const DISPLAY_LAYOUTS = ["concentric", "diagonal", "trinity", "corners"];
+const DISPLAY_FONT =
+  "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif";
 
 export function StageTemplatePicker() {
-  const { dispatch, T } = usePatternsOfPlace();
-  const [activeId, setActiveId] = useState(null);
+  const { state, dispatch } = usePatternsOfPlace();
+  const [activeId, setActiveId] = useState(
+    state.editor.selectedTemplate?.id ?? null,
+  );
+  const [hoveredId, setHoveredId] = useState(null);
 
   const choose = (tpl) => dispatch({ type: SELECT_TEMPLATE, template: tpl });
   const goBack = () => dispatch({ type: SET_STAGE, stage: 5 });
+  const layoutOptions = DISPLAY_LAYOUTS.map((id) =>
+    TEMPLATES.find((tpl) => tpl.id === id),
+  ).filter(Boolean);
+
+  const goNext = () => {
+    const selectedTemplate = layoutOptions.find((tpl) => tpl.id === activeId);
+    if (!selectedTemplate) return;
+    choose(selectedTemplate);
+  };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: T.bg,
+        backgroundImage: `
+          url(${bgImage.src})
+        `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         fontFamily: FONT,
-        padding: "48px",
+        padding: "40px 20px 84px",
         position: "relative",
+        overflow: "hidden",
       }}
     >
-      <Button
-        variant="secondary"
-        small={false}
-        T={T}
-        onClick={goBack}
-        style={{
-          position: "fixed",
-          bottom: 28,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 100,
-        }}
-      >
-        ← Back
-      </Button>
-
       <div
         style={{
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: "0.3em",
-          color: T.gold,
-          textTransform: "uppercase",
-          marginBottom: 16,
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background:
+            "radial-gradient(circle at 50% 45%, rgba(255, 158, 34, 0.2), rgba(0, 0, 0, 0) 40%)",
         }}
-      >
-        Step 1 / 3
-      </div>
+      />
+
       <h2
         style={{
-          fontSize: 48,
-          fontWeight: 800,
-          color: T.txt,
-          marginBottom: 12,
+          fontSize: "clamp(32px, 4vw, 42px)",
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+          color: "#f0bc46",
+          textTransform: "uppercase",
+          margin: "0 0 36px",
+          textAlign: "center",
+          textShadow: "0 2px 14px rgba(167, 108, 0, 0.45)",
+          fontFamily: DISPLAY_FONT,
         }}
       >
-        Choose Layout
+        Pick Your Composition
       </h2>
-      <p
-        style={{
-          fontSize: 16,
-          color: T.mut,
-          marginBottom: 48,
-          lineHeight: 1.6,
-        }}
-      >
-        Pick a starting arrangement for your clusters
-      </p>
 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3,1fr)",
-          gap: 20,
-          maxWidth: 900,
+          gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+          gap: 18,
+          maxWidth: 720,
           width: "100%",
+          marginBottom: 34,
         }}
       >
-        {TEMPLATES.map((tpl) => (
-          <button
-            key={tpl.id}
-            onClick={() => {
-              setActiveId(tpl.id);
-              choose(tpl);
-            }}
-            onMouseEnter={() => setActiveId(tpl.id)}
-            onMouseLeave={() => setActiveId(null)}
-            style={{
-              border: `2px solid ${activeId === tpl.id ? T.gold : T.brd}`,
-              background: activeId === tpl.id ? T.surf2 : T.surf,
-              borderRadius: 12,
-              padding: "20px 16px",
-              cursor: "pointer",
-              textAlign: "left",
-              transition: "all 0.18s ease-out",
-              transform: activeId === tpl.id ? "scale(1.02)" : "scale(1)",
-              minHeight: 240,
-              touchAction: "manipulation",
-              WebkitUserSelect: "none",
-              userSelect: "none",
-            }}
-          >
-            {/* Mini cluster diagram */}
-            <div
+        {layoutOptions.map((tpl) => {
+          const selected = activeId === tpl.id;
+          const highlighted = selected || hoveredId === tpl.id;
+          return (
+            <button
+              key={tpl.id}
+              onClick={() => {
+                setActiveId(tpl.id);
+              }}
+              onMouseEnter={() => setHoveredId(tpl.id)}
+              onMouseLeave={() => setHoveredId(null)}
               style={{
-                width: "100%",
-                height: 120,
-                background: T.surf2,
+                border: `1px solid ${highlighted ? "#efbe48" : "rgba(240, 188, 70, 0.45)"}`,
+                background: "rgba(6, 6, 6, 0.85)",
                 borderRadius: 8,
-                marginBottom: 16,
-                position: "relative",
-                overflow: "hidden",
+                padding: "14px 14px 10px",
+                cursor: "pointer",
+                textAlign: "center",
+                transition:
+                  "transform 0.16s ease-out, border-color 0.18s ease, box-shadow 0.18s ease",
+                transform: highlighted ? "translateY(-2px)" : "translateY(0)",
+                boxShadow: highlighted
+                  ? "0 0 0 1px rgba(246, 196, 75, 0.45), 0 0 30px rgba(191, 121, 0, 0.38)"
+                  : "0 0 0 1px rgba(0, 0, 0, 0.2)",
+                touchAction: "manipulation",
+                WebkitUserSelect: "none",
+                userSelect: "none",
               }}
             >
-              {tpl.clusters.map((cl, i) => (
-                <div
-                  key={i}
+              <div
+                style={{
+                  width: "100%",
+                  aspectRatio: "1.9 / 1",
+                  borderRadius: 4,
+                  marginBottom: 10,
+                  overflow: "hidden",
+                  border: "1px solid rgba(250, 201, 91, 0.2)",
+                  background: "#050505",
+                }}
+              >
+                <img
+                  src={LAYOUT_PREVIEWS[tpl.id]}
+                  alt={`${tpl.name} composition preview`}
                   style={{
-                    position: "absolute",
-                    left: `${cl.x * 100}%`,
-                    top: `${cl.y * 100}%`,
-                    width: cl.scale * 26,
-                    height: cl.scale * 26,
-                    borderRadius: "50%",
-                    background: `${T.gold}88`,
-                    transform: "translate(-50%,-50%)",
-                    border: `2px solid ${T.gold}`,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
                   }}
                 />
-              ))}
-            </div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: T.txt }}>
-              {tpl.name}
-            </div>
-          </button>
-        ))}
+              </div>
+              <div
+                style={{
+                  fontSize: 31,
+                  fontWeight: 500,
+                  color: "#d7a64a",
+                  lineHeight: 1.15,
+                  textShadow: highlighted
+                    ? "0 0 12px rgba(181, 121, 18, 0.45)"
+                    : "none",
+                  fontFamily: DISPLAY_FONT,
+                }}
+              >
+                {tpl.name}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: 22,
+          alignItems: "center",
+          justifyContent: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <Button
+          variant="secondary"
+          small={false}
+          T={{
+            gold: "#efbe48",
+            bg: "#030303",
+            surf2: "rgba(0, 0, 0, 0.74)",
+            mut: "#e2b45f",
+            brd: "rgba(239, 190, 72, 0.55)",
+          }}
+          onClick={goBack}
+          style={{
+            minWidth: 144,
+            minHeight: 56,
+            fontSize: 31,
+            fontWeight: 500,
+            letterSpacing: "0.02em",
+            fontFamily: DISPLAY_FONT,
+            border: "1px solid rgba(239, 190, 72, 0.6)",
+            boxShadow: "0 0 18px rgba(160, 98, 0, 0.24)",
+          }}
+        >
+          Back
+        </Button>
+
+        <Button
+          variant="secondary"
+          small={false}
+          T={{
+            gold: "#efbe48",
+            bg: "#030303",
+            surf2: "rgba(0, 0, 0, 0.74)",
+            mut: activeId ? "#f3c970" : "#876322",
+            brd: activeId
+              ? "rgba(239, 190, 72, 0.7)"
+              : "rgba(168, 118, 35, 0.5)",
+          }}
+          onClick={goNext}
+          disabled={!activeId}
+          style={{
+            minWidth: 144,
+            minHeight: 56,
+            fontSize: 31,
+            fontWeight: 500,
+            letterSpacing: "0.02em",
+            fontFamily: DISPLAY_FONT,
+            border: activeId
+              ? "1px solid rgba(239, 190, 72, 0.72)"
+              : "1px solid rgba(167, 122, 40, 0.55)",
+            boxShadow: activeId
+              ? "0 0 24px rgba(198, 132, 0, 0.34)"
+              : "0 0 0 rgba(0,0,0,0)",
+          }}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );
