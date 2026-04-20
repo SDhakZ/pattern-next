@@ -3,16 +3,8 @@ import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import {
   SET_STAGE,
   SET_THEME,
-  SET_RING_SETUP_MODE,
-  ADD_CLUSTER,
-  REMOVE_CLUSTER,
   UPDATE_CLUSTER,
-  SET_ACTIVE_CLUSTER,
-  ADD_RING,
-  REMOVE_RING,
   UPDATE_RING,
-  SET_ACTIVE_RING,
-  SET_BG_COLOR,
 } from "../../app/actions.js";
 import {
   selectClusters,
@@ -23,41 +15,27 @@ import {
   selectRingSetupMode,
 } from "../../app/selectors.js";
 import { Button } from "../shared/Button.jsx";
-import { Divider } from "../shared/Divider.jsx";
-import { Label } from "../shared/Label.jsx";
-import { SliderControl } from "../shared/SliderControl.jsx";
-import { ColorPicker } from "../shared/ColorPicker.jsx";
 import { CardCanvas } from "../shared/CardCanvas.jsx";
-import { PatternTile } from "../shared/PatternTile.jsx";
 import { RingStudioLeftPanel } from "./RingStudioLeftPanel.jsx";
 import { RingStudioRightPanel } from "./RingStudioRightPanel.jsx";
-import {
-  MOTIFS,
-  MOTIF_NAMES,
-  SELECTABLE_MOTIFS,
-} from "../../data/motifs/motifRegistry.js";
-import { PREVIEW_BG_OPTIONS } from "../../data/constants/backgrounds.js";
-import {
-  DEFAULT_COLORS,
-  MAX_RINGS_PER_CLUSTER,
-} from "../../data/constants/defaults.js";
-import { tangentSize } from "../../domain/geometry.js";
-import { FONT, FONT_MONO } from "../../data/constants/themes.js";
-
-const PANEL_STYLE = {
-  width: 380,
-  flexShrink: 0,
-  height: "100%",
-  minHeight: 0,
-  overflowY: "auto",
-  overscrollBehavior: "contain",
-  padding: "24px 20px",
-  display: "flex",
-  flexDirection: "column",
-};
+import { FONT } from "../../data/constants/themes.js";
+import bgImage from "../../../../assets/bg.png";
 
 export function StageStudio() {
   const { state, dispatch, T } = usePatternsOfPlace();
+  const studioT = {
+    ...T,
+    bg: "#060606",
+    surf: "rgba(9, 9, 9, 0.95)",
+    surf1: "rgba(12, 12, 12, 0.92)",
+    surf2: "rgba(16, 16, 16, 0.9)",
+    brd: "rgba(227, 176, 59, 0.3)",
+    txt: "#f0c75a",
+    mut: "#a08a57",
+    dim: "#776543",
+    gold: "#e3b03b",
+    shadow: "rgba(0,0,0,0.72)",
+  };
   const clusters = selectClusters(state);
   const activeCl = selectActiveCluster(state);
   const activeRing = selectActiveRing(state);
@@ -103,11 +81,6 @@ export function StageStudio() {
   };
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const touchDistance = (t1, t2) => {
-    const dx = t2.clientX - t1.clientX;
-    const dy = t2.clientY - t1.clientY;
-    return Math.hypot(dx, dy);
-  };
 
   const handlePreviewTouchStart = (event) => {
     if (!activeCl || !previewRef.current) return;
@@ -122,14 +95,6 @@ export function StageStudio() {
         startClusterY: activeCl.y,
       };
       return;
-    }
-
-    if (touches.length === 2) {
-      gestureRef.current = {
-        mode: "pinch",
-        startDistance: touchDistance(touches[0], touches[1]),
-        startScale: activeCl.scale,
-      };
     }
   };
 
@@ -148,15 +113,6 @@ export function StageStudio() {
       updCl("y", clamp(gesture.startClusterY + dy, 0, 1));
       return;
     }
-
-    if (gesture.mode === "pinch" && touches.length === 2) {
-      const dist = touchDistance(touches[0], touches[1]);
-      if (!gesture.startDistance) return;
-      updCl(
-        "scale",
-        clamp(gesture.startScale * (dist / gesture.startDistance), 0.2, 3),
-      );
-    }
   };
 
   const handlePreviewTouchEnd = (event) => {
@@ -174,7 +130,12 @@ export function StageStudio() {
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT,
-        background: T.bg,
+        backgroundImage: `
+          linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.9) 100%),
+          url(${bgImage.src})
+        `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         overflow: "hidden",
         position: "relative",
       }}
@@ -186,29 +147,42 @@ export function StageStudio() {
           justifyContent: "space-between",
           gap: 16,
           padding: "20px 24px",
-          borderBottom: `1px solid ${T.brd}`,
-          background: T.surf,
+          borderBottom: `1px solid ${studioT.brd}`,
+          background:
+            "linear-gradient(180deg, rgba(6,6,6,0.98) 0%, rgba(11,8,8,0.96) 100%)",
           flexShrink: 0,
         }}
       >
         <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
           <div
             style={{
-              fontSize: 9,
+              fontSize: 42,
               fontWeight: 700,
-              letterSpacing: "0.3em",
-              color: T.gold,
+              color: studioT.gold,
+              letterSpacing: "0.04em",
               textTransform: "uppercase",
-              marginBottom: 2,
+              fontFamily:
+                "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+              lineHeight: 1,
             }}
           >
-            Step 2 / 3
-          </div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
             Ring Studio
           </div>
         </div>
-        <Button variant="secondary" small={false} T={T} onClick={toggleTheme}>
+        <Button
+          variant="secondary"
+          small={false}
+          T={studioT}
+          onClick={toggleTheme}
+          style={{
+            minHeight: 42,
+            minWidth: 42,
+            padding: "8px 10px",
+            border: `1px solid ${studioT.brd}`,
+            color: studioT.gold,
+            background: "rgba(0,0,0,0.65)",
+          }}
+        >
           {theme === "dark" ? "☀" : "◐"}
         </Button>
       </header>
@@ -223,7 +197,7 @@ export function StageStudio() {
         }}
       >
         <RingStudioLeftPanel
-          T={T}
+          T={studioT}
           clusters={clusters}
           activeClusterId={activeClusterId}
           activeCl={activeCl}
@@ -249,7 +223,8 @@ export function StageStudio() {
             justifyContent: "center",
             padding: 24,
             gap: 10,
-            background: T.bg,
+            background:
+              "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
             overflow: "hidden",
           }}
         >
@@ -259,7 +234,7 @@ export function StageStudio() {
               fontWeight: 700,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: T.mut,
+              color: studioT.mut,
             }}
           >
             Postcard Preview
@@ -272,7 +247,8 @@ export function StageStudio() {
             onTouchCancel={handlePreviewTouchEnd}
             style={{
               borderRadius: 6,
-              boxShadow: `0 12px 40px ${T.shadow}`,
+              boxShadow: `0 18px 40px ${studioT.shadow}`,
+              border: `1px solid ${studioT.brd}`,
               touchAction: "none",
             }}
           >
@@ -286,10 +262,14 @@ export function StageStudio() {
               activeRingId={activeRingId}
             />
           </div>
-          <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
-            Touch: drag cluster with one finger, pinch with two fingers to zoom.
+          <div
+            style={{ fontSize: 10, color: studioT.mut, textAlign: "center" }}
+          >
+            Touch: drag cluster with one finger.
           </div>
-          <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
+          <div
+            style={{ fontSize: 10, color: studioT.mut, textAlign: "center" }}
+          >
             Active ring:{" "}
             <span style={{ color: "#00e5ff", fontWeight: 700 }}>
               cyan dashed
@@ -303,7 +283,7 @@ export function StageStudio() {
         </main>
 
         <RingStudioRightPanel
-          T={T}
+          T={studioT}
           bgColor={bgColor}
           dispatch={dispatch}
           activeCl={activeCl}
@@ -325,16 +305,44 @@ export function StageStudio() {
           gap: 12,
           padding: 12,
           borderRadius: 999,
-          background: T.surf,
-          border: `1px solid ${T.brd}`,
-          boxShadow: `0 12px 32px ${T.shadow}`,
+          background: "rgba(0, 0, 0, 0.82)",
+          border: `1px solid ${studioT.brd}`,
+          boxShadow: `0 12px 32px ${studioT.shadow}`,
           zIndex: 150,
         }}
       >
-        <Button variant="secondary" small={false} T={T} onClick={goBack}>
+        <Button
+          variant="secondary"
+          small={false}
+          T={studioT}
+          onClick={goBack}
+          style={{
+            minWidth: 142,
+            minHeight: 52,
+            fontSize: 24,
+            fontFamily:
+              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+            color: studioT.gold,
+            border: `1px solid ${studioT.brd}`,
+            background: "rgba(0,0,0,0.65)",
+          }}
+        >
           ← Back
         </Button>
-        <Button onClick={finalize} T={T}>
+        <Button
+          onClick={finalize}
+          T={studioT}
+          style={{
+            minWidth: 142,
+            minHeight: 52,
+            fontSize: 24,
+            fontFamily:
+              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+            border: `1px solid ${studioT.brd}`,
+            background: "rgba(227, 176, 59, 0.16)",
+            color: "#f2c86a",
+          }}
+        >
           Finalize →
         </Button>
       </div>
@@ -361,9 +369,9 @@ export function StageStudio() {
             style={{
               width: "min(520px, 100%)",
               borderRadius: 18,
-              background: T.surf,
-              border: `1px solid ${T.brd}`,
-              boxShadow: `0 24px 80px ${T.shadow}`,
+              background: "rgba(8, 8, 8, 0.96)",
+              border: `1px solid ${studioT.brd}`,
+              boxShadow: `0 24px 80px ${studioT.shadow}`,
               padding: 24,
               display: "flex",
               flexDirection: "column",
@@ -375,16 +383,16 @@ export function StageStudio() {
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: "0.3em",
-                color: T.gold,
+                color: studioT.gold,
                 textTransform: "uppercase",
               }}
             >
               Create Your Own Pattern
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: T.txt }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: studioT.txt }}>
               Open Pattern Lab
             </div>
-            <div style={{ fontSize: 12, lineHeight: 1.6, color: T.mut }}>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: studioT.mut }}>
               Build a reusable tile, save it to your library, and then come back
               to Ring Studio to apply it to your rings.
             </div>
@@ -398,12 +406,24 @@ export function StageStudio() {
             >
               <Button
                 variant="secondary"
-                T={T}
+                T={studioT}
                 onClick={() => setShowPatternLabModal(false)}
+                style={{
+                  color: studioT.gold,
+                  border: `1px solid ${studioT.brd}`,
+                }}
               >
                 Cancel
               </Button>
-              <Button T={T} onClick={enterPatternLab}>
+              <Button
+                T={studioT}
+                onClick={enterPatternLab}
+                style={{
+                  border: `1px solid ${studioT.brd}`,
+                  background: "rgba(227, 176, 59, 0.16)",
+                  color: "#f2c86a",
+                }}
+              >
                 Open Pattern Lab
               </Button>
             </div>

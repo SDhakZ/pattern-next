@@ -34,14 +34,40 @@ export function RingStudioRightPanel({
         padding: "24px 20px",
         display: "flex",
         flexDirection: "column",
-        background: T.surf,
+        background:
+          "linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(10,7,6,0.92) 100%)",
         borderLeft: `1px solid ${T.brd}`,
       }}
     >
-      <Label T={T}>Cluster / Ring Controls</Label>
+      <div
+        style={{
+          fontFamily:
+            "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+          fontSize: 18,
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          color: T.gold,
+          textTransform: "uppercase",
+          lineHeight: 1,
+          marginBottom: 14,
+        }}
+        T={T}
+      >
+        Cluster Control
+      </div>
       <div style={{ marginTop: 4 }}>
         <SliderControl
-          label="Cluster X"
+          label="Scale"
+          val={activeCl.scale}
+          min={0.2}
+          max={3}
+          step={0.05}
+          onChange={(v) => updCl("scale", v)}
+          display={`${activeCl.scale.toFixed(2)}x`}
+          T={T}
+        />
+        <SliderControl
+          label="X-axis"
           val={Math.round(activeCl.x * 100)}
           min={0}
           max={100}
@@ -50,7 +76,7 @@ export function RingStudioRightPanel({
           T={T}
         />
         <SliderControl
-          label="Cluster Y"
+          label="Y-axis"
           val={Math.round(activeCl.y * 100)}
           min={0}
           max={100}
@@ -58,18 +84,34 @@ export function RingStudioRightPanel({
           display={`${Math.round(activeCl.y * 100)}%`}
           T={T}
         />
-        <SliderControl
-          label="Cluster Scale"
-          val={activeCl.scale}
-          min={0.2}
-          max={3}
-          step={0.05}
-          onChange={(v) => updCl("scale", v)}
-          display={`${activeCl.scale.toFixed(2)}×`}
-          T={T}
-        />
         <Divider T={T} />
 
+        <div
+          style={{
+            fontFamily:
+              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+            fontSize: 18,
+            fontWeight: 700,
+            letterSpacing: "0.02em",
+            color: T.gold,
+            textTransform: "uppercase",
+            lineHeight: 1,
+            marginBottom: 14,
+          }}
+          T={T}
+        >
+          Ring Control
+        </div>
+        <SliderControl
+          label="Scale"
+          val={activeRing.radius}
+          min={20}
+          max={400}
+          step={2}
+          onChange={(v) => updRing("radius", v)}
+          display={`${(activeRing.radius / 100).toFixed(2)}x`}
+          T={T}
+        />
         <SliderControl
           label="Count"
           val={activeRing.count}
@@ -77,16 +119,6 @@ export function RingStudioRightPanel({
           max={100}
           onChange={(v) => updRing("count", v)}
           display={activeRing.count}
-          T={T}
-        />
-        <SliderControl
-          label="Radius"
-          val={activeRing.radius}
-          min={20}
-          max={400}
-          step={2}
-          onChange={(v) => updRing("radius", v)}
-          display={`${activeRing.radius}px`}
           T={T}
         />
         <div
@@ -107,9 +139,10 @@ export function RingStudioRightPanel({
             fontSize: 11,
             color: T.mut,
             padding: "8px 10px",
-            background: T.surf2,
+            background: "rgba(0,0,0,0.68)",
             borderRadius: 8,
             marginBottom: 8,
+            border: `1px solid ${T.brd}`,
           }}
         >
           Ring colors are controlled by the selected preset.
@@ -117,7 +150,7 @@ export function RingStudioRightPanel({
       ) : (
         <ColorPicker
           key={activeRing.id}
-          label="Ring Colors"
+          label="Color Picker"
           colors={activeRing.colors ?? DEFAULT_COLORS}
           onChange={(c) => updRing("colors", c)}
           layerCount={layerCount}
@@ -164,7 +197,9 @@ export function RingStudioRightPanel({
                   padding: "7px 10px",
                   borderRadius: 10,
                   border: `1px solid ${isActive ? T.gold : T.brd}`,
-                  background: isActive ? `${T.gold}1a` : T.surf1,
+                  background: isActive
+                    ? "rgba(227, 176, 59, 0.16)"
+                    : "rgba(0, 0, 0, 0.72)",
                   color: isActive ? T.gold : T.txt,
                   cursor: "pointer",
                   boxShadow: isActive
@@ -218,7 +253,10 @@ export function RingStudioRightPanel({
               fontWeight: 700,
               borderRadius: 8,
               border: `1px solid ${bgColor === "#101010" ? T.gold : T.brd}`,
-              background: bgColor === "#101010" ? `${T.gold}14` : T.surf2,
+              background:
+                bgColor === "#101010"
+                  ? "rgba(227, 176, 59, 0.16)"
+                  : "rgba(0, 0, 0, 0.72)",
               color: bgColor === "#101010" ? T.gold : T.txt,
               cursor: "pointer",
             }}
@@ -235,7 +273,10 @@ export function RingStudioRightPanel({
               fontWeight: 700,
               borderRadius: 8,
               border: `1px solid ${bgColor === "#f5f1e7" ? T.gold : T.brd}`,
-              background: bgColor === "#f5f1e7" ? `${T.gold}14` : T.surf2,
+              background:
+                bgColor === "#f5f1e7"
+                  ? "rgba(227, 176, 59, 0.16)"
+                  : "rgba(0, 0, 0, 0.72)",
               color: bgColor === "#f5f1e7" ? T.gold : T.txt,
               cursor: "pointer",
             }}
@@ -278,7 +319,7 @@ export function RingStudioRightPanel({
               padding: "7px 8px",
               borderRadius: 8,
               border: `1px solid ${T.brd}`,
-              background: T.surf1,
+              background: "rgba(0, 0, 0, 0.72)",
             }}
           >
             {bgColor.toUpperCase()}
@@ -293,7 +334,7 @@ export function RingStudioRightPanel({
               fontWeight: 700,
               borderRadius: 6,
               border: `1px solid ${T.brd}`,
-              background: T.surf2,
+              background: "rgba(0, 0, 0, 0.72)",
               color: T.txt,
               cursor: "pointer",
             }}

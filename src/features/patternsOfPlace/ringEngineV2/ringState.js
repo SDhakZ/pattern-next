@@ -1,6 +1,7 @@
 import { makeId } from "../utils/id.js";
 import {
   DEFAULT_COLORS,
+  MAX_CLUSTERS,
   MAX_RINGS_PER_CLUSTER,
 } from "../data/constants/defaults.js";
 import { MOTIF_META } from "../data/motifs/motifMeta.js";
@@ -43,7 +44,7 @@ function createRing(index = 0, motifId = DEFAULT_MOTIF_ID) {
   const motif = getMotifMeta(motifId);
   return {
     id: makeId(),
-    count: 6 + index * 4,
+    count: 20 + index * 4,
     radius: 80 + index * 80,
     motifId: motif.motifId,
     layerCount: motif.layerCount,
@@ -159,6 +160,8 @@ export function selectTemplateState(state, template) {
 }
 
 export function addClusterState(state) {
+  if (state.editor.clusters.length >= MAX_CLUSTERS) return state;
+
   const nextCluster = createCluster({
     x: 0.25 + Math.random() * 0.5,
     y: 0.25 + Math.random() * 0.5,
@@ -202,6 +205,8 @@ export function removeClusterState(state, clusterId) {
 }
 
 export function duplicateClusterState(state, clusterId) {
+  if (state.editor.clusters.length >= MAX_CLUSTERS) return state;
+
   const sourceClusterId = clusterId ?? state.ui.activeClusterId;
   const sourceIndex = state.editor.clusters.findIndex(
     (cluster) => cluster.id === sourceClusterId,

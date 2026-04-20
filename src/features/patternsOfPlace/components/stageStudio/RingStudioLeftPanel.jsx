@@ -15,7 +15,10 @@ import {
   SET_RING_SETUP_MODE,
 } from "../../app/actions.js";
 import { SELECTABLE_MOTIFS } from "../../data/motifs/motifRegistry.js";
-import { MAX_RINGS_PER_CLUSTER } from "../../data/constants/defaults.js";
+import {
+  MAX_CLUSTERS,
+  MAX_RINGS_PER_CLUSTER,
+} from "../../data/constants/defaults.js";
 import { FONT } from "../../data/constants/themes.js";
 
 export function RingStudioLeftPanel({
@@ -31,11 +34,36 @@ export function RingStudioLeftPanel({
   updRing,
   onCreatePattern,
 }) {
+  const isClusterLimitReached = clusters.length >= MAX_CLUSTERS;
+
+  const actionButtonStyle = {
+    fontSize: 18,
+    padding: 0,
+    minHeight: 34,
+    minWidth: 34,
+    borderRadius: 5,
+    lineHeight: 1,
+    fontWeight: 700,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
+  const actionIconStyle = {
+    width: "1em",
+    height: "1em",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    lineHeight: 1,
+    transform: "translateY(-1px)",
+  };
+
   const panelCardStyle = {
     padding: 10,
-    borderRadius: 12,
+    borderRadius: 6,
     border: `1px solid ${T.brd}`,
-    background: T.surf1,
+    background: "rgba(5, 5, 5, 0.9)",
     marginBottom: 10,
   };
 
@@ -45,7 +73,7 @@ export function RingStudioLeftPanel({
     fontWeight: 800,
     fontFamily: FONT,
     border: `1px solid ${isActive ? T.gold : T.brd}`,
-    background: isActive ? `${T.gold}18` : T.bg,
+    background: isActive ? "rgba(227, 176, 59, 0.2)" : "rgba(0, 0, 0, 0.74)",
     color: isActive ? T.gold : T.txt,
     cursor: "pointer",
     borderRadius: 999,
@@ -65,72 +93,105 @@ export function RingStudioLeftPanel({
         padding: "24px 20px",
         display: "flex",
         flexDirection: "column",
-        background: T.surf,
+        background:
+          "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
         borderRight: `1px solid ${T.brd}`,
       }}
     >
-      <div
-        style={{
-          padding: 10,
-          borderRadius: 12,
-          border: `1px solid ${T.brd}`,
-          background: T.surf1,
-          marginBottom: 10,
-        }}
-      >
-        <Label T={T}>Clusters ({clusters.length})</Label>
-        <div
-          style={{ fontSize: 10, color: T.mut, marginTop: 2, marginBottom: 8 }}
-        >
-          Choose the cluster you want to edit.
-        </div>
+      <div style={{ marginBottom: 18 }}>
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: 6,
-            marginBottom: 8,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+            marginBottom: 12,
           }}
         >
-          <Button
-            small
-            variant="secondary"
-            T={T}
-            onClick={() => dispatch({ type: ADD_CLUSTER })}
-            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+          <div
+            style={{
+              fontFamily:
+                "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+              fontSize: 18,
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              color: T.gold,
+              textTransform: "uppercase",
+              lineHeight: 1,
+            }}
           >
-            + Add cluster
-          </Button>
-          <Button
-            small
-            variant="secondary"
-            T={T}
-            onClick={() =>
-              dispatch({ type: DUPLICATE_CLUSTER, id: activeClusterId })
-            }
-            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+            Clusters ({clusters.length}/{MAX_CLUSTERS})
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: 6,
+            }}
           >
-            Duplicate
-          </Button>
-          <Button
-            small
-            variant="danger"
-            T={T}
-            onClick={() =>
-              dispatch({ type: REMOVE_CLUSTER, id: activeClusterId })
-            }
-            disabled={clusters.length <= 1}
-            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
-          >
-            Remove
-          </Button>
+            <Button
+              small
+              variant="secondary"
+              T={T}
+              onClick={() => dispatch({ type: ADD_CLUSTER })}
+              disabled={isClusterLimitReached}
+              style={{
+                ...actionButtonStyle,
+                color: T.gold,
+                border: `1px solid ${T.brd}`,
+                background: "rgba(57, 43, 8, 0.35)",
+              }}
+            >
+              <span style={actionIconStyle}>+</span>
+            </Button>
+            <Button
+              small
+              variant="secondary"
+              T={T}
+              onClick={() =>
+                dispatch({ type: DUPLICATE_CLUSTER, id: activeClusterId })
+              }
+              disabled={isClusterLimitReached}
+              style={{
+                ...actionButtonStyle,
+                color: "#b4b4b4",
+                border: `1px solid ${T.brd}`,
+                background: "rgba(12, 12, 12, 0.88)",
+              }}
+            >
+              <span style={actionIconStyle}>⧉</span>
+            </Button>
+            <Button
+              small
+              variant="danger"
+              T={T}
+              onClick={() =>
+                dispatch({ type: REMOVE_CLUSTER, id: activeClusterId })
+              }
+              disabled={clusters.length <= 1}
+              style={{
+                ...actionButtonStyle,
+                color: "#ff5a4c",
+                border: "1px solid rgba(187, 46, 36, 0.55)",
+                background: "rgba(51, 7, 7, 0.55)",
+              }}
+            >
+              <span style={actionIconStyle}>−</span>
+            </Button>
+          </div>
         </div>
 
         <div
           style={{
+            minHeight: 120,
+            padding: 10,
+            borderRadius: 10,
+            border: `1px solid ${T.brd}`,
+            background: "rgba(0, 0, 0, 0.88)",
             display: "flex",
             gap: 6,
             flexWrap: "wrap",
+            alignContent: "flex-start",
           }}
         >
           {clusters.map((cl, i) => {
@@ -147,7 +208,9 @@ export function RingStudioLeftPanel({
                   fontWeight: 800,
                   fontFamily: FONT,
                   border: `1px solid ${isActive ? T.gold : T.brd}`,
-                  background: isActive ? `${T.gold}18` : T.bg,
+                  background: isActive
+                    ? "rgba(227, 176, 59, 0.2)"
+                    : "rgba(0, 0, 0, 0.74)",
                   color: isActive ? T.gold : T.txt,
                   cursor: "pointer",
                   borderRadius: 999,
@@ -162,60 +225,98 @@ export function RingStudioLeftPanel({
         </div>
       </div>
 
-      <div style={panelCardStyle}>
-        <Label T={T}>
-          Rings ({activeCl.rings.length}/{MAX_RINGS_PER_CLUSTER})
-        </Label>
-        <div
-          style={{ fontSize: 10, color: T.mut, marginTop: 2, marginBottom: 8 }}
-        >
-          Pick a ring, then adjust its size and motif.
-        </div>
+      <div style={{ marginBottom: 18 }}>
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: 6,
-            marginBottom: 8,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+            marginBottom: 12,
           }}
         >
-          <Button
-            small
-            variant="secondary"
-            T={T}
-            onClick={() => dispatch({ type: ADD_RING })}
-            disabled={activeCl.rings.length >= MAX_RINGS_PER_CLUSTER}
-            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+          <div
+            style={{
+              fontFamily:
+                "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+              fontSize: 18,
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              color: T.gold,
+              textTransform: "uppercase",
+              lineHeight: 1,
+            }}
           >
-            + Add ring
-          </Button>
-          <Button
-            small
-            variant="secondary"
-            T={T}
-            onClick={() => dispatch({ type: DUPLICATE_RING, id: activeRingId })}
-            disabled={activeCl.rings.length >= MAX_RINGS_PER_CLUSTER}
-            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
+            Rings ({activeCl.rings.length}/{MAX_RINGS_PER_CLUSTER})
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: 6,
+            }}
           >
-            Duplicate
-          </Button>
-          <Button
-            small
-            variant="danger"
-            T={T}
-            onClick={() => dispatch({ type: REMOVE_RING, id: activeRingId })}
-            disabled={activeCl.rings.length <= 1}
-            style={{ fontSize: 10, padding: "8px 10px", minHeight: 38 }}
-          >
-            Remove
-          </Button>
+            <Button
+              small
+              variant="secondary"
+              T={T}
+              onClick={() => dispatch({ type: ADD_RING })}
+              disabled={activeCl.rings.length >= MAX_RINGS_PER_CLUSTER}
+              style={{
+                ...actionButtonStyle,
+                color: T.gold,
+                border: `1px solid ${T.brd}`,
+                background: "rgba(57, 43, 8, 0.35)",
+              }}
+            >
+              <span style={actionIconStyle}>+</span>
+            </Button>
+            <Button
+              small
+              variant="secondary"
+              T={T}
+              onClick={() =>
+                dispatch({ type: DUPLICATE_RING, id: activeRingId })
+              }
+              disabled={activeCl.rings.length >= MAX_RINGS_PER_CLUSTER}
+              style={{
+                ...actionButtonStyle,
+                color: "#b4b4b4",
+                border: `1px solid ${T.brd}`,
+                background: "rgba(12, 12, 12, 0.88)",
+              }}
+            >
+              <span style={actionIconStyle}>⧉</span>
+            </Button>
+            <Button
+              small
+              variant="danger"
+              T={T}
+              onClick={() => dispatch({ type: REMOVE_RING, id: activeRingId })}
+              disabled={activeCl.rings.length <= 1}
+              style={{
+                ...actionButtonStyle,
+                color: "#ff5a4c",
+                border: "1px solid rgba(187, 46, 36, 0.55)",
+                background: "rgba(51, 7, 7, 0.55)",
+              }}
+            >
+              <span style={actionIconStyle}>−</span>
+            </Button>
+          </div>
         </div>
 
         <div
           style={{
+            minHeight: 120,
+            padding: 10,
+            borderRadius: 10,
+            border: `1px solid ${T.brd}`,
+            background: "rgba(0, 0, 0, 0.88)",
             display: "flex",
             gap: 6,
             flexWrap: "wrap",
+            alignContent: "flex-start",
           }}
         >
           {activeCl.rings.map((ring, index) => {
@@ -252,7 +353,10 @@ export function RingStudioLeftPanel({
                 fontWeight: 700,
                 fontFamily: FONT,
                 border: `1px solid ${ringSetupMode === tab ? T.gold : T.brd}`,
-                background: ringSetupMode === tab ? `${T.gold}14` : T.bg,
+                background:
+                  ringSetupMode === tab
+                    ? "rgba(227, 176, 59, 0.16)"
+                    : "rgba(0, 0, 0, 0.74)",
                 color: ringSetupMode === tab ? T.gold : T.mut,
                 cursor: "pointer",
                 borderRadius: 8,
@@ -266,21 +370,6 @@ export function RingStudioLeftPanel({
 
         {ringSetupMode === "motif" ? (
           <>
-            <Button
-              small
-              variant="primary"
-              T={T}
-              onClick={onCreatePattern}
-              style={{
-                width: "100%",
-                fontSize: 10,
-                padding: "8px 10px",
-                minHeight: 38,
-                marginBottom: 8,
-              }}
-            >
-              Create your own pattern
-            </Button>
             <Label T={T}>Pattern Picker</Label>
             <div
               style={{
@@ -306,7 +395,9 @@ export function RingStudioLeftPanel({
                         aspectRatio: "1",
                         padding: 2,
                         border: `1.5px solid ${isActive ? T.gold : T.brd}`,
-                        background: isActive ? `${T.gold}14` : T.bg,
+                        background: isActive
+                          ? "rgba(227, 176, 59, 0.16)"
+                          : "rgba(0, 0, 0, 0.74)",
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
@@ -322,6 +413,24 @@ export function RingStudioLeftPanel({
                 },
               )}
             </div>
+            <Button
+              small
+              variant="primary"
+              T={T}
+              onClick={onCreatePattern}
+              style={{
+                width: "100%",
+                fontSize: 10,
+                padding: "8px 10px",
+                minHeight: 38,
+                marginTop: 2,
+                border: `1px solid ${T.brd}`,
+                background: "rgba(227, 176, 59, 0.16)",
+                color: "#f2c86a",
+              }}
+            >
+              Create your own pattern
+            </Button>
           </>
         ) : (
           <>
@@ -336,6 +445,9 @@ export function RingStudioLeftPanel({
                 padding: "8px 10px",
                 minHeight: 38,
                 marginBottom: 8,
+                border: `1px solid ${T.brd}`,
+                background: "rgba(227, 176, 59, 0.16)",
+                color: "#f2c86a",
               }}
             >
               Create your own pattern
@@ -365,7 +477,9 @@ export function RingStudioLeftPanel({
                         gap: 8,
                         padding: 8,
                         border: `1px solid ${isActive ? T.gold : T.brd}`,
-                        background: isActive ? `${T.gold}14` : T.bg,
+                        background: isActive
+                          ? "rgba(227, 176, 59, 0.16)"
+                          : "rgba(0, 0, 0, 0.74)",
                         borderRadius: 10,
                         cursor: "pointer",
                         textAlign: "left",

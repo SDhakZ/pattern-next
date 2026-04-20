@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ColorHarmonyWheel } from "./ColorHarmonyWheel.jsx";
-import { FONT, FONT_MONO } from "../../data/constants/themes.js";
+import { FONT } from "../../data/constants/themes.js";
 
 const COLOR_LABELS = ["Dark", "Mid", "Accent", "Alt", "Light"];
 const PALETTE_SIZE = 5;
@@ -70,27 +70,27 @@ const MANUAL_PALETTES = [
   {
     id: "earth",
     label: "Earth",
-    colors: ["#2f241d", "#7a4d35", "#c47a52", "#e7c39a", "#f2eadf"],
+    colors: ["#1B1B1B", "#8B5E34", "#D9A441", "#2F6B5F", "#F4E9D8"],
   },
   {
     id: "sunset",
     label: "Sunset",
-    colors: ["#40152a", "#7c274f", "#c04c69", "#f08a68", "#ffd5a8"],
+    colors: ["#1E0F2E", "#E94560", "#FF7B00", "#FFD166", "#2EC4B6"],
   },
   {
     id: "garden",
     label: "Garden",
-    colors: ["#173427", "#2f6b4f", "#61a278", "#a8d4a0", "#eef8df"],
+    colors: ["#0B1F14", "#2E7D32", "#A7D129", "#FFD166", "#F6FFF8"],
   },
   {
     id: "ink",
     label: "Ink",
-    colors: ["#111827", "#334155", "#64748b", "#cbd5e1", "#f8fafc"],
+    colors: ["#0A0A0A", "#1D4ED8", "#22D3EE", "#F8FAFC", "#F43F5E"],
   },
   {
     id: "spice",
     label: "Spice",
-    colors: ["#301913", "#7b3b2b", "#c26c42", "#e2a66f", "#f5e8cf"],
+    colors: ["#2B0A03", "#9A3412", "#F59E0B", "#FDE68A", "#4C1D95"],
   },
 ];
 
@@ -299,9 +299,22 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
   const colorList = currentColors.length > 0 ? currentColors : ["#3a2417"];
 
   return (
-    <div style={{ marginBottom: 10 }}>
+    <div
+      style={{
+        marginBottom: 10,
+        padding: 10,
+        borderRadius: 12,
+        border: `1px solid ${T.brd}`,
+        background: T.surf1,
+      }}
+    >
       <div
-        style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 6,
+          marginBottom: 10,
+        }}
       >
         {PICKER_MODES.map((option) => {
           const isActive = option.id === pickerMode;
@@ -313,14 +326,15 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
                 option.id === "harmony" ? switchToHarmony : switchToManual
               }
               style={{
-                padding: "4px 8px",
-                fontSize: 10,
+                minHeight: 38,
+                padding: "8px 10px",
+                fontSize: 11,
                 fontFamily: FONT,
                 fontWeight: 700,
                 letterSpacing: "0.04em",
-                borderRadius: 999,
+                borderRadius: 10,
                 border: `1px solid ${isActive ? T.gold : T.brd}`,
-                background: isActive ? T.surf2 : "transparent",
+                background: isActive ? `${T.gold}1a` : T.surf2,
                 color: isActive ? T.gold : T.mut,
                 cursor: "pointer",
               }}
@@ -332,38 +346,33 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
       </div>
 
       {pickerMode === "harmony" ? (
-        <ColorHarmonyWheel
-          colors={colorList}
-          onChange={onChange}
-          layerCount={layerCount}
-          T={T}
-          emitOnInteractionOnly
-        />
+        <div
+          style={{
+            border: `1px solid ${T.brd}`,
+            borderRadius: 12,
+            background: T.surf2,
+            padding: 8,
+          }}
+        >
+          <ColorHarmonyWheel
+            colors={colorList}
+            onChange={onChange}
+            layerCount={layerCount}
+            T={T}
+            emitOnInteractionOnly
+          />
+        </div>
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
-          <div style={{ fontSize: 10, color: T.mut }}>
+          <div style={{ fontSize: 11, color: T.mut }}>
             Manual mode uses 5 motif colors. Tap a slot to update it.
           </div>
-          <div
-            style={{
-              fontSize: 10,
-              color: selectedManualPaletteId ? T.gold : T.mut,
-              border: `1px solid ${selectedManualPaletteId ? T.gold : T.brd}`,
-              background: selectedManualPaletteId ? `${T.gold}14` : T.surf1,
-              borderRadius: 8,
-              padding: "6px 8px",
-            }}
-          >
-            Manual preset:{" "}
-            {selectedManualPaletteId
-              ? selectedManualPaletteId
-              : "None (custom)"}
-          </div>
+
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(92px, 1fr))",
-              gap: 6,
+              gridTemplateColumns: "repeat(auto-fit, minmax(104px, 1fr))",
+              gap: 8,
             }}
           >
             {MANUAL_PALETTES.map((palette) =>
@@ -382,15 +391,16 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
                     }
                     style={{
                       padding: 0,
-                      borderRadius: 10,
+                      borderRadius: 12,
                       border: `1px solid ${isSelected ? T.gold : T.brd}`,
                       background: isSelected ? `${T.gold}1a` : T.surf1,
                       cursor: "pointer",
                       overflow: "hidden",
                       textAlign: "left",
+                      boxShadow: isSelected ? `0 0 0 1px ${T.gold}55` : "none",
                     }}
                   >
-                    <div style={{ display: "flex", height: 24 }}>
+                    <div style={{ display: "flex", height: 26 }}>
                       {normalized.map((color, index) => (
                         <div
                           key={`${palette.id}-${index}`}
@@ -400,8 +410,8 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
                     </div>
                     <div
                       style={{
-                        padding: "6px 8px 7px",
-                        fontSize: 10,
+                        padding: "7px 9px 8px",
+                        fontSize: 11,
                         fontFamily: FONT,
                         fontWeight: 700,
                         color: isSelected ? T.gold : T.txt,
@@ -419,7 +429,7 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 6,
+              gap: 8,
             }}
           >
             {currentColors.slice(0, layerCount).map((color, index) => (
@@ -427,53 +437,65 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
                 key={`slot-${index}`}
                 style={{
                   border: `1px solid ${T.brd}`,
-                  borderRadius: 10,
+                  borderRadius: 12,
                   background: T.surf1,
                   display: "grid",
-                  gridTemplateColumns: "auto auto 1fr",
+                  gridTemplateColumns: "1fr auto",
                   alignItems: "center",
-                  gap: 8,
+                  gap: 10,
                   padding: "8px 10px",
+                  position: "relative",
+                  minHeight: 50,
                 }}
               >
+                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                  <span
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      background: color,
+                      border: `1px solid ${T.brd}`,
+                      boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.25)",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: T.txt,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {COLOR_LABELS[index] ?? `Color ${index + 1}`}
+                  </span>
+                </div>
                 <span
                   style={{
                     fontSize: 10,
-                    color: T.txt,
+                    color: T.mut,
                     fontWeight: 700,
-                    minWidth: 54,
+                    padding: "4px 8px",
+                    borderRadius: 999,
+                    border: `1px solid ${T.brd}`,
+                    background: T.surf2,
                   }}
                 >
-                  {COLOR_LABELS[index] ?? `Color ${index + 1}`}
+                  Tap
                 </span>
                 <input
                   type="color"
                   value={color}
                   onChange={(event) => updateColor(index, event.target.value)}
+                  aria-label={`Select ${COLOR_LABELS[index] ?? `Color ${index + 1}`}`}
                   style={{
-                    width: 42,
-                    height: 32,
-                    border: `1px solid ${T.brd}`,
-                    borderRadius: 7,
-                    cursor: "pointer",
-                    padding: 2,
-                    background: "transparent",
-                  }}
-                />
-                <input
-                  value={color}
-                  onChange={(event) => updateColor(index, event.target.value)}
-                  spellCheck={false}
-                  style={{
+                    position: "absolute",
+                    inset: 0,
                     width: "100%",
-                    padding: "8px 9px",
-                    borderRadius: 8,
-                    border: `1px solid ${T.brd}`,
-                    background: T.surf2,
-                    color: T.txt,
-                    fontFamily: FONT_MONO,
-                    fontSize: 11,
-                    boxSizing: "border-box",
+                    height: "100%",
+                    opacity: 0,
+                    cursor: "pointer",
+                    border: "none",
                   }}
                 />
               </div>
