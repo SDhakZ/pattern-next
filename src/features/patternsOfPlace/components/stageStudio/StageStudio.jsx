@@ -299,9 +299,7 @@ export function StageStudio() {
           justifyContent: "space-between",
           gap: 16,
           padding: "20px 24px",
-          borderBottom: `1px solid ${studioT.brd}`,
-          background:
-            "linear-gradient(180deg, rgba(6,6,6,0.98) 0%, rgba(11,8,8,0.96) 100%)",
+          background: "rgba(0, 0, 0, 0.8)",
           flexShrink: 0,
         }}
       >
@@ -359,8 +357,7 @@ export function StageStudio() {
             justifyContent: "center",
             padding: 24,
             gap: 10,
-            background:
-              "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
+
             overflow: "hidden",
           }}
         >

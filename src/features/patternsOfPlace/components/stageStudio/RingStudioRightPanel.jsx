@@ -34,9 +34,10 @@ export function RingStudioRightPanel({
         padding: "24px 20px",
         display: "flex",
         flexDirection: "column",
-        background:
-          "linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(10,7,6,0.92) 100%)",
-        borderLeft: `1px solid ${T.brd}`,
+        background: "rgba(8, 8, 8, 0.58)",
+        backdropFilter: "blur(10px) saturate(120%)",
+        WebkitBackdropFilter: "blur(10px) saturate(120%)",
+        boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
       }}
     >
       <div

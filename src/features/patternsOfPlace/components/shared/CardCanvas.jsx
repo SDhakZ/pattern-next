@@ -4,6 +4,7 @@ import { PatternTile } from "./PatternTile.jsx";
 import { tangentSize, polar } from "../../domain/geometry.js";
 import { DEFAULT_COLORS } from "../../data/constants/defaults.js";
 import { renderNewMotifMarkup } from "../../data/motifs/newMotifs.jsx";
+import { STATIC_PATTERN_PRESETS } from "../../data/constants/patternPresets.js";
 
 function sanitizeScopeId(value) {
   return String(value).replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -30,6 +31,12 @@ function scopeMotifMarkup(markup, scopeId) {
   return scoped;
 }
 
+function getPresetPreviewSrc(preset) {
+  const source = preset?.svgSrc;
+  if (!source) return null;
+  return typeof source === "string" ? source : source.src;
+}
+
 /**
  * Renders the postcard canvas: clusters of rings of motifs on a background.
  * activeClId / activeRingId drive the highlight overlays (cyan ring, orange dot).
@@ -44,6 +51,7 @@ export const CardCanvas = memo(function CardCanvas({
   activeRingId = null,
 }) {
   const sc = H / 480;
+  const presetLibrary = [...STATIC_PATTERN_PRESETS, ...library];
 
   return (
     <div
@@ -91,7 +99,8 @@ export const CardCanvas = memo(function CardCanvas({
                 : null;
               const preset = ringPatternLayers
                 ? null
-                : library.find((p) => p.id === r.presetId);
+                : presetLibrary.find((p) => p.id === r.presetId);
+              const presetPreviewSrc = getPresetPreviewSrc(preset);
               const rs = r.radius * s;
               const tileSize = Math.max(5, tangentSize(rs, r.count));
               const isActiveR = isActiveCl && r.id === activeRingId;
@@ -142,8 +151,16 @@ export const CardCanvas = memo(function CardCanvas({
                             layers={ringPatternLayers}
                             size={tileSize}
                           />
-                        ) : preset ? (
+                        ) : preset?.layers ? (
                           <PatternTile layers={preset.layers} size={tileSize} />
+                        ) : presetPreviewSrc ? (
+                          <img
+                            src={presetPreviewSrc}
+                            alt={preset.name}
+                            width={tileSize}
+                            height={tileSize}
+                            style={{ display: "block", objectFit: "contain" }}
+                          />
                         ) : motifMarkup ? (
                           <div
                             style={{ width: tileSize, height: tileSize }}

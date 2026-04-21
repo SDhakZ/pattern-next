@@ -315,7 +315,6 @@ export function StagePatternLab() {
           justifyContent: "space-between",
           gap: 16,
           padding: "20px 24px",
-          borderBottom: `1px solid ${T.brd}`,
           background:
             "linear-gradient(180deg, rgba(6,6,6,0.98) 0%, rgba(11,8,8,0.96) 100%)",
           flexShrink: 0,
@@ -351,9 +350,10 @@ export function StagePatternLab() {
         <aside
           style={{
             ...PANEL_STYLE,
-            background:
-              "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
-            borderRight: `1px solid ${T.brd}`,
+            background: "rgba(8, 8, 8, 0.58)",
+            backdropFilter: "blur(10px) saturate(120%)",
+            WebkitBackdropFilter: "blur(10px) saturate(120%)",
+            boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
           }}
         >
           {/* ── Layers ── */}
@@ -764,8 +764,6 @@ export function StagePatternLab() {
             justifyContent: "center",
             padding: 32,
             gap: 20,
-            background:
-              "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
             overflow: "hidden",
           }}
         >
@@ -812,9 +810,10 @@ export function StagePatternLab() {
         <aside
           style={{
             ...PANEL_STYLE,
-            background:
-              "linear-gradient(180deg, rgba(10,10,10,0.95) 0%, rgba(10,7,6,0.92) 100%)",
-            borderLeft: `1px solid ${T.brd}`,
+            background: "rgba(8, 8, 8, 0.58)",
+            backdropFilter: "blur(10px) saturate(120%)",
+            WebkitBackdropFilter: "blur(10px) saturate(120%)",
+            boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
           }}
         >
           <div

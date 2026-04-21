@@ -20,6 +20,7 @@ import {
   MAX_RINGS_PER_CLUSTER,
 } from "../../data/constants/defaults.js";
 import { FONT } from "../../data/constants/themes.js";
+import { STATIC_PATTERN_PRESETS } from "../../data/constants/patternPresets.js";
 
 export function RingStudioLeftPanel({
   T,
@@ -35,6 +36,13 @@ export function RingStudioLeftPanel({
   onCreatePattern,
 }) {
   const isClusterLimitReached = clusters.length >= MAX_CLUSTERS;
+  const presetOptions = [...STATIC_PATTERN_PRESETS, ...library];
+
+  const getPresetPreviewSrc = (preset) => {
+    const source = preset?.svgSrc;
+    if (!source) return null;
+    return typeof source === "string" ? source : source.src;
+  };
 
   const actionButtonStyle = {
     fontSize: 20,
@@ -93,9 +101,10 @@ export function RingStudioLeftPanel({
         padding: "24px 20px",
         display: "flex",
         flexDirection: "column",
-        background:
-          "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
-        borderRight: `1px solid ${T.brd}`,
+        background: "rgba(8, 8, 8, 0.58)",
+        backdropFilter: "blur(10px) saturate(120%)",
+        WebkitBackdropFilter: "blur(10px) saturate(120%)",
+        boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
       }}
     >
       <div style={{ marginBottom: 26 }}>
@@ -467,7 +476,7 @@ export function RingStudioLeftPanel({
               Create your own pattern
             </Button>
             <Label T={T}>Pattern Preset</Label>
-            {library.length > 0 ? (
+            {presetOptions.length > 0 ? (
               <div
                 style={{
                   display: "flex",
@@ -476,14 +485,15 @@ export function RingStudioLeftPanel({
                   marginBottom: 8,
                 }}
               >
-                {library.map((preset) => {
+                {presetOptions.map((preset) => {
                   const isActive = activeRing.presetId === preset.id;
+                  const previewSrc = getPresetPreviewSrc(preset);
                   return (
                     <button
                       key={preset.id}
                       onClick={() => {
                         updRing("presetId", preset.id);
-                        updRing("patternLayers", preset.layers);
+                        updRing("patternLayers", preset.layers ?? null);
                       }}
                       style={{
                         display: "flex",
@@ -513,7 +523,20 @@ export function RingStudioLeftPanel({
                           justifyContent: "center",
                         }}
                       >
-                        <PatternTile layers={preset.layers} size={38} />
+                        {previewSrc ? (
+                          <img
+                            src={previewSrc}
+                            alt={preset.name}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                              display: "block",
+                            }}
+                          />
+                        ) : (
+                          <PatternTile layers={preset.layers} size={38} />
+                        )}
                       </div>
                       <div style={{ minWidth: 0 }}>
                         <div
