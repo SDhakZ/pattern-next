@@ -93,7 +93,6 @@ const HARMONY_MODES = [
   { id: "triadic", label: "Triadic", offsets: [0, 120, 240, 60, 180] },
   { id: "split", label: "Split", offsets: [0, 150, 210, 30, -30] },
   { id: "tetradic", label: "Tetradic", offsets: [0, 90, 180, 270, 45] },
-  { id: "monochrome", label: "Monochrome", offsets: [0, 0, 0, 0, 0] },
 ];
 
 function generatePalette(h, s, v, harmonyId) {

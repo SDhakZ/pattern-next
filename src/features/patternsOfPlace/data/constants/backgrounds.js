@@ -16,11 +16,9 @@ export const BG_LIGHT = [
 ];
 export const PREVIEW_BG_OPTIONS = [
   { name: "Ink", color: "#101010" },
-  { name: "Charcoal", color: "#1b1b1b" },
   { name: "Paper", color: "#f2e9d8" },
   { name: "Sand", color: "#d8c7a6" },
   { name: "Night Blue", color: "#0d1b2a" },
   { name: "Forest", color: "#10261b" },
   { name: "Wine", color: "#2b1020" },
-  { name: "Stone", color: "#6d6a66" },
 ];

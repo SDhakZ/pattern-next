@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ColorHarmonyWheel } from "./ColorHarmonyWheel.jsx";
 import { FONT } from "../../data/constants/themes.js";
 
-const COLOR_LABELS = ["Dark", "Mid", "Accent", "Alt", "Light"];
 const PALETTE_SIZE = 5;
 
 const PICKER_MODES = [
@@ -16,7 +15,6 @@ const HARMONY_MODES = [
   { id: "triadic", label: "Triadic" },
   { id: "split", label: "Split" },
   { id: "tetradic", label: "Tetradic" },
-  { id: "monochrome", label: "Monochrome" },
 ];
 
 const HARMONY_PRESETS = {
@@ -54,13 +52,6 @@ const HARMONY_PRESETS = {
     { offset: 180, sat: 0.76, light: 0.54 },
     { offset: 270, sat: 0.76, light: 0.54 },
     { offset: 45, sat: 0.5, light: 0.68 },
-  ],
-  monochrome: [
-    { offset: 0, sat: 0.8, light: 0.52 },
-    { offset: 0, sat: 0.62, light: 0.64 },
-    { offset: 0, sat: 0.48, light: 0.42 },
-    { offset: 0, sat: 0.34, light: 0.74 },
-    { offset: 0, sat: 0.24, light: 0.3 },
   ],
 };
 
@@ -367,6 +358,71 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
         <div style={{ display: "grid", gap: 10 }}>
           <div
             style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            {currentColors.slice(0, layerCount).map((color, index) => (
+              <div
+                key={`slot-${index}`}
+                style={{
+                  border: `1px solid ${T.brd}`,
+                  borderRadius: 12,
+                  background: T.surf1,
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 10px",
+                  position: "relative",
+                  minHeight: 50,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                  <span
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      background: color,
+                      border: `1px solid ${T.brd}`,
+                      boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.25)",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: T.txt,
+                      fontWeight: 700,
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {color.toUpperCase()}
+                  </span>
+                </div>
+
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(event) => updateColor(index, event.target.value)}
+                  aria-label={`Select color ${color.toUpperCase()}`}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    opacity: 0,
+                    cursor: "pointer",
+                    border: "none",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(104px, 1fr))",
               gap: 8,
@@ -420,83 +476,6 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
                 );
               })(),
             )}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 8,
-            }}
-          >
-            {currentColors.slice(0, layerCount).map((color, index) => (
-              <div
-                key={`slot-${index}`}
-                style={{
-                  border: `1px solid ${T.brd}`,
-                  borderRadius: 12,
-                  background: T.surf1,
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "8px 10px",
-                  position: "relative",
-                  minHeight: 50,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                  <span
-                    style={{
-                      width: 18,
-                      height: 18,
-                      borderRadius: "50%",
-                      background: color,
-                      border: `1px solid ${T.brd}`,
-                      boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.25)",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: T.txt,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {COLOR_LABELS[index] ?? `Color ${index + 1}`}
-                  </span>
-                </div>
-                <span
-                  style={{
-                    fontSize: 10,
-                    color: T.mut,
-                    fontWeight: 700,
-                    padding: "4px 8px",
-                    borderRadius: 999,
-                    border: `1px solid ${T.brd}`,
-                    background: T.surf2,
-                  }}
-                >
-                  Tap
-                </span>
-                <input
-                  type="color"
-                  value={color}
-                  onChange={(event) => updateColor(index, event.target.value)}
-                  aria-label={`Select ${COLOR_LABELS[index] ?? `Color ${index + 1}`}`}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    opacity: 0,
-                    cursor: "pointer",
-                    border: "none",
-                  }}
-                />
-              </div>
-            ))}
           </div>
         </div>
       )}

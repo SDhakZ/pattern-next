@@ -75,6 +75,8 @@ export function StageStudio() {
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
   const DRAG_DEADZONE_PX = 3;
   const MIN_PINCH_DISTANCE = 8;
+  const MIN_RING_RADIUS = 20;
+  const MAX_RING_RADIUS = 400;
 
   const touchDistance = (t1, t2) => {
     const dx = t1.clientX - t2.clientX;
@@ -82,8 +84,20 @@ export function StageStudio() {
     return Math.sqrt(dx * dx + dy * dy);
   };
 
+  const touchSpread = (touches) => {
+    if (!touches || touches.length < 2) return 0;
+    let maxDistance = 0;
+    for (let i = 0; i < touches.length - 1; i += 1) {
+      for (let j = i + 1; j < touches.length; j += 1) {
+        const dist = touchDistance(touches[i], touches[j]);
+        if (dist > maxDistance) maxDistance = dist;
+      }
+    }
+    return maxDistance;
+  };
+
   const handlePreviewTouchStart = (event) => {
-    if (!activeCl || !previewRef.current) return;
+    if (!activeCl || !activeRing || !previewRef.current) return;
 
     const touches = event.touches;
     if (touches.length === 1) {
@@ -94,6 +108,17 @@ export function StageStudio() {
         startClusterX: activeCl.x,
         startClusterY: activeCl.y,
         hasMoved: false,
+      };
+      return;
+    }
+
+    if (touches.length >= 3) {
+      const dist = touchSpread(touches);
+      if (dist < MIN_PINCH_DISTANCE) return;
+      gestureRef.current = {
+        mode: "ringPinch",
+        startDistance: dist,
+        startRadius: activeRing.radius,
       };
       return;
     }
@@ -111,11 +136,25 @@ export function StageStudio() {
   };
 
   const handlePreviewTouchMove = (event) => {
-    if (!activeCl || !previewRef.current || !gestureRef.current) return;
+    if (!activeCl || !activeRing || !previewRef.current || !gestureRef.current)
+      return;
 
     const rect = previewRef.current.getBoundingClientRect();
     const touches = event.touches;
     let gesture = gestureRef.current;
+
+    // Three-finger pinch controls active ring scale.
+    if (touches.length >= 3 && gesture.mode !== "ringPinch") {
+      const dist = touchSpread(touches);
+      if (dist >= MIN_PINCH_DISTANCE) {
+        gestureRef.current = {
+          mode: "ringPinch",
+          startDistance: dist,
+          startRadius: activeRing.radius,
+        };
+        gesture = gestureRef.current;
+      }
+    }
 
     // Seamlessly switch from drag to pinch when a second finger is added.
     if (touches.length === 2 && gesture.mode !== "pinch") {
@@ -161,6 +200,23 @@ export function StageStudio() {
       return;
     }
 
+    if (gesture.mode === "ringPinch" && touches.length >= 3) {
+      const dist = touchSpread(touches);
+      if (
+        dist < MIN_PINCH_DISTANCE ||
+        gesture.startDistance < MIN_PINCH_DISTANCE
+      )
+        return;
+      const ratio = dist / gesture.startDistance;
+      const newRadius = clamp(
+        gesture.startRadius * ratio,
+        MIN_RING_RADIUS,
+        MAX_RING_RADIUS,
+      );
+      updRing("radius", newRadius);
+      return;
+    }
+
     if (gesture.mode === "pinch" && touches.length === 2) {
       const dist = touchDistance(touches[0], touches[1]);
       if (
@@ -179,6 +235,18 @@ export function StageStudio() {
     const touches = event.touches;
     if (touches.length === 0) {
       gestureRef.current = null;
+      return;
+    }
+
+    if (touches.length >= 3 && activeRing) {
+      const dist = touchSpread(touches);
+      if (dist >= MIN_PINCH_DISTANCE) {
+        gestureRef.current = {
+          mode: "ringPinch",
+          startDistance: dist,
+          startRadius: activeRing.radius,
+        };
+      }
       return;
     }
 
@@ -333,7 +401,8 @@ export function StageStudio() {
           <div
             style={{ fontSize: 10, color: studioT.mut, textAlign: "center" }}
           >
-            Touch: drag motif with one finger, pinch with two fingers to scale.
+            Touch: one finger drag cluster, two finger pinch cluster scale,
+            three finger pinch active ring scale.
           </div>
           <div
             style={{ fontSize: 10, color: studioT.mut, textAlign: "center" }}
@@ -398,6 +467,7 @@ export function StageStudio() {
           style={{
             minWidth: 132,
             minHeight: 44,
+            background: "rgba(227, 176, 59, 0.16)",
           }}
         >
           Finalize
@@ -424,7 +494,7 @@ export function StageStudio() {
           <div
             onClick={(event) => event.stopPropagation()}
             style={{
-              width: "min(520px, 100%)",
+              width: "min(420px, 100%)",
               borderRadius: 18,
               background: "rgba(8, 8, 8, 0.96)",
               border: `1px solid ${studioT.brd}`,
@@ -432,24 +502,31 @@ export function StageStudio() {
               padding: 24,
               display: "flex",
               flexDirection: "column",
+              alignItems: "center",
               gap: 12,
             }}
           >
             <div
               style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.3em",
-                color: studioT.gold,
+                fontSize: 22,
+                fontWeight: 800,
+                color: studioT.txt,
                 textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                textAlign: "center",
               }}
             >
-              Create Your Own Pattern
+              Create your own pattern
             </div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: studioT.txt }}>
-              Open Pattern Lab
-            </div>
-            <div style={{ fontSize: 12, lineHeight: 1.6, color: studioT.mut }}>
+            <div
+              style={{
+                fontSize: 12,
+                maxWidth: "300px",
+                lineHeight: 1.6,
+                color: studioT.mut,
+                textAlign: "center",
+              }}
+            >
               Build a reusable tile, save it to your library, and then come back
               to Ring Studio to apply it to your rings.
             </div>

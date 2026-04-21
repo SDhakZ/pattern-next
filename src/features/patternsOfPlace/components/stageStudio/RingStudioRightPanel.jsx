@@ -112,7 +112,7 @@ export function RingStudioRightPanel({
           label="Count"
           val={activeRing.count}
           min={2}
-          max={100}
+          max={150}
           onChange={(v) => updRing("count", v)}
           display={activeRing.count}
           T={T}
@@ -131,7 +131,7 @@ export function RingStudioRightPanel({
           lineHeight: 1,
         }}
       >
-        Color Picker
+        Color Palette
       </div>
       {isPresetActive ? (
         <div
@@ -150,7 +150,7 @@ export function RingStudioRightPanel({
       ) : (
         <ColorPicker
           key={activeRing.id}
-          label="Color Picker"
+          label="Color Palette"
           colors={activeRing.colors ?? DEFAULT_COLORS}
           onChange={(c) => updRing("colors", c)}
           layerCount={layerCount}
@@ -184,7 +184,7 @@ export function RingStudioRightPanel({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 6,
           }}
         >

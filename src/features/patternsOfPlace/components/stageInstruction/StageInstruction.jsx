@@ -78,7 +78,13 @@ export function StageInstruction() {
         <Button variant="nav" small={false} T={navT} onClick={previous}>
           Back
         </Button>
-        <Button variant="nav" small={false} T={navT} onClick={next}>
+        <Button
+          style={{ background: "rgba(227, 176, 59, 0.16)" }}
+          variant="nav"
+          small={false}
+          T={navT}
+          onClick={next}
+        >
           Next
         </Button>
       </div>

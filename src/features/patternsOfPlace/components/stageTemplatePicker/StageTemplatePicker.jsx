@@ -222,6 +222,7 @@ export function StageTemplatePicker() {
           style={{
             minWidth: 132,
             minHeight: 44,
+            background: "rgba(227, 176, 59, 0.16)",
           }}
         >
           Next

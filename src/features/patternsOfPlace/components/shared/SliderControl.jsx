@@ -25,7 +25,7 @@ export function SliderControl({
             fontWeight: 600,
             letterSpacing: "0.05em",
             textTransform: "uppercase",
-            color: T.mut,
+            color: "#a8a8a8",
             fontFamily: FONT,
           }}
         >
@@ -34,7 +34,7 @@ export function SliderControl({
         <span
           style={{
             fontSize: 12,
-            color: T.gold,
+            color: "#a8a8a8",
             fontFamily: FONT_MONO,
             fontWeight: 700,
           }}

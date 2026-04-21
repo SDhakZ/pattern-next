@@ -375,7 +375,7 @@ export function RingStudioLeftPanel({
                 minHeight: 36,
               }}
             >
-              {tab === "motif" ? "Single Motif" : "Preset Tile"}
+              {tab === "motif" ? "Motif" : "Pattern Preset"}
             </button>
           ))}
         </div>
@@ -455,7 +455,7 @@ export function RingStudioLeftPanel({
               onClick={onCreatePattern}
               style={{
                 width: "100%",
-                fontSize: 10,
+                fontSize: 12,
                 padding: "8px 10px",
                 minHeight: 38,
                 marginBottom: 8,

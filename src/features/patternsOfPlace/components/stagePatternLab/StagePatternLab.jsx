@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import {
   SET_STAGE,
@@ -69,12 +69,35 @@ export function StagePatternLab() {
   const [editingPresetId, setEditingPresetId] = useState(null);
   const [savedMsg, setSavedMsg] = useState("");
   const [previewBgColor, setPreviewBgColor] = useState("#101010");
-  const [copiedColors, setCopiedColors] = useState(null);
-  const [copyMsg, setCopyMsg] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedState, setLastSavedState] = useState(JSON.stringify(layers));
   const previewRef = useRef(null);
   const gestureRef = useRef(null);
   const editingPreset = library.find((preset) => preset.id === editingPresetId);
   const activeLayerCount = MOTIF_LAYER_COUNTS[active?.motifId] ?? 5;
+
+  const actionButtonStyle = {
+    fontSize: 20,
+    padding: 0,
+    minHeight: 34,
+    minWidth: 34,
+    borderRadius: 5,
+    lineHeight: 1,
+    fontWeight: 700,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
+  const actionIconStyle = {
+    width: "1em",
+    height: "1em",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    lineHeight: 1,
+    transform: "translateY(-1px)",
+  };
 
   const buildDefaultPresetName = () => {
     const existingNames = new Set(
@@ -89,6 +112,11 @@ export function StagePatternLab() {
     return candidate;
   };
 
+  useEffect(() => {
+    const currentState = JSON.stringify(layers);
+    setHasUnsavedChanges(currentState !== lastSavedState);
+  }, [layers, lastSavedState]);
+
   const upd = useCallback(
     (key, value) => {
       dispatch({ type: UPDATE_LAYER, id: active.id, key, value });
@@ -100,14 +128,6 @@ export function StagePatternLab() {
   const removeLayer = () => dispatch({ type: REMOVE_LAYER, id: activeLayerId });
   const duplicateLayer = () =>
     dispatch({ type: DUPLICATE_LAYER, id: activeLayerId });
-  const copyLayerColors = () => {
-    setCopiedColors([...active.colors]);
-    setCopyMsg("Copied");
-    setTimeout(() => setCopyMsg(""), 2000);
-  };
-  const pasteLayerColors = () => {
-    if (copiedColors) upd("colors", copiedColors);
-  };
 
   const saveAsNewPreset = () => {
     const normalizedName = presetName.trim() || buildDefaultPresetName();
@@ -115,6 +135,7 @@ export function StagePatternLab() {
     setSavedMsg(`"${normalizedName}" saved to library.`);
     setEditingPresetId(null);
     setPresetName("");
+    setLastSavedState(JSON.stringify(layers));
     setTimeout(() => setSavedMsg(""), 2000);
   };
 
@@ -130,6 +151,7 @@ export function StagePatternLab() {
     setSavedMsg(`"${normalizedName}" updated.`);
     setEditingPresetId(null);
     setPresetName("");
+    setLastSavedState(JSON.stringify(layers));
     setTimeout(() => setSavedMsg(""), 2000);
   };
 
@@ -275,7 +297,6 @@ export function StagePatternLab() {
       style={{
         height: "100dvh",
         backgroundImage: `
-          linear-gradient(180deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.9) 100%),
           url(${bgImage.src})
         `,
         backgroundSize: "cover",
@@ -341,122 +362,76 @@ export function StagePatternLab() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 6,
+              gap: 8,
+              marginBottom: 14,
             }}
           >
-            <Label T={T}>Layers ({layers.length})</Label>
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              gap: 4,
-              marginBottom: 8,
-            }}
-          >
-            <Button
-              small
-              variant="secondary"
-              T={T}
-              onClick={addLayer}
+            <p
               style={{
-                fontSize: 10,
-                padding: "7px 8px",
-                minHeight: 34,
-                minWidth: 0,
+                fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+                fontSize: 20,
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                color: T.gold,
+                textTransform: "uppercase",
+                lineHeight: 1,
               }}
             >
-              + Add
-            </Button>
-            <Button
-              small
-              variant="secondary"
-              T={T}
-              onClick={duplicateLayer}
-              disabled={!active}
+              Layers ({layers.length})
+            </p>
+            <div
               style={{
-                fontSize: 10,
-                padding: "7px 8px",
-                minHeight: 34,
-                minWidth: 0,
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: 6,
               }}
             >
-              Duplicate
-            </Button>
-            <Button
-              small
-              variant="danger"
-              T={T}
-              onClick={removeLayer}
-              disabled={layers.length <= 1}
-              style={{
-                fontSize: 10,
-                padding: "7px 8px",
-                minHeight: 34,
-                minWidth: 0,
-              }}
-            >
-              Remove
-            </Button>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 4,
-              flexWrap: "wrap",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-          >
-            <Button
-              small
-              variant="secondary"
-              T={T}
-              onClick={copyLayerColors}
-              disabled={!active}
-              style={{
-                fontSize: 10,
-                padding: "6px 10px",
-                minHeight: 30,
-                minWidth: 0,
-                letterSpacing: "0.01em",
-              }}
-            >
-              Copy layer colors
-            </Button>
-            <Button
-              small
-              variant="secondary"
-              T={T}
-              onClick={pasteLayerColors}
-              disabled={!copiedColors}
-              style={{
-                fontSize: 10,
-                padding: "6px 10px",
-                minHeight: 30,
-                minWidth: 0,
-                letterSpacing: "0.01em",
-              }}
-            >
-              Paste layer colors
-            </Button>
-            {copyMsg && (
-              <span
+              <Button
+                small
+                variant="secondary"
+                T={T}
+                onClick={addLayer}
                 style={{
-                  fontSize: 9,
-                  fontWeight: 700,
+                  ...actionButtonStyle,
                   color: T.gold,
-                  border: `1px solid ${T.gold}88`,
-                  background: `${T.gold}1f`,
-                  borderRadius: 999,
-                  padding: "2px 8px",
+                  border: `1px solid ${T.brd}`,
+                  background: "rgba(57, 43, 8, 0.35)",
                 }}
               >
-                {copyMsg} colors
-              </span>
-            )}
+                <span style={actionIconStyle}>+</span>
+              </Button>
+              <Button
+                small
+                variant="secondary"
+                T={T}
+                onClick={duplicateLayer}
+                disabled={!active}
+                style={{
+                  ...actionButtonStyle,
+                  color: "#b4b4b4",
+                  border: `1px solid ${T.brd}`,
+                  background: "rgba(12, 12, 12, 0.88)",
+                }}
+              >
+                <span style={actionIconStyle}>⧉</span>
+              </Button>
+              <Button
+                small
+                variant="danger"
+                T={T}
+                onClick={removeLayer}
+                disabled={layers.length <= 1}
+                style={{
+                  ...actionButtonStyle,
+                  color: "#ff5a4c",
+                  border: "1px solid rgba(187, 46, 36, 0.55)",
+                  background: "rgba(51, 7, 7, 0.55)",
+                }}
+              >
+                <span style={actionIconStyle}>−</span>
+              </Button>
+            </div>
           </div>
-
           <div
             style={{
               display: "flex",
@@ -517,13 +492,26 @@ export function StagePatternLab() {
           <Divider T={T} />
 
           {/* ── Motif Grid ── */}
-          <Label T={T}>Motif</Label>
+          <p
+            style={{
+              fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              color: T.gold,
+              textTransform: "uppercase",
+              lineHeight: 1,
+            }}
+          >
+            Motif
+          </p>
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(4,1fr)",
               gap: 3,
               marginBottom: 10,
+              marginTop: 16,
             }}
           >
             {SELECTABLE_MOTIFS.map(
@@ -560,17 +548,36 @@ export function StagePatternLab() {
           <Divider T={T} />
 
           {/* ── Save Preset ── */}
+          <style>{`
+            @keyframes savePresetPulse {
+              0%, 100% {
+                box-shadow: 0 0 0 0 rgba(227, 176, 59, 0.4);
+              }
+              50% {
+                box-shadow: 0 0 12px 4px rgba(227, 176, 59, 0.25);
+              }
+            }
+          `}</style>
           <div
             style={{
-              border: `1px solid ${T.brd}`,
+              border: `1px solid ${hasUnsavedChanges ? "#e3b03b" : T.brd}`,
               borderRadius: 10,
               background: "rgba(5, 5, 5, 0.9)",
               padding: "10px 10px 12px",
               marginBottom: 12,
+              transition: "border-color 0.3s ease",
+              animation: hasUnsavedChanges
+                ? "savePresetPulse 2s infinite"
+                : "none",
             }}
           >
             <Label T={T}>
               {editingPresetId ? "Edit Preset" : "Save Preset"}
+              {hasUnsavedChanges && !editingPresetId && (
+                <span style={{ fontSize: 10, color: "#e3b03b", marginLeft: 8 }}>
+                  ● unsaved
+                </span>
+              )}
             </Label>
             <div style={{ fontSize: 10, color: T.mut, marginBottom: 8 }}>
               Save a new preset any time. Select one from Library only when you
@@ -796,43 +803,6 @@ export function StagePatternLab() {
               activeLayerId={activeLayerId}
             />
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 0,
-              borderRadius: 6,
-              overflow: "hidden",
-              border: `1px solid ${T.brd}`,
-            }}
-          >
-            {active.colors.map((c, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 56,
-                  height: 40,
-                  background: c,
-                  position: "relative",
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: 3,
-                    left: 0,
-                    right: 0,
-                    textAlign: "center",
-                    fontSize: 7,
-                    fontFamily: FONT_MONO,
-                    color: "rgba(255,255,255,0.7)",
-                    textShadow: "0 1px 2px rgba(0,0,0,0.8)",
-                  }}
-                >
-                  {c}
-                </span>
-              </div>
-            ))}
-          </div>
 
           <div style={{ fontSize: 10, color: T.mut, textAlign: "center" }}>
             Touch: drag motif with one finger, pinch with two fingers to scale.
@@ -847,28 +817,20 @@ export function StagePatternLab() {
             borderLeft: `1px solid ${T.brd}`,
           }}
         >
-          {/* ── Color Palette ── */}
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
+              fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              color: T.gold,
+              textTransform: "uppercase",
+              marginBottom: 18,
+              lineHeight: 1,
             }}
           >
-            <Label T={T}>Color Palette</Label>
+            Transform
           </div>
-          <ColorPicker
-            key={active.id}
-            label="Manual Colors"
-            colors={active.colors}
-            onChange={(c) => upd("colors", c)}
-            layerCount={activeLayerCount}
-            T={T}
-          />
-          <Divider T={T} />
-
-          {/* ── Transform ── */}
           <SliderControl
             label="X offset"
             val={active.x}
@@ -909,8 +871,45 @@ export function StagePatternLab() {
             T={T}
           />
 
-          {/* ── Background ── */}
-          <Label T={T}>Preview Background</Label>
+          <Divider T={T} />
+          <div
+            style={{
+              fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              color: T.gold,
+              textTransform: "uppercase",
+              marginBottom: 18,
+              lineHeight: 1,
+            }}
+          >
+            Color Palette
+          </div>
+          <ColorPicker
+            key={active.id}
+            label="Manual Colors"
+            colors={active.colors}
+            onChange={(c) => upd("colors", c)}
+            layerCount={activeLayerCount}
+            T={T}
+          />
+          <Divider T={T} />
+
+          <div
+            style={{
+              fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              color: T.gold,
+              textTransform: "uppercase",
+              marginBottom: 18,
+              lineHeight: 1,
+            }}
+          >
+            Background
+          </div>
           <div
             style={{
               marginTop: 4,
@@ -922,7 +921,7 @@ export function StagePatternLab() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                 gap: 6,
               }}
             >
@@ -973,16 +972,6 @@ export function StagePatternLab() {
                         {option.name}
                       </span>
                     </span>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 700,
-                        color: isActive ? T.gold : T.dim,
-                        opacity: isActive ? 1 : 0.65,
-                      }}
-                    >
-                      {isActive ? "Selected" : ""}
-                    </span>
                   </button>
                 );
               })}
@@ -993,44 +982,7 @@ export function StagePatternLab() {
                 gap: 6,
                 flexWrap: "wrap",
               }}
-            >
-              <button
-                type="button"
-                onClick={() => setPreviewBgColor("#101010")}
-                style={{
-                  padding: "7px 10px",
-                  fontSize: 10,
-                  fontFamily: FONT,
-                  fontWeight: 700,
-                  borderRadius: 8,
-                  border: `1px solid ${previewBgColor === "#101010" ? T.gold : T.brd}`,
-                  background:
-                    previewBgColor === "#101010" ? `${T.gold}14` : T.surf2,
-                  color: previewBgColor === "#101010" ? T.gold : T.txt,
-                  cursor: "pointer",
-                }}
-              >
-                Dark default
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreviewBgColor("#f5f1e7")}
-                style={{
-                  padding: "7px 10px",
-                  fontSize: 10,
-                  fontFamily: FONT,
-                  fontWeight: 700,
-                  borderRadius: 8,
-                  border: `1px solid ${previewBgColor === "#f5f1e7" ? T.gold : T.brd}`,
-                  background:
-                    previewBgColor === "#f5f1e7" ? `${T.gold}14` : T.surf2,
-                  color: previewBgColor === "#f5f1e7" ? T.gold : T.txt,
-                  cursor: "pointer",
-                }}
-              >
-                Light paper
-              </button>
-            </div>
+            ></div>
             <div
               style={{
                 display: "grid",
@@ -1095,7 +1047,7 @@ export function StagePatternLab() {
         style={{
           position: "fixed",
           left: "50%",
-          bottom: 28,
+          bottom: 60,
           transform: "translateX(-50%)",
           display: "flex",
           alignItems: "center",
@@ -1118,7 +1070,7 @@ export function StagePatternLab() {
             minHeight: 44,
           }}
         >
-          Back
+          Back to Ring Studio
         </Button>
       </div>
     </div>
