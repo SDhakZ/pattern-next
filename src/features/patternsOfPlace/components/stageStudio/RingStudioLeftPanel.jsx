@@ -37,7 +37,7 @@ export function RingStudioLeftPanel({
   const isClusterLimitReached = clusters.length >= MAX_CLUSTERS;
 
   const actionButtonStyle = {
-    fontSize: 18,
+    fontSize: 20,
     padding: 0,
     minHeight: 34,
     minWidth: 34,
@@ -98,7 +98,7 @@ export function RingStudioLeftPanel({
         borderRight: `1px solid ${T.brd}`,
       }}
     >
-      <div style={{ marginBottom: 18 }}>
+      <div style={{ marginBottom: 26 }}>
         <div
           style={{
             display: "flex",
@@ -110,9 +110,8 @@ export function RingStudioLeftPanel({
         >
           <div
             style={{
-              fontFamily:
-                "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
-              fontSize: 18,
+              fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+              fontSize: 20,
               fontWeight: 700,
               letterSpacing: "0.02em",
               color: T.gold,
@@ -225,7 +224,7 @@ export function RingStudioLeftPanel({
         </div>
       </div>
 
-      <div style={{ marginBottom: 18 }}>
+      <div style={{ marginBottom: 26 }}>
         <div
           style={{
             display: "flex",
@@ -237,9 +236,8 @@ export function RingStudioLeftPanel({
         >
           <div
             style={{
-              fontFamily:
-                "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
-              fontSize: 18,
+              fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+              fontSize: 20,
               fontWeight: 700,
               letterSpacing: "0.02em",
               color: T.gold,
@@ -339,7 +337,20 @@ export function RingStudioLeftPanel({
           })}
         </div>
       </div>
-
+      <div
+        style={{
+          fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+          fontSize: 20,
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          color: T.gold,
+          textTransform: "uppercase",
+          marginBottom: 18,
+          lineHeight: 1,
+        }}
+      >
+        Pattern Picker
+      </div>
       <div style={panelCardStyle}>
         <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
           {["motif", "preset"].map((tab) => (
@@ -348,9 +359,10 @@ export function RingStudioLeftPanel({
               onClick={() => dispatch({ type: SET_RING_SETUP_MODE, mode: tab })}
               style={{
                 flex: 1,
-                padding: "7px 8px",
-                fontSize: 10,
-                fontWeight: 700,
+                padding: "7px 7px 4px 7px",
+                fontSize: 14,
+                textTransform: "uppercase",
+                fontWeight: 500,
                 fontFamily: FONT,
                 border: `1px solid ${ringSetupMode === tab ? T.gold : T.brd}`,
                 background:
@@ -370,13 +382,13 @@ export function RingStudioLeftPanel({
 
         {ringSetupMode === "motif" ? (
           <>
-            <Label T={T}>Pattern Picker</Label>
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(4, 1fr)",
                 gap: 6,
                 marginBottom: 8,
+                marginTop: 14,
               }}
             >
               {SELECTABLE_MOTIFS.map(
@@ -420,10 +432,12 @@ export function RingStudioLeftPanel({
               onClick={onCreatePattern}
               style={{
                 width: "100%",
-                fontSize: 10,
+                fontSize: 12,
                 padding: "8px 10px",
                 minHeight: 38,
                 marginTop: 2,
+                fontWeight: 600,
+                textTransform: "capitalize",
                 border: `1px solid ${T.brd}`,
                 background: "rgba(227, 176, 59, 0.16)",
                 color: "#f2c86a",

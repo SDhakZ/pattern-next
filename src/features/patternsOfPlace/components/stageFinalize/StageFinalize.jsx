@@ -435,7 +435,7 @@ export function StageFinalize() {
         style={{
           position: "fixed",
           left: "50%",
-          bottom: 20,
+          bottom: 28,
           transform: "translateX(-50%)",
           display: "flex",
           alignItems: "center",
@@ -453,7 +453,7 @@ export function StageFinalize() {
           small={false}
           T={T}
           onClick={goBack}
-          style={{ minWidth: 144, minHeight: 48 }}
+          style={{ minWidth: 132, minHeight: 44 }}
         >
           Back
         </Button>
@@ -462,7 +462,7 @@ export function StageFinalize() {
           small={false}
           T={T}
           onClick={restart}
-          style={{ minWidth: 144, minHeight: 48 }}
+          style={{ minWidth: 132, minHeight: 44 }}
         >
           Start Over
         </Button>

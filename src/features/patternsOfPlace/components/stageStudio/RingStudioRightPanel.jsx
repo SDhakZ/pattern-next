@@ -41,15 +41,14 @@ export function RingStudioRightPanel({
     >
       <div
         style={{
-          fontFamily:
-            "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
-          fontSize: 18,
+          fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+          fontSize: 20,
           fontWeight: 700,
           letterSpacing: "0.02em",
           color: T.gold,
           textTransform: "uppercase",
+          marginBottom: 18,
           lineHeight: 1,
-          marginBottom: 14,
         }}
       >
         Cluster Control
@@ -87,15 +86,14 @@ export function RingStudioRightPanel({
 
         <div
           style={{
-            fontFamily:
-              "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
-            fontSize: 18,
+            fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+            fontSize: 20,
             fontWeight: 700,
             letterSpacing: "0.02em",
             color: T.gold,
             textTransform: "uppercase",
+            marginBottom: 18,
             lineHeight: 1,
-            marginBottom: 14,
           }}
         >
           Ring Control
@@ -120,7 +118,21 @@ export function RingStudioRightPanel({
           T={T}
         />
       </div>
-
+      <Divider T={T} />
+      <div
+        style={{
+          fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+          fontSize: 20,
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          color: T.gold,
+          textTransform: "uppercase",
+          marginBottom: 18,
+          lineHeight: 1,
+        }}
+      >
+        Color Picker
+      </div>
       {isPresetActive ? (
         <div
           style={{
@@ -147,8 +159,20 @@ export function RingStudioRightPanel({
       )}
 
       <Divider T={T} />
-
-      <Label T={T}>Preview Background</Label>
+      <div
+        style={{
+          fontFamily: 'Outfit, "DM Sans", system-ui, sans-serif',
+          fontSize: 20,
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          color: T.gold,
+          textTransform: "uppercase",
+          marginBottom: 18,
+          lineHeight: 1,
+        }}
+      >
+        Background
+      </div>
       <div
         style={{
           marginTop: 4,
@@ -157,9 +181,6 @@ export function RingStudioRightPanel({
           gap: 10,
         }}
       >
-        <div style={{ fontSize: 10, color: T.mut }}>
-          Pick a backdrop to view the motifs better
-        </div>
         <div
           style={{
             display: "grid",
@@ -216,61 +237,9 @@ export function RingStudioRightPanel({
                     {option.name}
                   </span>
                 </span>
-                <span
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: isActive ? T.gold : T.dim,
-                    opacity: isActive ? 1 : 0.65,
-                  }}
-                >
-                  {isActive ? "Selected" : ""}
-                </span>
               </button>
             );
           })}
-        </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          <button
-            type="button"
-            onClick={() => dispatch({ type: SET_BG_COLOR, color: "#101010" })}
-            style={{
-              padding: "7px 10px",
-              fontSize: 10,
-              fontFamily: FONT,
-              fontWeight: 700,
-              borderRadius: 8,
-              border: `1px solid ${bgColor === "#101010" ? T.gold : T.brd}`,
-              background:
-                bgColor === "#101010"
-                  ? "rgba(227, 176, 59, 0.16)"
-                  : "rgba(0, 0, 0, 0.72)",
-              color: bgColor === "#101010" ? T.gold : T.txt,
-              cursor: "pointer",
-            }}
-          >
-            Dark default
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch({ type: SET_BG_COLOR, color: "#f5f1e7" })}
-            style={{
-              padding: "7px 10px",
-              fontSize: 10,
-              fontFamily: FONT,
-              fontWeight: 700,
-              borderRadius: 8,
-              border: `1px solid ${bgColor === "#f5f1e7" ? T.gold : T.brd}`,
-              background:
-                bgColor === "#f5f1e7"
-                  ? "rgba(227, 176, 59, 0.16)"
-                  : "rgba(0, 0, 0, 0.72)",
-              color: bgColor === "#f5f1e7" ? T.gold : T.txt,
-              cursor: "pointer",
-            }}
-          >
-            Light paper
-          </button>
         </div>
         <div
           style={{

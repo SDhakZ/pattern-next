@@ -81,6 +81,7 @@ export function StageTemplatePicker() {
           textAlign: "center",
           textShadow: "0 2px 14px rgba(167, 108, 0, 0.45)",
           fontFamily: DISPLAY_FONT,
+          letterSpacing: "0em",
         }}
       >
         Pick Your Composition
@@ -149,8 +150,8 @@ export function StageTemplatePicker() {
               </div>
               <div
                 style={{
-                  fontSize: 24,
-                  fontWeight: 500,
+                  fontSize: 20,
+                  fontWeight: 400,
                   color: "#d7a64a",
                   lineHeight: 1.15,
                   textShadow: highlighted
@@ -170,7 +171,7 @@ export function StageTemplatePicker() {
         style={{
           position: "fixed",
           left: "50%",
-          bottom: 20,
+          bottom: 60,
           transform: "translateX(-50%)",
           display: "flex",
           alignItems: "center",
@@ -197,8 +198,8 @@ export function StageTemplatePicker() {
           }}
           onClick={goBack}
           style={{
-            minWidth: 144,
-            minHeight: 48,
+            minWidth: 132,
+            minHeight: 44,
           }}
         >
           Back
@@ -219,8 +220,8 @@ export function StageTemplatePicker() {
           onClick={goNext}
           disabled={!activeId}
           style={{
-            minWidth: 144,
-            minHeight: 48,
+            minWidth: 132,
+            minHeight: 44,
           }}
         >
           Next

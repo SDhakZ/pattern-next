@@ -52,7 +52,7 @@ export function StageInstruction() {
               {step.title}
             </h2>
 
-            <p className="mt-5 min-h-[5em] max-w-80 text-balance text-[clamp(15px,1.06vw,20px)] font-medium leading-[1.18] text-[rgba(230,187,69,1)] font-['Outfit','DM_Sans',system-ui,sans-serif]">
+            <p className="mt-1 min-h-[5em] text-[16px] font-normal max-w-80 text-balance leading-[1.18] text-[rgba(230,187,69,1)] font-['Outfit','DM_Sans',system-ui,sans-serif]">
               {step.description}
             </p>
           </div>
@@ -63,7 +63,7 @@ export function StageInstruction() {
         style={{
           position: "fixed",
           left: "50%",
-          bottom: 20,
+          bottom: 60,
           transform: "translateX(-50%)",
           display: "flex",
           alignItems: "center",
@@ -72,7 +72,6 @@ export function StageInstruction() {
           borderRadius: 999,
           background: "rgba(0, 0, 0, 0.82)",
           border: "1px solid rgba(184,137,18,0.45)",
-          boxShadow: "0 12px 32px rgba(0,0,0,0.55)",
           zIndex: 150,
         }}
       >

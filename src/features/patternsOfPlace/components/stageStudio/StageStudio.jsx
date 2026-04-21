@@ -73,6 +73,8 @@ export function StageStudio() {
   };
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const DRAG_DEADZONE_PX = 3;
+  const MIN_PINCH_DISTANCE = 8;
 
   const touchDistance = (t1, t2) => {
     const dx = t1.clientX - t2.clientX;
@@ -91,12 +93,14 @@ export function StageStudio() {
         startTouchY: touches[0].clientY,
         startClusterX: activeCl.x,
         startClusterY: activeCl.y,
+        hasMoved: false,
       };
       return;
     }
 
     if (touches.length === 2) {
       const dist = touchDistance(touches[0], touches[1]);
+      if (dist < MIN_PINCH_DISTANCE) return;
       gestureRef.current = {
         mode: "pinch",
         startDistance: dist,
@@ -111,9 +115,45 @@ export function StageStudio() {
 
     const rect = previewRef.current.getBoundingClientRect();
     const touches = event.touches;
-    const gesture = gestureRef.current;
+    let gesture = gestureRef.current;
+
+    // Seamlessly switch from drag to pinch when a second finger is added.
+    if (touches.length === 2 && gesture.mode !== "pinch") {
+      const dist = touchDistance(touches[0], touches[1]);
+      if (dist >= MIN_PINCH_DISTANCE) {
+        gestureRef.current = {
+          mode: "pinch",
+          startDistance: dist,
+          startScale: activeCl.scale,
+        };
+        gesture = gestureRef.current;
+      }
+    }
+
+    // Seamlessly switch from pinch back to drag when one finger remains.
+    if (touches.length === 1 && gesture.mode !== "drag") {
+      gestureRef.current = {
+        mode: "drag",
+        startTouchX: touches[0].clientX,
+        startTouchY: touches[0].clientY,
+        startClusterX: activeCl.x,
+        startClusterY: activeCl.y,
+        hasMoved: false,
+      };
+      gesture = gestureRef.current;
+    }
 
     if (gesture.mode === "drag" && touches.length === 1) {
+      const deltaPxX = touches[0].clientX - gesture.startTouchX;
+      const deltaPxY = touches[0].clientY - gesture.startTouchY;
+      if (
+        !gesture.hasMoved &&
+        Math.hypot(deltaPxX, deltaPxY) < DRAG_DEADZONE_PX
+      ) {
+        return;
+      }
+      gesture.hasMoved = true;
+
       const dx = (touches[0].clientX - gesture.startTouchX) / rect.width;
       const dy = (touches[0].clientY - gesture.startTouchY) / rect.height;
       updCl("x", clamp(gesture.startClusterX + dx, 0, 1));
@@ -123,6 +163,11 @@ export function StageStudio() {
 
     if (gesture.mode === "pinch" && touches.length === 2) {
       const dist = touchDistance(touches[0], touches[1]);
+      if (
+        dist < MIN_PINCH_DISTANCE ||
+        gesture.startDistance < MIN_PINCH_DISTANCE
+      )
+        return;
       const ratio = dist / gesture.startDistance;
       const newScale = clamp(gesture.startScale * ratio, 0.2, 3);
       updCl("scale", newScale);
@@ -131,8 +176,33 @@ export function StageStudio() {
   };
 
   const handlePreviewTouchEnd = (event) => {
-    if (event.touches.length === 0) {
+    const touches = event.touches;
+    if (touches.length === 0) {
       gestureRef.current = null;
+      return;
+    }
+
+    if (touches.length === 1 && activeCl) {
+      gestureRef.current = {
+        mode: "drag",
+        startTouchX: touches[0].clientX,
+        startTouchY: touches[0].clientY,
+        startClusterX: activeCl.x,
+        startClusterY: activeCl.y,
+        hasMoved: false,
+      };
+      return;
+    }
+
+    if (touches.length === 2 && activeCl) {
+      const dist = touchDistance(touches[0], touches[1]);
+      if (dist >= MIN_PINCH_DISTANCE) {
+        gestureRef.current = {
+          mode: "pinch",
+          startDistance: dist,
+          startScale: activeCl.scale,
+        };
+      }
     }
   };
 
@@ -296,7 +366,7 @@ export function StageStudio() {
         style={{
           position: "fixed",
           left: "50%",
-          bottom: 20,
+          bottom: 60,
           transform: "translateX(-50%)",
           display: "flex",
           alignItems: "center",
@@ -315,8 +385,8 @@ export function StageStudio() {
           T={studioT}
           onClick={goBack}
           style={{
-            minWidth: 144,
-            minHeight: 48,
+            minWidth: 132,
+            minHeight: 44,
           }}
         >
           Back
@@ -326,8 +396,8 @@ export function StageStudio() {
           onClick={finalize}
           T={studioT}
           style={{
-            minWidth: 144,
-            minHeight: 48,
+            minWidth: 132,
+            minHeight: 44,
           }}
         >
           Finalize

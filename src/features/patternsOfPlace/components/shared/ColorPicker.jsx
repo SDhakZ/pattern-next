@@ -327,10 +327,11 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
               }
               style={{
                 minHeight: 38,
-                padding: "8px 10px",
-                fontSize: 11,
+                padding: "7px 7px 4px 7px",
+                fontSize: 14,
+                textTransform: "uppercase",
+                fontWeight: 500,
                 fontFamily: FONT,
-                fontWeight: 700,
                 letterSpacing: "0.04em",
                 borderRadius: 10,
                 border: `1px solid ${isActive ? T.gold : T.brd}`,
@@ -364,10 +365,6 @@ export function ColorPicker({ label, colors, onChange, layerCount = 5, T }) {
         </div>
       ) : (
         <div style={{ display: "grid", gap: 10 }}>
-          <div style={{ fontSize: 11, color: T.mut }}>
-            Manual mode uses 5 motif colors. Tap a slot to update it.
-          </div>
-
           <div
             style={{
               display: "grid",

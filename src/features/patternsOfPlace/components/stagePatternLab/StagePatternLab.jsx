@@ -140,6 +140,8 @@ export function StagePatternLab() {
 
   const goBack = () => dispatch({ type: SET_STAGE, stage: 2 });
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const DRAG_DEADZONE_PX = 3;
+  const MIN_PINCH_DISTANCE = 8;
   const touchDistance = (t1, t2) => {
     const dx = t2.clientX - t1.clientX;
     const dy = t2.clientY - t1.clientY;
@@ -157,14 +159,17 @@ export function StagePatternLab() {
         startTouchY: touches[0].clientY,
         startX: active.x,
         startY: active.y,
+        hasMoved: false,
       };
       return;
     }
 
     if (touches.length === 2) {
+      const dist = touchDistance(touches[0], touches[1]);
+      if (dist < MIN_PINCH_DISTANCE) return;
       gestureRef.current = {
         mode: "pinch",
-        startDistance: touchDistance(touches[0], touches[1]),
+        startDistance: dist,
         startScale: active.scale,
       };
     }
@@ -172,13 +177,47 @@ export function StagePatternLab() {
 
   const handlePreviewTouchMove = (event) => {
     if (!active || !previewRef.current || !gestureRef.current) return;
-    event.preventDefault();
 
     const touches = event.touches;
-    const gesture = gestureRef.current;
+    let gesture = gestureRef.current;
     const rect = previewRef.current.getBoundingClientRect();
 
+    // Smoothly switch gesture mode as fingers are added/removed.
+    if (touches.length === 2 && gesture.mode !== "pinch") {
+      const dist = touchDistance(touches[0], touches[1]);
+      if (dist >= MIN_PINCH_DISTANCE) {
+        gestureRef.current = {
+          mode: "pinch",
+          startDistance: dist,
+          startScale: active.scale,
+        };
+        gesture = gestureRef.current;
+      }
+    }
+
+    if (touches.length === 1 && gesture.mode !== "drag") {
+      gestureRef.current = {
+        mode: "drag",
+        startTouchX: touches[0].clientX,
+        startTouchY: touches[0].clientY,
+        startX: active.x,
+        startY: active.y,
+        hasMoved: false,
+      };
+      gesture = gestureRef.current;
+    }
+
     if (gesture.mode === "drag" && touches.length === 1) {
+      const deltaPxX = touches[0].clientX - gesture.startTouchX;
+      const deltaPxY = touches[0].clientY - gesture.startTouchY;
+      if (
+        !gesture.hasMoved &&
+        Math.hypot(deltaPxX, deltaPxY) < DRAG_DEADZONE_PX
+      ) {
+        return;
+      }
+      gesture.hasMoved = true;
+
       const dx = (touches[0].clientX - gesture.startTouchX) / (rect.width / 2);
       const dy = (touches[0].clientY - gesture.startTouchY) / (rect.height / 2);
       upd("x", clamp(gesture.startX + dx, -1, 1));
@@ -188,7 +227,11 @@ export function StagePatternLab() {
 
     if (gesture.mode === "pinch" && touches.length === 2) {
       const dist = touchDistance(touches[0], touches[1]);
-      if (!gesture.startDistance) return;
+      if (
+        dist < MIN_PINCH_DISTANCE ||
+        gesture.startDistance < MIN_PINCH_DISTANCE
+      )
+        return;
       upd(
         "scale",
         clamp(gesture.startScale * (dist / gesture.startDistance), 0.2, 3),
@@ -197,8 +240,33 @@ export function StagePatternLab() {
   };
 
   const handlePreviewTouchEnd = (event) => {
-    if (event.touches.length === 0) {
+    const touches = event.touches;
+    if (touches.length === 0) {
       gestureRef.current = null;
+      return;
+    }
+
+    if (touches.length === 1 && active) {
+      gestureRef.current = {
+        mode: "drag",
+        startTouchX: touches[0].clientX,
+        startTouchY: touches[0].clientY,
+        startX: active.x,
+        startY: active.y,
+        hasMoved: false,
+      };
+      return;
+    }
+
+    if (touches.length === 2 && active) {
+      const dist = touchDistance(touches[0], touches[1]);
+      if (dist >= MIN_PINCH_DISTANCE) {
+        gestureRef.current = {
+          mode: "pinch",
+          startDistance: dist,
+          startScale: active.scale,
+        };
+      }
     }
   };
 
@@ -851,9 +919,6 @@ export function StagePatternLab() {
               gap: 10,
             }}
           >
-            <div style={{ fontSize: 10, color: T.mut }}>
-              Pick a backdrop to view the motifs better
-            </div>
             <div
               style={{
                 display: "grid",
@@ -1030,7 +1095,7 @@ export function StagePatternLab() {
         style={{
           position: "fixed",
           left: "50%",
-          bottom: 20,
+          bottom: 28,
           transform: "translateX(-50%)",
           display: "flex",
           alignItems: "center",
@@ -1049,8 +1114,8 @@ export function StagePatternLab() {
           T={T}
           onClick={goBack}
           style={{
-            minWidth: 144,
-            minHeight: 48,
+            minWidth: 132,
+            minHeight: 44,
           }}
         >
           Back
