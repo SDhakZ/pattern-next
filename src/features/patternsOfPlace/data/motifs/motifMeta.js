@@ -2,14 +2,14 @@ export const MOTIF_META = [
   {
     id: 0,
     name: "Motif 1",
-    previewColors: ["#fdad17", "#260e50", "#fdad17", "#260e50", "#fdad17"],
-    layerCount: 2,
+    previewColors: ["#311463", "#080503", "#c98f2c", "#311463", "#080503"],
+    layerCount: 3,
   },
   {
     id: 1,
     name: "Motif 2",
-    previewColors: ["#ffad14", "#260e50", "#110c19", "#ffad14", "#260e50"],
-    layerCount: 3,
+    previewColors: ["#4a1d7a", "#110c19", "#ffb10a", "#2b024d", "#4a1d7a"],
+    layerCount: 4,
   },
   {
     id: 2,

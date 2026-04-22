@@ -40,24 +40,6 @@ export function Button({
     WebkitUserSelect: "none",
     userSelect: "none",
     transform: active && !disabled ? "scale(0.985)" : "scale(1)",
-    boxShadow: isNav
-      ? disabled
-        ? "0 0 0 1px rgba(184,137,18,0.2), inset 0 -6px 14px rgba(0,0,0,0.42)"
-        : active
-          ? "0 0 0 1px rgba(214,170,67,0.28), 0 0 12px rgba(214,170,67,0.42), inset 0 2px 8px rgba(0,0,0,0.52)"
-          : "0 0 0 1px rgba(184,137,18,0.2), 0 0 18px rgba(184,137,18,0.34), inset 0 -8px 16px rgba(0,0,0,0.44)"
-      : active && !disabled
-        ? "inset 0 2px 6px rgba(0,0,0,0.22)"
-        : variant === "primary"
-          ? "0 4px 12px rgba(0,0,0,0.2)"
-          : "0 2px 8px rgba(0,0,0,0.08)",
-    ...(focused && !disabled
-      ? {
-          boxShadow: isNav
-            ? "0 0 0 2px rgba(237,188,71,0.42), 0 0 20px rgba(214,170,67,0.52), inset 0 -8px 16px rgba(0,0,0,0.44)"
-            : `0 0 0 3px ${T.gold}66, 0 4px 12px rgba(0,0,0,0.2)`,
-        }
-      : {}),
   };
 
   const variants = {

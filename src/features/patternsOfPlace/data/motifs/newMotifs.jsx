@@ -114,19 +114,19 @@ function createMotifComponent(svg, colorMap, defaultPalette = []) {
   });
 }
 
-// SVG 1 — 2 layers: gold + dark purple
-const M01_DEFAULT = ["#fdad17", "#260e50", "#fdad17", "#260e50", "#fdad17"];
+// SVG 1 — 3 layers: dark purple + black + brown gold
+const M01_DEFAULT = ["#311463", "#080503", "#c98f2c", "#311463", "#080503"];
 export const M01 = createMotifComponent(
   svg1Raw,
-  { "#fdad17": 0, "#260e50": 1 },
+  { "#311463": 0, "#080503": 1, "#c98f2c": 2 },
   M01_DEFAULT,
 );
 
-// SVG 2 — 3 layers: gold + dark purple + near-black shadow
-const M02_DEFAULT = ["#ffad14", "#260e50", "#110c19", "#ffad14", "#260e50"];
+// SVG 2 — 4 layers: medium purple + near-black + bright gold + dark navy
+const M02_DEFAULT = ["#4a1d7a", "#110c19", "#ffb10a", "#2b024d", "#4a1d7a"];
 export const M02 = createMotifComponent(
   svg2Raw,
-  { "#ffad14": 0, "#260e50": 1, "#110c19": 2 },
+  { "#4a1d7a": 0, "#110c19": 1, "#ffb10a": 2, "#2b024d": 3 },
   M02_DEFAULT,
 );
 
@@ -212,10 +212,14 @@ export const M12 = createMotifComponent(
 
 export function renderNewMotifMarkup(id, palette) {
   const variants = {
-    0: { svg: svg1Raw, map: { "#fdad17": 0, "#260e50": 1 }, def: M01_DEFAULT },
+    0: {
+      svg: svg1Raw,
+      map: { "#311463": 0, "#080503": 1, "#c98f2c": 2 },
+      def: M01_DEFAULT,
+    },
     1: {
       svg: svg2Raw,
-      map: { "#ffad14": 0, "#260e50": 1, "#110c19": 2 },
+      map: { "#4a1d7a": 0, "#110c19": 1, "#ffb10a": 2, "#2b024d": 3 },
       def: M02_DEFAULT,
     },
     2: {

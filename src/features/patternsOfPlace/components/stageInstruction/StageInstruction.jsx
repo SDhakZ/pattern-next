@@ -1,6 +1,6 @@
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import { SET_STAGE } from "../../app/actions.js";
-import { Button } from "../shared/Button.jsx";
+import { GlowButton } from "../shared/GlowButton.jsx";
 import bg from "../../../../assets/bg.png";
 
 const STEPS = [
@@ -22,13 +22,6 @@ const STEPS = [
 export function StageInstruction() {
   const { dispatch } = usePatternsOfPlace();
   const bgSrc = typeof bg === "string" ? bg : bg?.src;
-  const navT = {
-    gold: "#efbe48",
-    bg: "#030303",
-    surf2: "rgba(0, 0, 0, 0.74)",
-    mut: "#e2b45f",
-    brd: "rgba(239, 190, 72, 0.55)",
-  };
 
   const next = () => dispatch({ type: SET_STAGE, stage: 1 });
   const previous = () => dispatch({ type: SET_STAGE, stage: 0 });
@@ -59,34 +52,13 @@ export function StageInstruction() {
         ))}
       </div>
 
-      <div
-        style={{
-          position: "fixed",
-          left: "50%",
-          bottom: 60,
-          transform: "translateX(-50%)",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          padding: 12,
-          borderRadius: 999,
-          background: "rgba(0, 0, 0, 0.82)",
-          border: "1px solid rgba(184,137,18,0.45)",
-          zIndex: 150,
-        }}
-      >
-        <Button variant="nav" small={false} T={navT} onClick={previous}>
+      <div className="fixed left-1/2 bottom-[60px] -translate-x-1/2 flex items-center gap-3 p-3 rounded-full bg-[rgba(0,0,0,0.82)] border border-[rgba(184,137,18,0.45)] z-[150]">
+        <GlowButton variant="nav" onClick={previous}>
           Back
-        </Button>
-        <Button
-          style={{ background: "rgba(227, 176, 59, 0.16)" }}
-          variant="nav"
-          small={false}
-          T={navT}
-          onClick={next}
-        >
+        </GlowButton>
+        <GlowButton variant="glow" onClick={next}>
           Next
-        </Button>
+        </GlowButton>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import { SET_STAGE, SELECT_TEMPLATE } from "../../app/actions.js";
-import { Button } from "../shared/Button.jsx";
+import { GlowButton } from "../shared/GlowButton.jsx";
 import { TEMPLATES } from "../../data/constants/templates.js";
 import { FONT } from "../../data/constants/themes.js";
 import concentricImg from "../../../../assets/layouts/centric.png";
@@ -186,47 +186,12 @@ export function StageTemplatePicker() {
           zIndex: 150,
         }}
       >
-        <Button
-          variant="nav"
-          small={false}
-          T={{
-            gold: "#efbe48",
-            bg: "#030303",
-            surf2: "rgba(0, 0, 0, 0.74)",
-            mut: "#e2b45f",
-            brd: "rgba(239, 190, 72, 0.55)",
-          }}
-          onClick={goBack}
-          style={{
-            minWidth: 132,
-            minHeight: 44,
-          }}
-        >
+        <GlowButton variant="nav" onClick={goBack}>
           Back
-        </Button>
-
-        <Button
-          variant="nav"
-          small={false}
-          T={{
-            gold: "#efbe48",
-            bg: "#030303",
-            surf2: "rgba(0, 0, 0, 0.74)",
-            mut: activeId ? "#f3c970" : "#876322",
-            brd: activeId
-              ? "rgba(239, 190, 72, 0.7)"
-              : "rgba(168, 118, 35, 0.5)",
-          }}
-          onClick={goNext}
-          disabled={!activeId}
-          style={{
-            minWidth: 132,
-            minHeight: 44,
-            background: "rgba(227, 176, 59, 0.16)",
-          }}
-        >
+        </GlowButton>
+        <GlowButton variant="glow" onClick={goNext} disabled={!activeId}>
           Next
-        </Button>
+        </GlowButton>
       </div>
     </div>
   );

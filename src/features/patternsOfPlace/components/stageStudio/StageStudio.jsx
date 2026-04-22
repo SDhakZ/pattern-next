@@ -10,6 +10,7 @@ import {
   selectRingSetupMode,
 } from "../../app/selectors.js";
 import { Button } from "../shared/Button.jsx";
+import { GlowButton } from "../shared/GlowButton.jsx";
 import { CardCanvas } from "../shared/CardCanvas.jsx";
 import { RingStudioLeftPanel } from "./RingStudioLeftPanel.jsx";
 import { RingStudioRightPanel } from "./RingStudioRightPanel.jsx";
@@ -445,30 +446,12 @@ export function StageStudio() {
           zIndex: 150,
         }}
       >
-        <Button
-          variant="nav"
-          small={false}
-          T={studioT}
-          onClick={goBack}
-          style={{
-            minWidth: 132,
-            minHeight: 44,
-          }}
-        >
+        <GlowButton variant="nav" onClick={goBack}>
           Back
-        </Button>
-        <Button
-          variant="nav"
-          onClick={finalize}
-          T={studioT}
-          style={{
-            minWidth: 132,
-            minHeight: 44,
-            background: "rgba(227, 176, 59, 0.16)",
-          }}
-        >
+        </GlowButton>
+        <GlowButton variant="glow" onClick={finalize}>
           Finalize
-        </Button>
+        </GlowButton>
       </div>
 
       {showPatternLabModal && (
