@@ -62,20 +62,11 @@ export const CardCanvas = memo(function CardCanvas({
         position: "relative",
         overflow: "hidden",
         borderRadius: 6,
+        border: "1px solid rgba(255,255,255,0.06)",
+        boxSizing: "border-box",
         flexShrink: 0,
       }}
     >
-      {/* subtle inner border */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 10,
-          border: "1px solid rgba(255,255,255,0.06)",
-          borderRadius: 4,
-          pointerEvents: "none",
-        }}
-      />
-
       {clusters.map((cl) => {
         const s = sc * cl.scale;
         const ox = cl.x * W;
