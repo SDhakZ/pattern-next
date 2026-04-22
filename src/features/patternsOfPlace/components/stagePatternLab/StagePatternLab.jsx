@@ -314,7 +314,7 @@ export function StagePatternLab() {
           alignItems: "center",
           justifyContent: "space-between",
           gap: 16,
-          padding: "20px 24px",
+          padding: "32px 24px",
           background:
             "linear-gradient(180deg, rgba(6,6,6,0.98) 0%, rgba(11,8,8,0.96) 100%)",
           flexShrink: 0,
