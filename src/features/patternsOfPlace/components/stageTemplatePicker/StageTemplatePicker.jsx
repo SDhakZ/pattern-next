@@ -79,7 +79,6 @@ export function StageTemplatePicker() {
           textTransform: "uppercase",
           margin: "0 0 36px",
           textAlign: "center",
-          textShadow: "0 2px 14px rgba(167, 108, 0, 0.45)",
           fontFamily: DISPLAY_FONT,
           letterSpacing: "0em",
         }}
