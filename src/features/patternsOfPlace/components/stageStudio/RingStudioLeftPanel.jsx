@@ -1,6 +1,5 @@
 import { Button } from "../shared/Button.jsx";
 import { Divider } from "../shared/Divider.jsx";
-import { Label } from "../shared/Label.jsx";
 import { ColorPicker } from "../shared/ColorPicker.jsx";
 import { PatternTile } from "../shared/PatternTile.jsx";
 import {
@@ -36,7 +35,7 @@ export function RingStudioLeftPanel({
   onCreatePattern,
 }) {
   const isClusterLimitReached = clusters.length >= MAX_CLUSTERS;
-  const presetOptions = [...STATIC_PATTERN_PRESETS, ...library];
+  const presetOptions = [...library, ...STATIC_PATTERN_PRESETS];
 
   const getPresetPreviewSrc = (preset) => {
     const source = preset?.svgSrc;
@@ -457,32 +456,14 @@ export function RingStudioLeftPanel({
           </>
         ) : (
           <>
-            <Button
-              small
-              variant="primary"
-              T={T}
-              onClick={onCreatePattern}
-              style={{
-                width: "100%",
-                fontSize: 12,
-                padding: "8px 10px",
-                minHeight: 38,
-                marginBottom: 8,
-                border: `1px solid ${T.brd}`,
-                background: "rgba(227, 176, 59, 0.16)",
-                color: "#f2c86a",
-              }}
-            >
-              Create your own pattern
-            </Button>
-            <Label T={T}>Pattern Preset</Label>
             {presetOptions.length > 0 ? (
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: 6,
                   marginBottom: 8,
+                  marginTop: 14,
                 }}
               >
                 {presetOptions.map((preset) => {
@@ -495,65 +476,37 @@ export function RingStudioLeftPanel({
                         updRing("presetId", preset.id);
                         updRing("patternLayers", preset.layers ?? null);
                       }}
+                      aria-label={preset.name}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        padding: 8,
-                        border: `1px solid ${isActive ? T.gold : T.brd}`,
+                        aspectRatio: "1",
+                        padding: 2,
+                        border: `1.5px solid ${isActive ? T.gold : T.brd}`,
                         background: isActive
                           ? "rgba(227, 176, 59, 0.16)"
                           : "rgba(0, 0, 0, 0.74)",
-                        borderRadius: 10,
                         cursor: "pointer",
-                        textAlign: "left",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: 10,
+                        overflow: "hidden",
                         boxShadow: isActive ? `0 0 0 1px ${T.gold}55` : "none",
                       }}
                     >
-                      <div
-                        style={{
-                          width: 38,
-                          height: 38,
-                          background: "#111",
-                          borderRadius: 6,
-                          flexShrink: 0,
-                          overflow: "hidden",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {previewSrc ? (
-                          <img
-                            src={previewSrc}
-                            alt={preset.name}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              display: "block",
-                            }}
-                          />
-                        ) : (
-                          <PatternTile layers={preset.layers} size={38} />
-                        )}
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div
+                      {previewSrc ? (
+                        <img
+                          src={previewSrc}
+                          alt={preset.name}
                           style={{
-                            fontSize: 11,
-                            fontWeight: 800,
-                            color: T.txt,
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
                           }}
-                        >
-                          {preset.name}
-                        </div>
-                        <div
-                          style={{ fontSize: 9, color: T.mut, marginTop: 1 }}
-                        >
-                          Tap to apply preset tile
-                        </div>
-                      </div>
+                        />
+                      ) : (
+                        <PatternTile layers={preset.layers} size={46} />
+                      )}
                     </button>
                   );
                 })}
@@ -567,11 +520,32 @@ export function RingStudioLeftPanel({
                   background: T.surf2,
                   borderRadius: 8,
                   marginBottom: 8,
+                  marginTop: 14,
                 }}
               >
                 No presets yet. Go back to Pattern Lab to create some.
               </div>
             )}
+            <Button
+              small
+              variant="primary"
+              T={T}
+              onClick={onCreatePattern}
+              style={{
+                width: "100%",
+                fontSize: 12,
+                padding: "8px 10px",
+                minHeight: 38,
+                marginTop: 2,
+                fontWeight: 600,
+                textTransform: "capitalize",
+                border: `1px solid ${T.brd}`,
+                background: "rgba(227, 176, 59, 0.16)",
+                color: "#f2c86a",
+              }}
+            >
+              Create your own pattern
+            </Button>
           </>
         )}
       </div>

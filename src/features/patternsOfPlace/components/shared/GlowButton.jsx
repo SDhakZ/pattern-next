@@ -15,7 +15,7 @@ export function GlowButton({
 
   const variantClasses = {
     nav: "min-w-[132px] min-h-[44px] px-7 py-2 bg-[rgba(3,7,16,0.88)] text-[#d7b450] border border-[rgba(184,137,18,0.9)] font-['Outfit','DM_Sans',system-ui,sans-serif] text-[22px] font-normal tracking-[0.05em]",
-    glow: "min-w-[132px] min-h-[44px] px-7 py-2 bg-gradient-to-b from-[rgba(22,22,22,0.88)] to-[rgba(8,8,8,0.94)] text-[#e7af1a] border border-[rgba(233,175,24,0.75)] font-['DM_Sans',system-ui,sans-serif] text-[22px] tracking-[0.08em]",
+    glow: "min-w-[132px] min-h-[44px] px-7 py-2 bg-[#2F200B] text-[#e7af1a] border border-[rgba(233,175,24,0.75)] font-['DM_Sans',system-ui,sans-serif] text-[22px] tracking-[0.08em]",
   };
 
   const disabledClass = disabled ? "opacity-55 cursor-not-allowed" : "";
@@ -47,20 +47,21 @@ export function GlowButton({
 
       {variant === "glow" && (
         <style>{`
+       
           @keyframes glowPulse {
             0%,
             100% {
               box-shadow:
                 0 0 0 1px rgba(233, 175, 24, 0.22),
                 0 0 18px rgba(233, 175, 24, 0.32),
-                inset 0 -10px 24px rgba(0, 0, 0, 0.5);
+                inset 0 -0px 24px rgba(0, 0, 0, 0.5);
             }
 
             50% {
               box-shadow:
                 0 0 0 1px rgba(233, 175, 24, 0.34),
-                0 0 28px rgba(233, 175, 24, 0.5),
-                inset 0 -10px 24px rgba(0, 0, 0, 0.5);
+                0 0 10px rgba(233, 175, 24, 0.5),
+                inset 0 -0px 0px rgba(0, 0, 0, 0.5);
             }
           }
 
@@ -68,7 +69,7 @@ export function GlowButton({
             box-shadow:
               0 0 0 1px rgba(233, 175, 24, 0.3),
               0 0 26px rgba(233, 175, 24, 0.5),
-              inset 0 -10px 24px rgba(0, 0, 0, 0.5) !important;
+              inset 0 -0px 24px rgba(0, 0, 0, 0.5) !important;
             filter: brightness(1.06);
           }
 

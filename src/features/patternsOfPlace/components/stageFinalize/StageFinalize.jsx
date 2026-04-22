@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import {
@@ -14,28 +14,14 @@ import {
   selectPreviewSide,
   selectExport,
   selectReverseDecorations,
-  selectActiveReverseDecoration,
   selectReverseTemplate,
 } from "../../app/selectors.js";
 import { Button } from "../shared/Button.jsx";
-import { Label } from "../shared/Label.jsx";
 import { CardCanvas } from "../shared/CardCanvas.jsx";
 import { PostcardReverse } from "./PostcardReverse.jsx";
 import { useExportArtwork } from "../../hooks/useExportArtwork.js";
 import { FONT } from "../../data/constants/themes.js";
 import bgImage from "../../../../assets/bg.png";
-
-const PANEL_STYLE = {
-  width: 380,
-  flexShrink: 0,
-  height: "100%",
-  minHeight: 0,
-  overflowY: "auto",
-  overscrollBehavior: "contain",
-  padding: "24px 20px",
-  display: "flex",
-  flexDirection: "column",
-};
 
 export function StageFinalize() {
   const { state, dispatch, T } = usePatternsOfPlace();
@@ -48,7 +34,7 @@ export function StageFinalize() {
   const reverseTemplate = selectReverseTemplate(state);
   const { activeReverseDecorationId } = state.ui;
 
-  const { downloadJPEG, downloadSVG, getSvgPair } = useExportArtwork({
+  const { downloadJPEG, getSvgPair } = useExportArtwork({
     clusters,
     bgColor,
     library,
@@ -61,6 +47,7 @@ export function StageFinalize() {
   const [qrExpiresAt, setQrExpiresAt] = useState("");
   const [qrStatus, setQrStatus] = useState("");
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const goBack = () => dispatch({ type: SET_STAGE, stage: 2 });
   const restart = () => dispatch({ type: RESET });
@@ -70,7 +57,7 @@ export function StageFinalize() {
     dispatch({
       type: SET_EXPORT_STATUS,
       isDownloading: true,
-      message: "Rendering…",
+      message: "Rendering...",
     });
     try {
       await downloadJPEG();
@@ -83,9 +70,10 @@ export function StageFinalize() {
       dispatch({
         type: SET_EXPORT_STATUS,
         isDownloading: false,
-        message: "Failed — try SVG",
+        message: "Failed - try again",
       });
     }
+
     setTimeout(
       () =>
         dispatch({
@@ -97,10 +85,10 @@ export function StageFinalize() {
     );
   };
 
-  const ensureQrUrl = async () => {
-    if (qrUrl) return qrUrl;
+  const ensureQrUrl = async (forceRefresh = false) => {
+    if (qrUrl && !forceRefresh) return qrUrl;
 
-    const { frontSvg, reverseSvg } = getSvgPair();
+    const { frontSvg, reverseSvg } = await getSvgPair();
     const response = await fetch("/api/qr-codes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -127,39 +115,22 @@ export function StageFinalize() {
     return data.qrUrl || "";
   };
 
-  const handleGenerateQr = async () => {
+  const handleGenerateQr = async (forceRefresh = false) => {
     setIsGeneratingQr(true);
     setQrStatus("");
-
     try {
-      const { frontSvg, reverseSvg } = getSvgPair();
-      const response = await fetch("/api/qr-codes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          redirectUrl: `${window.location.origin}/patterns-of-place`,
-          metadata: {
-            kind: "patterns-of-place-download",
-            frontSvg,
-            reverseSvg,
-            createdAt: new Date().toISOString(),
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || "Failed to generate QR");
-      }
-
-      const data = await response.json();
-      setQrUrl(data.qrUrl || "");
-      setQrExpiresAt(data.expiresAt || "");
-      setQrStatus("QR generated. Scan once to download both sides.");
+      await ensureQrUrl(forceRefresh);
     } catch (error) {
       setQrStatus(error?.message || "Failed to generate QR.");
     } finally {
       setIsGeneratingQr(false);
+    }
+  };
+
+  const handleOpenQrModal = async () => {
+    setIsQrModalOpen(true);
+    if (!qrUrl) {
+      await handleGenerateQr(false);
     }
   };
 
@@ -173,14 +144,6 @@ export function StageFinalize() {
     }
   };
 
-  const panelCardStyle = {
-    padding: 10,
-    borderRadius: 12,
-    border: `1px solid ${T.brd}`,
-    background: "rgba(12, 12, 12, 0.88)",
-    marginBottom: 10,
-  };
-
   return (
     <div
       style={{
@@ -188,254 +151,273 @@ export function StageFinalize() {
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT,
-        backgroundImage: `
-          url(${bgImage.src})
-        `,
+        backgroundImage: `url(${bgImage.src})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         overflow: "hidden",
         position: "relative",
       }}
     >
-      <header
+      <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
-          padding: "20px 24px",
-          borderBottom: `1px solid ${T.brd}`,
-          background:
-            "linear-gradient(180deg, rgba(6,6,6,0.98) 0%, rgba(11,8,8,0.96) 100%)",
-          flexShrink: 0,
+          fontSize: 42,
+          fontWeight: 700,
+          color: "#f0bc46",
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          letterSpacing: "0em",
+          fontFamily:
+            "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
+          lineHeight: 1,
+          textAlign: "center",
+          position: "absolute",
+          top: 80,
+          left: "50%",
+          transform: "translateX(-50%)",
         }}
       >
-        <div style={{ flex: 1, textAlign: "center", minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: T.txt }}>
-            Finalize & Share
-          </div>
-        </div>
-      </header>
+        COLLECT YOUR KEEPSAKE
+      </div>
 
-      <div
+      <main
+        aria-label="Postcard preview"
         style={{
           flex: 1,
           minHeight: 0,
           minWidth: 0,
           display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          padding: "18px 24px 120px",
+          background:
+            "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
           overflow: "hidden",
         }}
       >
-        <aside
+        <div
           style={{
-            ...PANEL_STYLE,
-            background:
-              "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
-            borderRight: `1px solid ${T.brd}`,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: 10,
+            borderRadius: 8,
           }}
         >
-          <div style={panelCardStyle}>
-            <Label T={T}>Preview Side</Label>
-            <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
-              {["front", "reverse"].map((side) => (
-                <button
-                  key={side}
-                  onClick={() => dispatch({ type: SET_PREVIEW_SIDE, side })}
-                  style={{
-                    flex: 1,
-                    padding: "7px 8px",
-                    fontSize: 10,
-                    fontWeight: 700,
-                    fontFamily: FONT,
-                    border: `1px solid ${previewSide === side ? T.gold : T.brd}`,
-                    background: previewSide === side ? `${T.gold}14` : T.bg,
-                    color: previewSide === side ? T.gold : T.mut,
-                    cursor: "pointer",
-                    borderRadius: 8,
-                    minHeight: 36,
-                    textTransform: "capitalize",
-                  }}
-                >
-                  {side}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-        <main
-          aria-label="Postcard preview"
+          {["front", "reverse"].map((side) => (
+            <button
+              key={side}
+              onClick={() => dispatch({ type: SET_PREVIEW_SIDE, side })}
+              style={{
+                padding: "7px 12px",
+                fontSize: 10,
+                fontWeight: 700,
+                fontFamily: FONT,
+                border: `1px solid ${previewSide === side ? T.gold : T.brd}`,
+                background: previewSide === side ? `${T.gold}14` : T.bg,
+                color: previewSide === side ? T.gold : T.mut,
+                cursor: "pointer",
+                borderRadius: 8,
+                minHeight: 36,
+                minWidth: 96,
+                textTransform: "capitalize",
+              }}
+            >
+              {side}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ borderRadius: 6, boxShadow: `0 16px 48px ${T.shadow}` }}>
+          {isFront ? (
+            <CardCanvas
+              clusters={clusters}
+              bgColor={bgColor}
+              W={660}
+              H={440}
+              library={library}
+            />
+          ) : (
+            <PostcardReverse
+              T={T}
+              bgColor={bgColor}
+              W={660}
+              H={440}
+              reverseRings={reverseRings}
+              library={library}
+              activeRingId={activeReverseDecorationId}
+              template={reverseTemplate}
+              clusters={clusters}
+            />
+          )}
+        </div>
+
+        <div
           style={{
-            flex: 1,
-            minHeight: 0,
-            minWidth: 0,
             display: "flex",
-            flexDirection: "column",
+            alignItems: "center",
+            gap: 10,
+            padding: 10,
+
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            T={T}
+            onClick={handleJPEG}
+            disabled={isDownloading}
+            style={{ minWidth: 160, borderRadius: 8 }}
+          >
+            {isDownloading ? statusMessage || "Rendering..." : "Download PNG"}
+          </Button>
+          <Button
+            variant="blue"
+            T={T}
+            onClick={handleOpenQrModal}
+            disabled={isGeneratingQr}
+            style={{ minWidth: 160, borderRadius: 8 }}
+          >
+            {isGeneratingQr ? "Generating..." : "Generate QR"}
+          </Button>
+        </div>
+      </main>
+
+      {isQrModalOpen && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: 24,
-            gap: 10,
-            background:
-              "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
-            overflow: "hidden",
+            zIndex: 220,
+            padding: 20,
           }}
+          onClick={() => setIsQrModalOpen(false)}
         >
           <div
             style={{
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: T.mut,
+              width: "min(420px, 100%)",
+              padding: 16,
+              borderRadius: 14,
+              border: `1px solid ${T.brd}`,
+              background: "rgba(12, 12, 12, 0.96)",
+              boxShadow: `0 24px 80px ${T.shadow}`,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+              alignItems: "center",
             }}
+            onClick={(event) => event.stopPropagation()}
           >
-            {isFront ? "Front" : "Reverse"} Preview
-          </div>
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 800,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: T.txt,
+              }}
+            >
+              Secure QR Link
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: T.mut,
+                textAlign: "center",
+                lineHeight: 1.5,
+              }}
+            >
+              Scan to open the one-time download page for both postcard sides.
+            </div>
 
-          <div
-            style={{ borderRadius: 6, boxShadow: `0 16px 48px ${T.shadow}` }}
-          >
-            {isFront ? (
-              <CardCanvas
-                clusters={clusters}
-                bgColor={bgColor}
-                W={660}
-                H={440}
-                library={library}
-              />
+            {qrUrl ? (
+              <QRCodeCanvas value={qrUrl} size={180} level="H" includeMargin />
             ) : (
-              <PostcardReverse
-                T={T}
-                bgColor={bgColor}
-                W={660}
-                H={440}
-                reverseRings={[]}
-                library={library}
-                activeRingId={activeReverseDecorationId}
-                template={reverseTemplate}
-                clusters={clusters}
-              />
-            )}
-          </div>
-        </main>
-        <aside
-          style={{
-            ...PANEL_STYLE,
-            background:
-              "linear-gradient(180deg, rgba(9,9,9,0.95) 0%, rgba(12,6,4,0.9) 100%)",
-            borderLeft: `1px solid ${T.brd}`,
-          }}
-        >
-          <div style={panelCardStyle}>
-            <Label T={T}>Download</Label>
-            <div
-              style={{
-                fontSize: 10,
-                color: T.mut,
-                marginTop: 2,
-                marginBottom: 8,
-              }}
-            >
-              Export your final postcard front and back.
-            </div>
-            <Button T={T} onClick={handleJPEG} disabled={isDownloading}>
-              {isDownloading
-                ? statusMessage || "Rendering..."
-                : "↓ Download PNG"}
-            </Button>
-          </div>
-
-          <div style={panelCardStyle}>
-            <Label T={T}>Secure QR Link</Label>
-            <div
-              style={{
-                fontSize: 10,
-                color: T.mut,
-                marginTop: 2,
-                marginBottom: 8,
-              }}
-            >
-              Generate a one-time link for download and sharing.
-            </div>
-            <Button
-              variant="blue"
-              T={T}
-              onClick={handleGenerateQr}
-              disabled={isGeneratingQr}
-            >
-              {isGeneratingQr ? "Generating..." : "Generate QR Link"}
-            </Button>
-
-            {qrUrl && (
               <div
                 style={{
-                  marginTop: 10,
-                  padding: 10,
-                  borderRadius: 8,
-                  border: `1px solid ${T.brd}`,
-                  background: T.surf2,
+                  width: 180,
+                  height: 180,
+                  borderRadius: 10,
+                  border: `1px dashed ${T.brd}`,
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 8,
                   alignItems: "center",
+                  justifyContent: "center",
+                  color: T.mut,
+                  fontSize: 11,
+                  textAlign: "center",
+                  padding: 12,
                 }}
               >
-                <QRCodeCanvas
-                  value={qrUrl}
-                  size={140}
-                  level="H"
-                  includeMargin
-                />
-                <div
-                  style={{ fontSize: 10, color: T.mut, textAlign: "center" }}
-                >
-                  Scan to open one-time download page.
-                </div>
-                <Button
-                  variant="secondary"
-                  small
-                  T={T}
-                  onClick={handleCopyLink}
-                >
-                  Copy Link
-                </Button>
-                {qrExpiresAt && (
-                  <div
-                    style={{ fontSize: 10, color: T.dim, textAlign: "center" }}
-                  >
-                    Expires: {new Date(qrExpiresAt).toLocaleString()}
-                  </div>
-                )}
+                {isGeneratingQr ? "Generating QR..." : "QR unavailable"}
               </div>
             )}
-          </div>
 
-          {(statusMessage || qrStatus) && (
-            <div
-              role="status"
-              aria-live="polite"
-              style={{
-                marginTop: "auto",
-                fontSize: 11,
-                fontWeight: 600,
-                textAlign: "center",
-                color:
-                  statusMessage.toLowerCase().includes("fail") ||
-                  qrStatus.toLowerCase().includes("fail")
+            {qrExpiresAt && (
+              <div style={{ fontSize: 10, color: T.dim, textAlign: "center" }}>
+                Expires: {new Date(qrExpiresAt).toLocaleString()}
+              </div>
+            )}
+
+            {qrStatus && (
+              <div
+                style={{
+                  fontSize: 11,
+                  color: qrStatus.toLowerCase().includes("fail")
                     ? "#e05a5a"
                     : "#4caf50",
+                  textAlign: "center",
+                }}
+              >
+                {qrStatus}
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                width: "100%",
+                justifyContent: "center",
+                flexWrap: "wrap",
+                marginTop: 4,
               }}
             >
-              {qrStatus || statusMessage}
+              <Button
+                variant="secondary"
+                small
+                T={T}
+                onClick={handleCopyLink}
+                disabled={!qrUrl}
+              >
+                Copy Link
+              </Button>
+              <Button
+                variant="blue"
+                small
+                T={T}
+                onClick={() => handleGenerateQr(true)}
+                disabled={isGeneratingQr}
+              >
+                {isGeneratingQr ? "Regenerating..." : "Regenerate"}
+              </Button>
+              <Button small T={T} onClick={() => setIsQrModalOpen(false)}>
+                Close
+              </Button>
             </div>
-          )}
-        </aside>
-      </div>
+          </div>
+        </div>
+      )}
 
       <div
         style={{
           position: "fixed",
           left: "50%",
-          bottom: 28,
+          bottom: 60,
           transform: "translateX(-50%)",
           display: "flex",
           alignItems: "center",
@@ -462,7 +444,7 @@ export function StageFinalize() {
           small={false}
           T={T}
           onClick={restart}
-          style={{ minWidth: 132, minHeight: 44 }}
+          style={{ minWidth: 132, minHeight: 44, background: "#2F200B" }}
         >
           Start Over
         </Button>

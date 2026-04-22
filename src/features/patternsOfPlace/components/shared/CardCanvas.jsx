@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { MOTIFS } from "../../data/motifs/motifRegistry.js";
-import { PatternTile } from "./PatternTile.jsx";
+import { ArcWarpedPatternRing } from "./ArcWarpedPatternRing.jsx";
 import { tangentSize, polar } from "../../domain/geometry.js";
 import { DEFAULT_COLORS } from "../../data/constants/defaults.js";
 import { renderNewMotifMarkup } from "../../data/motifs/newMotifs.jsx";
@@ -112,6 +112,9 @@ export const CardCanvas = memo(function CardCanvas({
               const scopedMotifMarkup = motifMarkup
                 ? scopeMotifMarkup(motifMarkup, `${cl.id}_${r.id}`)
                 : null;
+              const shouldArcWarpPreset = Boolean(
+                ringPatternLayers || preset?.layers || presetPreviewSrc,
+              );
 
               return (
                 <div key={r.id}>
@@ -131,49 +134,51 @@ export const CardCanvas = memo(function CardCanvas({
                       }}
                     />
                   )}
-                  {Array.from({ length: r.count }).map((_, mi) => {
-                    const angle = (360 / r.count) * mi;
-                    const pos = polar(rs, angle);
-                    return (
-                      <div
-                        key={mi}
-                        style={{
-                          position: "absolute",
-                          left: pos.x,
-                          top: pos.y,
-                          width: tileSize,
-                          height: tileSize,
-                          transform: `translate(-50%,-50%) rotate(${angle}deg)`,
-                        }}
-                      >
-                        {ringPatternLayers ? (
-                          <PatternTile
-                            layers={ringPatternLayers}
-                            size={tileSize}
-                          />
-                        ) : preset?.layers ? (
-                          <PatternTile layers={preset.layers} size={tileSize} />
-                        ) : presetPreviewSrc ? (
-                          <img
-                            src={presetPreviewSrc}
-                            alt={preset.name}
-                            width={tileSize}
-                            height={tileSize}
-                            style={{ display: "block", objectFit: "contain" }}
-                          />
-                        ) : motifMarkup ? (
-                          <div
-                            style={{ width: tileSize, height: tileSize }}
-                            dangerouslySetInnerHTML={{
-                              __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="${tileSize}" height="${tileSize}" style="display:block">${scopedMotifMarkup}</svg>`,
-                            }}
-                          />
-                        ) : (
-                          <MC c={r.colors ?? DEFAULT_COLORS} size={tileSize} />
-                        )}
-                      </div>
-                    );
-                  })}
+                  {shouldArcWarpPreset ? (
+                    <ArcWarpedPatternRing
+                      layers={ringPatternLayers ?? preset?.layers ?? null}
+                      imageSrc={
+                        !ringPatternLayers && !preset?.layers
+                          ? presetPreviewSrc
+                          : null
+                      }
+                      tileSize={tileSize}
+                      ringRadius={rs}
+                      count={r.count}
+                    />
+                  ) : (
+                    Array.from({ length: r.count }).map((_, mi) => {
+                      const angle = (360 / r.count) * mi;
+                      const pos = polar(rs, angle);
+                      return (
+                        <div
+                          key={mi}
+                          style={{
+                            position: "absolute",
+                            left: pos.x,
+                            top: pos.y,
+                            width: tileSize,
+                            height: tileSize,
+                            transform: `translate(-50%,-50%) rotate(${angle}deg)`,
+                          }}
+                        >
+                          {motifMarkup ? (
+                            <div
+                              style={{ width: tileSize, height: tileSize }}
+                              dangerouslySetInnerHTML={{
+                                __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="${tileSize}" height="${tileSize}" style="display:block">${scopedMotifMarkup}</svg>`,
+                              }}
+                            />
+                          ) : (
+                            <MC
+                              c={r.colors ?? DEFAULT_COLORS}
+                              size={tileSize}
+                            />
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               );
             })}
