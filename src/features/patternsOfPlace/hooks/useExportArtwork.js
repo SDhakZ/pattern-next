@@ -45,7 +45,9 @@ function getInlineSVG(id, a, b, c, d, e) {
 
 function getStaticPresetSrc(preset) {
   if (!preset?.svgSrc) return null;
-  return typeof preset.svgSrc === "string" ? preset.svgSrc : preset.svgSrc?.src ?? null;
+  return typeof preset.svgSrc === "string"
+    ? preset.svgSrc
+    : (preset.svgSrc?.src ?? null);
 }
 
 async function fetchSvgDataUrl(src) {
@@ -80,7 +82,11 @@ async function buildFrontCanvas(clusters, bgColor, library, W, H) {
   ctx.strokeStyle = "rgba(255,255,255,0.06)";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  const bx = 10, by = 10, bw = W - 20, bh = H - 20, br = 4;
+  const bx = 10,
+    by = 10,
+    bw = W - 20,
+    bh = H - 20,
+    br = 4;
   ctx.moveTo(bx + br, by);
   ctx.lineTo(bx + bw - br, by);
   ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + br);

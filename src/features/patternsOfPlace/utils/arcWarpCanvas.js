@@ -89,7 +89,10 @@ export async function buildImageTileSource(imageSrc, tileSize) {
   ctx.imageSmoothingQuality = "high";
 
   const img = await loadImage(imageSrc);
-  const scale = Math.min(renderTileSize / img.width, renderTileSize / img.height);
+  const scale = Math.min(
+    renderTileSize / img.width,
+    renderTileSize / img.height,
+  );
   const w = img.width * scale;
   const h = img.height * scale;
   const x = (renderTileSize - w) / 2;
