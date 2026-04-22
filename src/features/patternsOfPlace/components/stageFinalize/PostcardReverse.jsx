@@ -39,7 +39,7 @@ export function PostcardReverse({
   const noteLineStartY = noteLabelY + Math.round(16 * layoutSc);
   const noteLineGap = Math.round(18 * layoutSc) + 1;
 
-  const fromLabelY = H - pad - Math.round(40 * layoutSc);
+  const fromLabelY = H - pad - Math.round(43 * layoutSc);
 
   const stampW = Math.round(44 * layoutSc);
   const stampH = Math.round(54 * layoutSc);
@@ -132,7 +132,7 @@ export function PostcardReverse({
         style={{
           position: "absolute",
           left: pad,
-          top: fromLabelY + Math.round(8 * layoutSc),
+          top: fromLabelY + Math.round(14 * layoutSc),
           width: leftW - pad * 2,
           height: 1,
           background: T.brd,
