@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --sb-size: 8px;
+  --sb-thumb: rgba(255, 255, 255, 0.28);
+  --sb-thumb-hover: rgba(255, 255, 255, 0.42);
+  --sb-track: transparent;
 }
 
 @theme inline {
@@ -29,4 +33,30 @@ body {
 
 html {
   min-height: 100%;
+}
+
+/* Minimal global scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-thumb) var(--sb-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--sb-size);
+  height: var(--sb-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--sb-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
 }

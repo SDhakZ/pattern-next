@@ -299,7 +299,7 @@ export function StageStudio() {
           alignItems: "center",
           justifyContent: "space-between",
           gap: 16,
-          padding: "20px 24px",
+          padding: "32px 24px",
           background: "rgba(0, 0, 0, 0.8)",
           flexShrink: 0,
         }}
