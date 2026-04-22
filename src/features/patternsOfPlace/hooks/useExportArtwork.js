@@ -69,6 +69,8 @@ async function buildFrontCanvas(clusters, bgColor, library, W, H) {
   if (!ctx) return null;
 
   ctx.scale(dpr, dpr);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
   // Background
   ctx.fillStyle = bgColor;
@@ -148,7 +150,7 @@ async function buildFrontCanvas(clusters, bgColor, library, W, H) {
           const angleSpan = (Math.PI * 2) / r.count;
           const outerR = rs + tileSize / 2;
           const innerR = Math.max(2, rs - tileSize / 2);
-          const slices = Math.max(24, Math.round(tileSize / 2));
+          const slices = Math.max(48, Math.round(tileSize * 1.25));
 
           for (let i = 0; i < r.count; i++) {
             const angleDeg = (360 / r.count) * i;

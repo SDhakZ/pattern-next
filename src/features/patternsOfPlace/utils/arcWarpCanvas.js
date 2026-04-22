@@ -2,6 +2,13 @@ import { presetFitScale } from "../domain/geometry.js";
 import { renderNewMotifMarkup } from "../data/motifs/newMotifs.jsx";
 import { DEFAULT_COLORS } from "../data/constants/defaults.js";
 
+const TILE_SUPERSAMPLE_FACTOR = 3;
+
+function getRenderTileSize(tileSize) {
+  const safeTile = Math.max(1, Math.round(tileSize));
+  return safeTile * TILE_SUPERSAMPLE_FACTOR;
+}
+
 export function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -21,13 +28,17 @@ export function motifMarkupToDataUrl(motifId, colors, size) {
 }
 
 export async function buildLayerTileSource(layers, tileSize) {
+  const renderTileSize = getRenderTileSize(tileSize);
   const source = document.createElement("canvas");
-  source.width = tileSize;
-  source.height = tileSize;
+  source.width = renderTileSize;
+  source.height = renderTileSize;
   const ctx = source.getContext("2d");
   if (!ctx) return null;
 
-  const half = tileSize / 2;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+
+  const half = renderTileSize / 2;
   const fit = presetFitScale(layers);
 
   for (const layer of layers) {
@@ -38,7 +49,7 @@ export async function buildLayerTileSource(layers, tileSize) {
 
     const motifSize = Math.max(
       4,
-      Math.round(tileSize * 0.5 * layerScale * fit),
+      Math.round(renderTileSize * 0.5 * layerScale * fit),
     );
     const cx = half + layerX * half * fit;
     const cy = half + layerY * half * fit;
@@ -67,19 +78,23 @@ export async function buildLayerTileSource(layers, tileSize) {
 }
 
 export async function buildImageTileSource(imageSrc, tileSize) {
+  const renderTileSize = getRenderTileSize(tileSize);
   const source = document.createElement("canvas");
-  source.width = tileSize;
-  source.height = tileSize;
+  source.width = renderTileSize;
+  source.height = renderTileSize;
   const ctx = source.getContext("2d");
   if (!ctx) return null;
 
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+
   const img = await loadImage(imageSrc);
-  const scale = Math.min(tileSize / img.width, tileSize / img.height);
+  const scale = Math.min(renderTileSize / img.width, renderTileSize / img.height);
   const w = img.width * scale;
   const h = img.height * scale;
-  const x = (tileSize - w) / 2;
-  const y = (tileSize - h) / 2;
-  ctx.clearRect(0, 0, tileSize, tileSize);
+  const x = (renderTileSize - w) / 2;
+  const y = (renderTileSize - h) / 2;
+  ctx.clearRect(0, 0, renderTileSize, renderTileSize);
   ctx.drawImage(img, x, y, w, h);
   return source;
 }
@@ -97,7 +112,6 @@ export function drawArcWarpedTile(
 ) {
   const midR = (innerR + outerR) / 2;
   const radialThickness = Math.max(1, outerR - innerR);
-  const sourceSliceWidth = source.width / slices;
 
   for (let i = 0; i < slices; i += 1) {
     const t0 = i / slices;
@@ -107,6 +121,12 @@ export function drawArcWarpedTile(
     const am = (a0 + a1) / 2;
 
     const segWidth = Math.max(1, Math.abs(a1 - a0) * midR);
+    const srcX0 = Math.floor((i * source.width) / slices);
+    const srcX1 = Math.ceil(((i + 1) * source.width) / slices);
+    const srcSliceWidth = Math.max(1, srcX1 - srcX0);
+
+    // Adaptive overlap prevents anti-aliased seam lines between adjacent slices.
+    const seamOverlap = Math.min(3, Math.max(1.5, segWidth * 0.08));
     const px = centerX + Math.cos(am) * midR;
     const py = centerY + Math.sin(am) * midR;
 
@@ -115,13 +135,13 @@ export function drawArcWarpedTile(
     ctx.rotate(am + Math.PI / 2);
     ctx.drawImage(
       source,
-      i * sourceSliceWidth,
+      srcX0,
       0,
-      sourceSliceWidth,
+      srcSliceWidth,
       source.height,
-      -segWidth / 2,
+      -(segWidth + seamOverlap) / 2,
       -radialThickness / 2,
-      segWidth,
+      segWidth + seamOverlap,
       radialThickness,
     );
     ctx.restore();

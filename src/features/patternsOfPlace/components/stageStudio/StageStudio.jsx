@@ -489,7 +489,9 @@ export function StageStudio() {
             <div
               style={{
                 fontSize: 22,
-                fontWeight: 800,
+                fontWeight: 600,
+                fontFamily:
+                  "Garamond, 'Palatino Linotype', 'Times New Roman', serif",
                 color: studioT.txt,
                 textTransform: "uppercase",
                 letterSpacing: "0.04em",

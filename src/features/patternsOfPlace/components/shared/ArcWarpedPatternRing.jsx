@@ -60,10 +60,12 @@ export const ArcWarpedPatternRing = memo(function ArcWarpedPatternRing({
     if (!ctx) return;
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.clearRect(0, 0, logicalSize, logicalSize);
 
     const angleSpan = (Math.PI * 2) / count;
-    const slices = Math.max(24, Math.round(tileSize / 2));
+    const slices = Math.max(48, Math.round(tileSize * 1.25));
 
     for (let i = 0; i < count; i += 1) {
       const angleDeg = (360 / count) * i;
