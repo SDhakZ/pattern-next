@@ -1,4 +1,5 @@
 import { FONT } from "../../data/constants/themes.js";
+import { getAdaptiveColors } from "../../utils/colorUtils.js";
 
 /**
  * Renders the postcard reverse side.
@@ -35,6 +36,9 @@ export function PostcardReverse({
   const fsBody = Math.round(9 * layoutSc);
   const fsTiny = Math.round(7 * layoutSc);
 
+  // Get adaptive colors based on background luminance
+  const colors = getAdaptiveColors(bgColor, T);
+
   const noteLabelY = pad;
   const noteLineStartY = noteLabelY + Math.round(16 * layoutSc);
   const noteLineGap = Math.round(18 * layoutSc) + 1;
@@ -51,7 +55,7 @@ export function PostcardReverse({
   const addrAreaW = rightW - 2 * padRight;
   const addrGap = Math.round(18 * layoutSc);
 
-  const borderStyle = { border: `1px solid ${T.brd}` };
+  const borderStyle = { border: `1px solid ${colors.brd}` };
 
   return (
     <div
@@ -82,7 +86,7 @@ export function PostcardReverse({
           top: 0,
           width: 1,
           height: H,
-          background: T.brd,
+          background: colors.brd,
         }}
       />
 
@@ -92,9 +96,10 @@ export function PostcardReverse({
           left: pad,
           top: noteLabelY,
           fontSize: fsLabel,
+          fontWeight: 600,
           letterSpacing: "0.25em",
           textTransform: "uppercase",
-          color: T.mut,
+          color: colors.brd,
         }}
       >
         Note
@@ -109,7 +114,7 @@ export function PostcardReverse({
             top: noteLineStartY + i * noteLineGap,
             width: leftW - pad * 2,
             height: 1,
-            background: T.brd,
+            background: colors.brd,
           }}
         />
       ))}
@@ -120,9 +125,10 @@ export function PostcardReverse({
           left: pad,
           top: fromLabelY,
           fontSize: fsLabel,
+          fontWeight: 600,
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: T.mut,
+          color: colors.brd,
         }}
       >
         From
@@ -135,7 +141,7 @@ export function PostcardReverse({
           top: fromLabelY + Math.round(14 * layoutSc),
           width: leftW - pad * 2,
           height: 1,
-          background: T.brd,
+          background: colors.brd,
         }}
       />
 
@@ -145,8 +151,9 @@ export function PostcardReverse({
           left: pad,
           bottom: pad,
           fontSize: fsBody,
+          fontWeight: 600,
           letterSpacing: "0.1em",
-          color: T.dim,
+          color: colors.brd,
         }}
       >
         Patterns of Place · 2026
@@ -159,7 +166,7 @@ export function PostcardReverse({
           top: stampY,
           width: stampW,
           height: stampH,
-          border: `2px solid ${T.brd}`,
+          border: `2px solid ${colors.brd}`,
           borderRadius: 4,
         }}
       >
@@ -172,7 +179,7 @@ export function PostcardReverse({
             width: Math.round(28 * layoutSc),
             height: Math.round(38 * layoutSc),
             borderRadius: 2,
-            background: T.brd,
+            background: colors.brd,
             opacity: 0.6,
           }}
         />
@@ -184,9 +191,10 @@ export function PostcardReverse({
           left: rightX + padRight,
           top: toLabelY,
           fontSize: fsTiny,
+          fontWeight: 600,
           letterSpacing: "0.15em",
           textTransform: "uppercase",
-          color: T.dim,
+          color: colors.brd,
         }}
       >
         To
@@ -201,7 +209,7 @@ export function PostcardReverse({
             top: toLabelY + Math.round(addrGap * (i + 1)),
             width: addrAreaW * w,
             height: 1,
-            background: T.brd,
+            background: colors.brd,
           }}
         />
       ))}

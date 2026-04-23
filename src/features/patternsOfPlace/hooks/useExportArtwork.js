@@ -4,6 +4,7 @@ import { DEFAULT_COLORS } from "../data/constants/defaults.js";
 import { triggerDownload, svgStringToCanvas } from "../utils/download.js";
 import { renderNewMotifMarkup } from "../data/motifs/newMotifs.jsx";
 import { STATIC_PATTERN_PRESETS } from "../data/constants/patternPresets.js";
+import { getAdaptiveColors } from "../utils/colorUtils.js";
 import {
   loadImage,
   motifMarkupToDataUrl,
@@ -335,11 +336,11 @@ function buildReverseSVG(
   const fsBody = Math.round(9 * layoutSc); // branding line
   const fsTiny = Math.round(7 * layoutSc); // "To" label
 
-  const brd = T.brd;
-  const mut = T.mut;
-  const dim = T.dim;
-  const txt = T.txt;
-  const gold = T.gold;
+  // Get adaptive colors based on background luminance
+  const colors = getAdaptiveColors(bgColor, T);
+  const brd = colors.brd;
+  const mut = colors.brd;
+  const dim = colors.brd;
 
   const parts = [];
 
