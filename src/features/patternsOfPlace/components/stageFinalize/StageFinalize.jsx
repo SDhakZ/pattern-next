@@ -170,13 +170,10 @@ export function StageFinalize() {
             "'Cormorant Garamond', 'Palatino Linotype', 'Times New Roman', serif",
           lineHeight: 1,
           textAlign: "center",
-          position: "absolute",
-          top: 80,
-          left: "50%",
-          transform: "translateX(-50%)",
+          marginTop: 80,
         }}
       >
-        COLLECT YOUR KEEPSAKE
+        Collect Your Keepsake
       </div>
 
       <main
@@ -190,7 +187,7 @@ export function StageFinalize() {
           alignItems: "center",
           justifyContent: "center",
           gap: 12,
-          padding: "18px 24px 120px",
+          padding: "18px 24px 160px",
           background:
             "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
           overflow: "hidden",
@@ -211,17 +208,18 @@ export function StageFinalize() {
               onClick={() => dispatch({ type: SET_PREVIEW_SIDE, side })}
               style={{
                 padding: "7px 12px",
-                fontSize: 10,
+                fontSize: 14,
                 fontWeight: 700,
                 fontFamily: FONT,
                 border: `1px solid ${previewSide === side ? T.gold : T.brd}`,
-                background: previewSide === side ? `${T.gold}14` : T.bg,
+                background:
+                  previewSide === side ? `${T.gold}14` : "rgba(0, 0, 0, 0.74)",
                 color: previewSide === side ? T.gold : T.mut,
                 cursor: "pointer",
                 borderRadius: 8,
                 minHeight: 36,
                 minWidth: 96,
-                textTransform: "capitalize",
+                textTransform: "uppercase",
               }}
             >
               {side}

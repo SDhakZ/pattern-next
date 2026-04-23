@@ -28,7 +28,7 @@ export function Button({
     opacity: disabled ? 0.55 : 1,
     border: "none",
     outline: "none",
-    fontSize: isNav ? 22 : small ? 13 : 14,
+    fontSize: isNav ? 22 : small ? 13 : 16,
     padding: isNav ? "8px 28px" : small ? "10px 18px" : "14px 26px",
     letterSpacing: isNav ? "0.05em" : "0.02em",
     minHeight: isNav ? 44 : small ? 44 : 48,
