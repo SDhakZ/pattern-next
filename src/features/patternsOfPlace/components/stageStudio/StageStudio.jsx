@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePatternsOfPlace } from "../../app/PatternsOfPlaceProvider.jsx";
 import { SET_STAGE, UPDATE_CLUSTER, UPDATE_RING } from "../../app/actions.js";
 import {
@@ -98,6 +98,7 @@ export function StageStudio() {
   };
 
   const handlePreviewTouchStart = (event) => {
+    if (event.cancelable) event.preventDefault();
     if (!activeCl || !activeRing || !previewRef.current) return;
 
     const touches = event.touches;
@@ -137,6 +138,7 @@ export function StageStudio() {
   };
 
   const handlePreviewTouchMove = (event) => {
+    if (event.cancelable) event.preventDefault();
     if (!activeCl || !activeRing || !previewRef.current || !gestureRef.current)
       return;
 
@@ -233,6 +235,7 @@ export function StageStudio() {
   };
 
   const handlePreviewTouchEnd = (event) => {
+    if (event.cancelable) event.preventDefault();
     const touches = event.touches;
     if (touches.length === 0) {
       gestureRef.current = null;
@@ -276,6 +279,37 @@ export function StageStudio() {
   };
 
   if (!activeCl || !activeRing) return null;
+
+  const handlePreviewWheel = (event) => {
+    // Trackpad pinch is emitted as ctrl+wheel in many browsers.
+    if (event.ctrlKey && event.cancelable) event.preventDefault();
+  };
+
+  useEffect(() => {
+    const node = previewRef.current;
+    if (!node) return undefined;
+
+    // Safari emits non-standard gesture events for pinch zoom.
+    const preventGestureZoom = (event) => {
+      if (event.cancelable) event.preventDefault();
+    };
+
+    node.addEventListener("gesturestart", preventGestureZoom, {
+      passive: false,
+    });
+    node.addEventListener("gesturechange", preventGestureZoom, {
+      passive: false,
+    });
+    node.addEventListener("gestureend", preventGestureZoom, {
+      passive: false,
+    });
+
+    return () => {
+      node.removeEventListener("gesturestart", preventGestureZoom);
+      node.removeEventListener("gesturechange", preventGestureZoom);
+      node.removeEventListener("gestureend", preventGestureZoom);
+    };
+  }, []);
 
   return (
     <div
@@ -379,6 +413,7 @@ export function StageStudio() {
             onTouchMove={handlePreviewTouchMove}
             onTouchEnd={handlePreviewTouchEnd}
             onTouchCancel={handlePreviewTouchEnd}
+            onWheel={handlePreviewWheel}
             style={{
               borderRadius: 6,
               boxShadow: `0 18px 40px ${studioT.shadow}`,

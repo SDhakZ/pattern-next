@@ -227,7 +227,12 @@ export function StageFinalize() {
           ))}
         </div>
 
-        <div style={{ borderRadius: 6, boxShadow: `0 16px 48px ${T.shadow}` }}>
+        <div
+          style={{
+            borderRadius: 6,
+            boxShadow: `0 16px 48px ${T.shadow}`,
+          }}
+        >
           {isFront ? (
             <CardCanvas
               clusters={clusters}
