@@ -188,8 +188,6 @@ export function StageFinalize() {
           justifyContent: "center",
           gap: 12,
           padding: "18px 24px 160px",
-          background:
-            "radial-gradient(circle at 50% 30%, rgba(146, 47, 18, 0.28), rgba(0,0,0,0.2) 42%, rgba(0,0,0,0.82) 100%)",
           overflow: "hidden",
         }}
       >

@@ -18,6 +18,7 @@ export function RingStudioRightPanel({
   ringSetupMode,
   updCl,
   updRing,
+  compactLayout = false,
 }) {
   const isPresetActive = ringSetupMode === "preset" || !!activeRing.presetId;
   const layerCount = MOTIF_LAYER_COUNTS[activeRing.motifId] ?? 5;
@@ -25,19 +26,22 @@ export function RingStudioRightPanel({
   return (
     <aside
       style={{
-        width: 380,
+        width: compactLayout ? "100%" : 380,
         flexShrink: 0,
-        height: "100%",
+        height: compactLayout ? "auto" : "100%",
+        maxHeight: compactLayout ? "46dvh" : "100%",
         minHeight: 0,
         overflowY: "auto",
+        overflowX: "hidden",
         overscrollBehavior: "contain",
-        padding: "24px 20px",
+        padding: compactLayout ? "14px 12px" : "24px 20px",
         display: "flex",
         flexDirection: "column",
         background: "rgba(8, 8, 8, 0.58)",
         backdropFilter: "blur(10px) saturate(120%)",
         WebkitBackdropFilter: "blur(10px) saturate(120%)",
         boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+        borderTop: compactLayout ? `1px solid ${T.brd}` : "none",
       }}
     >
       <div

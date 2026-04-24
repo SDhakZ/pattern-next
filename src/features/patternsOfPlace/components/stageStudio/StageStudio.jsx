@@ -42,6 +42,15 @@ export function StageStudio() {
   const previewRef = useRef(null);
   const gestureRef = useRef(null);
   const [showPatternLabModal, setShowPatternLabModal] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(1440);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const onResize = () => setViewportWidth(window.innerWidth);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const updCl = useCallback(
     (key, value) => {
@@ -311,6 +320,15 @@ export function StageStudio() {
     };
   }, []);
 
+  const isTablet = viewportWidth <= 1280;
+  const isMobile = viewportWidth <= 960;
+  const previewW = isMobile
+    ? Math.max(280, Math.min(600, viewportWidth - 36))
+    : isTablet
+      ? 520
+      : 600;
+  const previewH = Math.round((previewW * 2) / 3);
+
   return (
     <div
       style={{
@@ -323,7 +341,7 @@ export function StageStudio() {
         `,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        overflow: "hidden",
+        overflow: isMobile ? "auto" : "hidden",
         position: "relative",
       }}
     >
@@ -342,6 +360,7 @@ export function StageStudio() {
           <div
             style={{
               fontSize: 42,
+              fontSize: isMobile ? 30 : 42,
               fontWeight: 700,
               color: studioT.gold,
               letterSpacing: "0.04em",
@@ -362,35 +381,40 @@ export function StageStudio() {
           minHeight: 0,
           minWidth: 0,
           display: "flex",
-          overflow: "hidden",
+          flexDirection: isMobile ? "column" : "row",
+          overflow: isMobile ? "visible" : "hidden",
         }}
       >
-        <RingStudioLeftPanel
-          T={studioT}
-          clusters={clusters}
-          activeClusterId={activeClusterId}
-          activeCl={activeCl}
-          activeRingId={activeRingId}
-          activeRing={activeRing}
-          library={library}
-          ringSetupMode={ringSetupMode}
-          dispatch={dispatch}
-          updRing={updRing}
-          onCreatePattern={openPatternLab}
-        />
+        <div style={{ order: isMobile ? 2 : 1 }}>
+          <RingStudioLeftPanel
+            T={studioT}
+            clusters={clusters}
+            activeClusterId={activeClusterId}
+            activeCl={activeCl}
+            activeRingId={activeRingId}
+            activeRing={activeRing}
+            library={library}
+            ringSetupMode={ringSetupMode}
+            dispatch={dispatch}
+            updRing={updRing}
+            onCreatePattern={openPatternLab}
+            compactLayout={isMobile}
+          />
+        </div>
 
         <main
           role="region"
           aria-label="Postcard preview"
           style={{
             flex: 1,
+            order: isMobile ? 1 : 2,
             minHeight: 0,
             minWidth: 0,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            padding: 24,
+            padding: isMobile ? "18px 12px 10px" : 24,
             gap: 10,
 
             overflow: "hidden",
@@ -424,8 +448,8 @@ export function StageStudio() {
             <CardCanvas
               clusters={clusters}
               bgColor={bgColor}
-              W={600}
-              H={400}
+              W={previewW}
+              H={previewH}
               library={library}
               activeClId={activeClusterId}
               activeRingId={activeRingId}
@@ -452,28 +476,32 @@ export function StageStudio() {
           </div>
         </main>
 
-        <RingStudioRightPanel
-          T={studioT}
-          bgColor={bgColor}
-          dispatch={dispatch}
-          activeCl={activeCl}
-          activeRing={activeRing}
-          ringSetupMode={ringSetupMode}
-          updCl={updCl}
-          updRing={updRing}
-        />
+        <div style={{ order: 3 }}>
+          <RingStudioRightPanel
+            T={studioT}
+            bgColor={bgColor}
+            dispatch={dispatch}
+            activeCl={activeCl}
+            activeRing={activeRing}
+            ringSetupMode={ringSetupMode}
+            updCl={updCl}
+            updRing={updRing}
+            compactLayout={isMobile}
+          />
+        </div>
       </div>
 
       <div
         style={{
-          position: "fixed",
-          left: "50%",
-          bottom: 60,
-          transform: "translateX(-50%)",
+          position: isMobile ? "sticky" : "fixed",
+          left: isMobile ? "auto" : "50%",
+          bottom: isMobile ? 14 : 60,
+          transform: isMobile ? "none" : "translateX(-50%)",
           display: "flex",
           alignItems: "center",
           gap: 12,
           padding: 12,
+          margin: isMobile ? "10px auto 16px" : 0,
           borderRadius: 999,
           background: "rgba(0, 0, 0, 0.82)",
           border: `1px solid ${studioT.brd}`,
