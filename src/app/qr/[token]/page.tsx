@@ -22,6 +22,7 @@ type ValidationResponse = {
   redirectUrl?: string;
   payload?: {
     kind?: string;
+    frontPng?: string;
     frontSvg?: string;
     reverseSvg?: string;
   };
@@ -126,7 +127,8 @@ export default function QrTokenPage() {
   const payload = result?.payload;
   const hasDownloadPayload =
     payload?.kind === "patterns-of-place-download" &&
-    typeof payload.frontSvg === "string" &&
+    (typeof payload.frontPng === "string" ||
+      typeof payload.frontSvg === "string") &&
     typeof payload.reverseSvg === "string";
 
   const loadingBg = isMobile
@@ -139,8 +141,18 @@ export default function QrTokenPage() {
 
   const downloadPng = async (side: "front" | "reverse") => {
     if (!hasDownloadPayload) return;
-    const svgText = side === "front" ? payload.frontSvg! : payload.reverseSvg!;
     setDownloadingSide(side);
+
+    if (side === "front" && typeof payload.frontPng === "string") {
+      try {
+        triggerDownload("patterns-of-place-front.png", payload.frontPng);
+      } finally {
+        setDownloadingSide(null);
+      }
+      return;
+    }
+
+    const svgText = side === "front" ? payload.frontSvg! : payload.reverseSvg!;
     try {
       const pngUrl = await svgToPngDataUrl(svgText, EXPORT_W, EXPORT_H);
       triggerDownload(`patterns-of-place-${side}.png`, pngUrl);

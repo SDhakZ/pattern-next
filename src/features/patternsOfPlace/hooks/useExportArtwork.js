@@ -436,8 +436,7 @@ export function useExportArtwork({
   template = "default",
 }) {
   // getSvgPair is used by the QR code flow (sends SVG strings to the API).
-  // The front SVG uses <image> elements for static presets (no arc warp), which
-  // is acceptable for server-side storage. PNG download uses buildFrontCanvas instead.
+  // Kept for direct SVG downloads.
   const getSvgPair = useCallback(async () => {
     const frontSvg = await buildFrontSVG(
       clusters,
@@ -457,6 +456,35 @@ export function useExportArtwork({
       clusters,
     );
     return { frontSvg, reverseSvg };
+  }, [clusters, bgColor, library, reverseRings, T, template]);
+
+  // QR flow should match PNG export exactly for static presets and arc-warp rendering.
+  const getQrPayload = useCallback(async () => {
+    const frontCanvas = await buildFrontCanvas(
+      clusters,
+      bgColor,
+      library,
+      EXPORT_W,
+      EXPORT_H,
+    );
+
+    let frontPng = "";
+    if (frontCanvas) {
+      frontPng = frontCanvas.toDataURL("image/png", 0.95);
+    }
+
+    const reverseSvg = buildReverseSVG(
+      reverseRings,
+      bgColor,
+      library,
+      T,
+      EXPORT_W,
+      EXPORT_H,
+      template,
+      clusters,
+    );
+
+    return { frontPng, reverseSvg };
   }, [clusters, bgColor, library, reverseRings, T, template]);
 
   const downloadSVG = useCallback(async () => {
@@ -515,5 +543,5 @@ export function useExportArtwork({
     );
   }, [clusters, bgColor, library, reverseRings, T, template]);
 
-  return { downloadJPEG, downloadSVG, getSvgPair };
+  return { downloadJPEG, downloadSVG, getSvgPair, getQrPayload };
 }

@@ -34,7 +34,7 @@ export function StageFinalize() {
   const reverseTemplate = selectReverseTemplate(state);
   const { activeReverseDecorationId } = state.ui;
 
-  const { downloadJPEG, getSvgPair } = useExportArtwork({
+  const { downloadJPEG, getQrPayload } = useExportArtwork({
     clusters,
     bgColor,
     library,
@@ -88,7 +88,7 @@ export function StageFinalize() {
   const ensureQrUrl = async (forceRefresh = false) => {
     if (qrUrl && !forceRefresh) return qrUrl;
 
-    const { frontSvg, reverseSvg } = await getSvgPair();
+    const { frontPng, reverseSvg } = await getQrPayload();
     const response = await fetch("/api/qr-codes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -96,7 +96,7 @@ export function StageFinalize() {
         redirectUrl: `${window.location.origin}/patterns-of-place`,
         metadata: {
           kind: "patterns-of-place-download",
-          frontSvg,
+          frontPng,
           reverseSvg,
           createdAt: new Date().toISOString(),
         },
