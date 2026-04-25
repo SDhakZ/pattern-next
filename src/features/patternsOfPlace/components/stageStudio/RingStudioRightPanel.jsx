@@ -20,8 +20,9 @@ export function RingStudioRightPanel({
   updRing,
   compactLayout = false,
 }) {
-  const isPresetActive = ringSetupMode === "preset" || !!activeRing.presetId;
+  const isPresetActive = activeRing.presetId != null;
   const layerCount = MOTIF_LAYER_COUNTS[activeRing.motifId] ?? 5;
+  void ringSetupMode;
 
   return (
     <aside
